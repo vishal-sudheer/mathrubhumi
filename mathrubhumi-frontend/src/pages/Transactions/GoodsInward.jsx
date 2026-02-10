@@ -64,7 +64,7 @@ export default function GoodsInwardPage() {
     quantity: '',
     purchaseRate: '',
     exchangeRate: '',
-    currency: 'Indian Rupee',
+    currency: 'Indian Rupees',
     tax: '',
     discount: '',
     discountAmount: '',
@@ -87,7 +87,7 @@ export default function GoodsInwardPage() {
     quantity: '',
     fValue: '',
     exchangeRate: '',
-    currency: 'Indian Rupee',
+    currency: 'Indian Rupees',
     mrp: '',
     currencyIndex: null
   });
@@ -136,14 +136,14 @@ export default function GoodsInwardPage() {
 
   const resolveCurrencyId = (currencyName) => {
     const match = currencies.find((cur) => cur.name === currencyName);
-    if (match?.id) return match.id;
-    const fallback = currencies.find((cur) => cur.name === 'Indian Rupee') || currencies[0];
+    if (match?.id !== undefined) return match.id;
+    const fallback = currencies.find((cur) => cur.name === 'Indian Rupees') || currencies[0];
     return fallback?.id ?? null;
   };
 
   const resolveCurrencyName = () => {
-    const fallback = currencies.find((cur) => cur.name === 'Indian Rupee') || currencies[0];
-    return fallback?.name || 'Indian Rupee';
+    const fallback = currencies.find((cur) => cur.name === 'Indian Rupees') || currencies[0];
+    return fallback?.name || 'Indian Rupees';
   };
 
   const decodeUnicode = (str) => {
@@ -180,7 +180,7 @@ export default function GoodsInwardPage() {
         console.log('Currencies API response:', response.data);
         if (Array.isArray(response.data) && response.data.length > 0 && response.data.every(cur => cur.id !== undefined && cur.name)) {
           setCurrencies(response.data);
-          const defaultCurrency = response.data.find(cur => cur.name === 'Indian Rupee') || response.data[0] || { id: 1, name: 'Indian Rupee' };
+          const defaultCurrency = response.data.find(cur => cur.name === 'Indian Rupees') || response.data[0] || { id: 0, name: 'Indian Rupees' };
           setFormData((prev) => ({
             ...prev,
             currency: defaultCurrency.name,
@@ -194,31 +194,31 @@ export default function GoodsInwardPage() {
         } else {
           console.error('Invalid currencies data format:', response.data);
           showModal('Invalid currency data received from server', 'error');
-          setCurrencies([{ id: 1, name: 'Indian Rupee' }]);
+          setCurrencies([{ id: 0, name: 'Indian Rupees' }]);
           setFormData((prev) => ({
             ...prev,
-            currency: 'Indian Rupee',
-            currencyIndex: 1
+            currency: 'Indian Rupees',
+            currencyIndex: 0
           }));
           setMasterEntryData((prev) => ({
             ...prev,
-            currency: 'Indian Rupee',
-            currencyIndex: 1
+            currency: 'Indian Rupees',
+            currencyIndex: 0
           }));
         }
       } catch (error) {
         console.error('Failed to fetch currencies:', error);
         showModal('Failed to load currencies. Using default currency.', 'error');
-        setCurrencies([{ id: 1, name: 'Indian Rupee' }]);
+        setCurrencies([{ id: 0, name: 'Indian Rupees' }]);
         setFormData((prev) => ({
           ...prev,
-          currency: 'Indian Rupee',
-          currencyIndex: 1
+          currency: 'Indian Rupees',
+          currencyIndex: 0
         }));
         setMasterEntryData((prev) => ({
           ...prev,
-          currency: 'Indian Rupee',
-          currencyIndex: 1
+          currency: 'Indian Rupees',
+          currencyIndex: 0
         }));
       }
     };
@@ -839,7 +839,7 @@ export default function GoodsInwardPage() {
         discount: '',
         discountAmount: '',
         titleId: '',
-        currencyIndex: resolveCurrencyId('Indian Rupee')
+        currencyIndex: resolveCurrencyId('Indian Rupees')
       });
       setIsMalayalam(false);
       console.log('Item added:', { itemName, isMalayalam: false });
@@ -877,7 +877,7 @@ export default function GoodsInwardPage() {
         showModal('Please add at least one item', 'error');
         return;
       }
-      const invalidCurrencyItem = items.find((item) => !item.currencyIndex || Number(item.currencyIndex) <= 0);
+      const invalidCurrencyItem = items.find((item) => item.currencyIndex === null || item.currencyIndex === undefined || Number(item.currencyIndex) < 0);
       if (invalidCurrencyItem) {
         showModal('Please select a valid currency for all items', 'error');
         return;
@@ -1087,7 +1087,7 @@ export default function GoodsInwardPage() {
       discount: '',
       discountAmount: '',
       titleId: '',
-      currencyIndex: resolveCurrencyId('Indian Rupee')
+      currencyIndex: resolveCurrencyId('Indian Rupees')
     });
     setMasterEntryData({
       subCategory: '',
@@ -1106,7 +1106,7 @@ export default function GoodsInwardPage() {
       exchangeRate: '',
       currency: resolveCurrencyName(),
       mrp: '',
-      currencyIndex: resolveCurrencyId('Indian Rupee')
+      currencyIndex: resolveCurrencyId('Indian Rupees')
     });
     setIsEditMode(false);
     setGoodsInwardId(null);
@@ -1151,7 +1151,7 @@ export default function GoodsInwardPage() {
       exchangeRate: '',
       currency: resolveCurrencyName(),
       mrp: '',
-      currencyIndex: resolveCurrencyId('Indian Rupee')
+      currencyIndex: resolveCurrencyId('Indian Rupees')
     });
   };
 
@@ -1446,7 +1446,7 @@ export default function GoodsInwardPage() {
                     exchangeRate: '',
                     currency: resolveCurrencyName(),
                     mrp: '',
-                    currencyIndex: resolveCurrencyId('Indian Rupee')
+                    currencyIndex: resolveCurrencyId('Indian Rupees')
                   })}
                   className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900 text-xs font-semibold shadow-sm transition-all duration-200"
                 >
