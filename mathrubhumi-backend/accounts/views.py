@@ -62,6 +62,26 @@ class_type_mapping = {
 }
 class_type_reverse_mapping = {v: k for k, v in class_type_mapping.items()}
 
+
+def _coerce_int(value, default=0):
+    if value is None:
+        return default
+    if isinstance(value, str):
+        value = value.strip()
+        if value == '':
+            return default
+    return int(value)
+
+
+def _coerce_float(value, default=0.0):
+    if value is None:
+        return default
+    if isinstance(value, str):
+        value = value.strip()
+        if value == '':
+            return default
+    return float(value)
+
 def get_next_value(company_id: int, fin_year: str, code: str) -> int:
     query = """
            UPDATE public."last_values" SET last_value = last_value + 1
@@ -500,16 +520,16 @@ def create_goods_inward(request):
                     return JsonResponse({'error': f'Missing or null field: {field}'}, status=400)
 
             try:
-                gross = float(data['gross']) if data['gross'] else 0.0
-                nett = float(data['nett']) if data['nett'] else 0.0
-                p_breakup_id1 = int(data['p_breakup_id1']) if data['p_breakup_id1'] else 0
-                p_breakup_amt1 = float(data['p_breakup_amt1']) if data['p_breakup_amt1'] else 0.00
-                p_breakup_id2 = int(data['p_breakup_id2']) if data['p_breakup_id2'] else 0
-                p_breakup_amt2 = float(data['p_breakup_amt2']) if data['p_breakup_amt2'] else 0.00
-                p_breakup_id3 = int(data['p_breakup_id3']) if data['p_breakup_id3'] else 0
-                p_breakup_amt3 = float(data['p_breakup_amt3']) if data['p_breakup_amt3'] else 0.00
-                p_breakup_id4 = int(data['p_breakup_id4']) if data['p_breakup_id4'] else 0
-                p_breakup_amt4 = float(data['p_breakup_amt4']) if data['p_breakup_amt4'] else 0.00                
+                gross = _coerce_float(data.get('gross'), 0.0)
+                nett = _coerce_float(data.get('nett'), 0.0)
+                p_breakup_id1 = _coerce_int(data.get('p_breakup_id1'), 0)
+                p_breakup_amt1 = _coerce_float(data.get('p_breakup_amt1'), 0.0)
+                p_breakup_id2 = _coerce_int(data.get('p_breakup_id2'), 0)
+                p_breakup_amt2 = _coerce_float(data.get('p_breakup_amt2'), 0.0)
+                p_breakup_id3 = _coerce_int(data.get('p_breakup_id3'), 0)
+                p_breakup_amt3 = _coerce_float(data.get('p_breakup_amt3'), 0.0)
+                p_breakup_id4 = _coerce_int(data.get('p_breakup_id4'), 0)
+                p_breakup_amt4 = _coerce_float(data.get('p_breakup_amt4'), 0.0)
                 for item in data['items']:
                     required_item_fields = ['itemName', 'isbn', 'quantity', 'purchaseRate', 'exchangeRate', 'currency', 'tax', 'discount', 'discountAmount', 'value', 'titleId', 'currencyIndex']
                     for field in required_item_fields:
@@ -1060,18 +1080,18 @@ def get_goods_inward_by_id(request, goods_inward_purchase_no):
                 print(data['entry_date'])
                 print(data['srl_no'])
                 print(data['id'])
-                gross = float(data['gross']) if data['gross'] else 0.0
-                nett = float(data['nett']) if data['nett'] else 0.0
-                p_breakup_id1 = int(data['p_breakup_id1']) if data['p_breakup_id2'] else 0
-                p_breakup_amt1 = float(data['p_breakup_amt1']) if data['p_breakup_amt1'] else 0.00
-                p_breakup_id2 = int(data['p_breakup_id2']) if data['p_breakup_id2'] else 0
-                p_breakup_amt2 = float(data['p_breakup_amt2']) if data['p_breakup_amt2'] else 0.00
-                p_breakup_id3 = int(data['p_breakup_id3']) if data['p_breakup_id3'] else 0
-                p_breakup_amt3 = float(data['p_breakup_amt3']) if data['p_breakup_amt3'] else 0.00
-                p_breakup_id4 = int(data['p_breakup_id4']) if data['p_breakup_id4'] else 0
-                p_breakup_amt4 = float(data['p_breakup_amt4']) if data['p_breakup_amt4'] else 0.00                
-                days = int(data['days']) if data['days'] else 0
-                discount_percent = float(data['discount_percent']) if data['discount_percent'] else 0.0
+                gross = _coerce_float(data.get('gross'), 0.0)
+                nett = _coerce_float(data.get('nett'), 0.0)
+                p_breakup_id1 = _coerce_int(data.get('p_breakup_id1'), 0)
+                p_breakup_amt1 = _coerce_float(data.get('p_breakup_amt1'), 0.0)
+                p_breakup_id2 = _coerce_int(data.get('p_breakup_id2'), 0)
+                p_breakup_amt2 = _coerce_float(data.get('p_breakup_amt2'), 0.0)
+                p_breakup_id3 = _coerce_int(data.get('p_breakup_id3'), 0)
+                p_breakup_amt3 = _coerce_float(data.get('p_breakup_amt3'), 0.0)
+                p_breakup_id4 = _coerce_int(data.get('p_breakup_id4'), 0)
+                p_breakup_amt4 = _coerce_float(data.get('p_breakup_amt4'), 0.0)
+                days = _coerce_int(data.get('days'), 0)
+                discount_percent = _coerce_float(data.get('discount_percent'), 0.0)
                 for item in data['items']:
                     required_item_fields = ['itemName', 'isbn', 'quantity', 'purchaseRate', 'exchangeRate', 'currency', 'tax', 'discount', 'discountAmount', 'value', 'titleId', 'currencyIndex']
                     for field in required_item_fields:

@@ -69,7 +69,7 @@ export default function GoodsInwardPage() {
     discount: '',
     discountAmount: '',
     titleId: '',
-    currencyIndex: null
+    currencyIndex: 0
   });
 
   const [masterEntryData, setMasterEntryData] = useState({
@@ -89,7 +89,7 @@ export default function GoodsInwardPage() {
     exchangeRate: '',
     currency: 'Indian Rupees',
     mrp: '',
-    currencyIndex: null
+    currencyIndex: 0
   });
 
   const [inwardMaster, setInwardMaster] = useState({
@@ -138,7 +138,7 @@ export default function GoodsInwardPage() {
     const match = currencies.find((cur) => cur.name === currencyName);
     if (match?.id !== undefined) return match.id;
     const fallback = currencies.find((cur) => cur.name === 'Indian Rupees') || currencies[0];
-    return fallback?.id ?? null;
+    return fallback?.id ?? 0;
   };
 
   const resolveCurrencyName = () => {
@@ -298,7 +298,7 @@ export default function GoodsInwardPage() {
       }
     } else if (name === 'currency') {
       const selectedCurrencyId = resolveCurrencyId(value);
-      if (!selectedCurrencyId) {
+      if (selectedCurrencyId === null || selectedCurrencyId === undefined || Number(selectedCurrencyId) < 0) {
         showModal('Currencies are not available yet. Please try again.', 'error');
         return;
       }
@@ -375,7 +375,15 @@ export default function GoodsInwardPage() {
 
   const handleInwardMasterChange = async (e) => {
     const { name, value } = e.target;
-    setInwardMaster(prev => ({ ...prev, [name]: value }));
+    const breakupNo = name.startsWith('breakup_nm') ? Number(name.replace('breakup_nm', '')) : null;
+    setInwardMaster(prev => {
+      const updated = { ...prev, [name]: value };
+      if (breakupNo >= 1 && breakupNo <= 4) {
+        // When users type breakup name manually, clear the old linked id until a suggestion is selected again.
+        updated[`breakup_id${breakupNo}`] = '';
+      }
+      return updated;
+    });
 
     if (name === 'supplier_nm') {
       const trimmed = value.trim();
@@ -683,6 +691,7 @@ export default function GoodsInwardPage() {
       [`breakup_nm${breakupNo}`]: suggestion.breakup_nm,
       [`breakup_id${breakupNo}`]: suggestion.id
     }));
+    setActiveBreakupNo(breakupNo);
 
     setBreakupSuggestions([]);
     setShowBreakupSuggestions(false);
@@ -753,7 +762,7 @@ export default function GoodsInwardPage() {
       }
 
       const currencyIndex = resolveCurrencyId(currency);
-      if (!currencyIndex) {
+      if (currencyIndex === null || currencyIndex === undefined || Number(currencyIndex) < 0) {
         showModal('Please select a valid currency before adding the item', 'error');
         return;
       }
@@ -784,6 +793,13 @@ export default function GoodsInwardPage() {
 
   const handleSubmitGoodsInward = async () => {
     try {
+      const toNumberOrZero = (rawValue) => {
+        if (rawValue === null || rawValue === undefined) return 0;
+        if (typeof rawValue === 'string' && rawValue.trim() === '') return 0;
+        const parsed = Number(rawValue);
+        return Number.isFinite(parsed) ? parsed : NaN;
+      };
+
       const requiredFields = [
         { key: 'supplier_id', type: 'number', label: 'Supplier ID' },
         { key: 'bill_no', type: 'string', label: 'Bill No' },
@@ -817,6 +833,37 @@ export default function GoodsInwardPage() {
         return;
       }
 
+      const breakupPayload = [1, 2, 3, 4].map((no) => {
+        const breakupName = String(inwardMaster[`breakup_nm${no}`] || '').trim();
+        const breakupIdRaw = inwardMaster[`breakup_id${no}`];
+        const breakupAmountRaw = inwardMaster[`breakup_amt${no}`];
+        const breakupIdParsed = toNumberOrZero(breakupIdRaw);
+        const breakupAmountParsed = toNumberOrZero(breakupAmountRaw);
+        const breakupId = Number.isInteger(breakupIdParsed) ? breakupIdParsed : NaN;
+
+        return {
+          no,
+          breakupName,
+          breakupId,
+          breakupAmount: breakupAmountParsed
+        };
+      });
+
+      for (const breakup of breakupPayload) {
+        if (!Number.isFinite(breakup.breakupAmount)) {
+          showModal(`Please enter a valid amount for Breakup ${breakup.no}`, 'error');
+          return;
+        }
+        if (breakup.breakupName && (!Number.isFinite(breakup.breakupId) || breakup.breakupId <= 0)) {
+          showModal(`Please select a valid value from suggestions for Breakup ${breakup.no}`, 'error');
+          return;
+        }
+        if (!breakup.breakupName && breakup.breakupAmount !== 0) {
+          showModal(`Please select Breakup ${breakup.no} before entering amount`, 'error');
+          return;
+        }
+      }
+
       const payload = {
         entry_date: inwardMaster.entry_date,
         bill_no: inwardMaster.bill_no,
@@ -826,14 +873,14 @@ export default function GoodsInwardPage() {
         is_cash: inwardMaster.is_cash,
         type: inwardMaster.type,
         notes: inwardMaster.notes,
-        p_breakup_id1: inwardMaster.breakup_id1,
-        p_breakup_amt1: inwardMaster.breakup_amt1,
-        p_breakup_id2: inwardMaster.breakup_id2,
-        p_breakup_amt2: inwardMaster.breakup_amt2,
-        p_breakup_id3: inwardMaster.breakup_id3,
-        p_breakup_amt3: inwardMaster.breakup_amt3,
-        p_breakup_id4: inwardMaster.breakup_id4,
-        p_breakup_amt4: inwardMaster.breakup_amt4,
+        p_breakup_id1: breakupPayload[0].breakupName ? breakupPayload[0].breakupId : 0,
+        p_breakup_amt1: breakupPayload[0].breakupAmount,
+        p_breakup_id2: breakupPayload[1].breakupName ? breakupPayload[1].breakupId : 0,
+        p_breakup_amt2: breakupPayload[1].breakupAmount,
+        p_breakup_id3: breakupPayload[2].breakupName ? breakupPayload[2].breakupId : 0,
+        p_breakup_amt3: breakupPayload[2].breakupAmount,
+        p_breakup_id4: breakupPayload[3].breakupName ? breakupPayload[3].breakupId : 0,
+        p_breakup_amt4: breakupPayload[3].breakupAmount,
         supplier_nm: inwardMaster.supplier_nm,
         supplier_id: parseInt(inwardMaster.supplier_id),
         user_id: parseInt(inwardMaster.user_id),
