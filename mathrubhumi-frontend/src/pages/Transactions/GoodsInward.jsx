@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../../utils/axiosInstance';
 import { TrashIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import Modal from '../../components/Modal';
+import { getSession } from '../../utils/session';
 
 export default function GoodsInwardPage() {
+  const { user: sessionUser } = getSession();
   const [items, setItems] = useState([]);
   const [goodsInwardIdToLoad, setGoodsInwardIdToLoad] = useState('');
   const [goodsInwardId, setGoodsInwardId] = useState(null);
@@ -16,9 +18,7 @@ export default function GoodsInwardPage() {
   const [supplierSuggestions, setSupplierSuggestions] = useState([]);
   const [showSupplierSuggestions, setShowSupplierSuggestions] = useState(false);
   const [supplierHighlightedIndex, setSupplierHighlightedIndex] = useState(-1);
-  const [userSuggestions, setUserSuggestions] = useState([]);
-  const [showUserSuggestions, setShowUserSuggestions] = useState(false);
-  const [userHighlightedIndex, setUserHighlightedIndex] = useState(-1);
+
   const [branchesSuggestions, setBranchesSuggestions] = useState([]);
   const [showBranchesSuggestions, setShowBranchesSuggestions] = useState(false);
   const [branchesHighlightedIndex, setBranchesHighlightedIndex] = useState(-1);
@@ -108,8 +108,8 @@ export default function GoodsInwardPage() {
     discount_percent: '',
     supplier_nm: '',
     supplier_id: '',
-    user_nm: '',
-    user_id: '',
+    user_nm: sessionUser?.name || '',
+    user_id: sessionUser?.id || '',
     branches_nm: '',
     branches_id: '',
     breakup_nm1: '',
@@ -404,33 +404,6 @@ export default function GoodsInwardPage() {
           setSupplierHighlightedIndex(-1);
         }
       }
-    } else if (name === 'user_nm') {
-      const trimmed = value.trim();
-      console.log('Input change (user_nm):', { value: trimmed });
-      if (trimmed.length === 0) {
-        setUserSuggestions([]);
-        setShowUserSuggestions(false);
-        setUserHighlightedIndex(-1);
-      } else {
-        try {
-          const res = await api.get(`/auth/user-search/?q=${encodeURIComponent(trimmed)}`);
-          console.log('User API response:', res.data);
-          if (res.data && res.data.length > 0) {
-            setUserSuggestions(res.data);
-            setShowUserSuggestions(true);
-            setUserHighlightedIndex(-1);
-          } else {
-            setUserSuggestions([]);
-            setShowUserSuggestions(false);
-            setUserHighlightedIndex(-1);
-          }
-        } catch (error) {
-          console.error('User autocomplete error:', error);
-          setUserSuggestions([]);
-          setShowUserSuggestions(false);
-          setUserHighlightedIndex(-1);
-        }
-      }
     } else if (name === 'branches_nm') {
       const trimmed = value.trim();
       console.log('Input change (branches_nm):', { value: trimmed });
@@ -548,35 +521,6 @@ export default function GoodsInwardPage() {
         setShowSupplierSuggestions(false);
         setSupplierSuggestions([]);
         setSupplierHighlightedIndex(-1);
-      }
-    } else if (inputName === 'user_nm' && showUserSuggestions && userSuggestions.length > 0) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setUserHighlightedIndex((prev) => {
-          const newIndex = prev < userSuggestions.length - 1 ? prev + 1 : 0;
-          const suggestionElement = document.getElementById(`user-suggestion-${newIndex}`);
-          if (suggestionElement) {
-            suggestionElement.scrollIntoView({ block: 'nearest' });
-          }
-          return newIndex;
-        });
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setUserHighlightedIndex((prev) => {
-          const newIndex = prev > 0 ? prev - 1 : userSuggestions.length - 1;
-          const suggestionElement = document.getElementById(`user-suggestion-${newIndex}`);
-          if (suggestionElement) {
-            suggestionElement.scrollIntoView({ block: 'nearest' });
-          }
-          return newIndex;
-        });
-      } else if (e.key === 'Enter' && userHighlightedIndex >= 0) {
-        e.preventDefault();
-        handleUserSuggestionClick(userSuggestions[userHighlightedIndex]);
-      } else if (e.key === 'Escape') {
-        setShowUserSuggestions(false);
-        setUserSuggestions([]);
-        setUserHighlightedIndex(-1);
       }
     } else if (inputName === 'branches_nm' && showBranchesSuggestions && branchesSuggestions.length > 0) {
       if (e.key === 'ArrowDown') {
@@ -718,17 +662,7 @@ export default function GoodsInwardPage() {
     setSupplierHighlightedIndex(-1);
   };
 
-  const handleUserSuggestionClick = (suggestion) => {
-    console.log('User suggestion selected:', { user_nm: suggestion.user_nm });
-    setInwardMaster((prev) => ({
-      ...prev,
-      user_nm: suggestion.user_nm,
-      user_id: suggestion.id
-    }));
-    setUserSuggestions([]);
-    setShowUserSuggestions(false);
-    setUserHighlightedIndex(-1);
-  };
+
 
   const handleBranchesSuggestionClick = (suggestion) => {
     console.log('Branches suggestion selected:', { branches_nm: suggestion.branches_nm });
@@ -1057,8 +991,8 @@ export default function GoodsInwardPage() {
       discount_percent: '',
       supplier_nm: '',
       supplier_id: '',
-      user_nm: '',
-      user_id: '',
+      user_nm: sessionUser?.name || '',
+      user_id: sessionUser?.id || '',
       branches_nm: '',
       branches_id: '',
       breakup_nm1: '',
@@ -1116,9 +1050,7 @@ export default function GoodsInwardPage() {
     setSupplierSuggestions([]);
     setShowSupplierSuggestions(false);
     setSupplierHighlightedIndex(-1);
-    setUserSuggestions([]);
-    setShowUserSuggestions(false);
-    setUserHighlightedIndex(-1);
+
     setBranchesSuggestions([]);
     setShowBranchesSuggestions(false);
     setBranchesHighlightedIndex(-1);
@@ -1501,32 +1433,14 @@ export default function GoodsInwardPage() {
               placeholder="Bill Date"
               className={inputClasses}
             />
-            <div className="relative">
-              <input
-                type="text"
-                name="user_nm"
-                value={inwardMaster.user_nm}
-                onChange={handleInwardMasterChange}
-                onKeyDown={(e) => handleKeyDown(e, 'user_nm')}
-                placeholder="User"
-                className={`${inputClasses} w-full`}
-                autoComplete="off"
-              />
-              {showUserSuggestions && userSuggestions.length > 0 && inwardMaster.user_nm.trim() && (
-                <ul className="absolute z-20 bg-white border border-gray-200 mt-1.5 w-full shadow-lg rounded-lg text-xs max-h-48 overflow-y-auto">
-                  {userSuggestions.map((user, index) => (
-                    <li
-                      key={user.id}
-                      id={`user-suggestion-${index}`}
-                      className={`px-3 py-2 cursor-pointer ${userHighlightedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
-                      onClick={() => handleUserSuggestionClick(user)}
-                    >
-                      {user.user_nm}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            <input
+              type="text"
+              name="user_nm"
+              value={inwardMaster.user_nm}
+              placeholder="User"
+              className={`${inputClasses} w-full bg-gray-50 cursor-not-allowed`}
+              readOnly
+            />
             <input
               type="number"
               name="gross"
