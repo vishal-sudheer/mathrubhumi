@@ -1020,12 +1020,12 @@ export default function SaleBillPage() {
   );
 
   const cardClasses = "bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-lg shadow-sm";
-  const inputClasses = "px-2 py-1.5 rounded-md border border-gray-200 bg-white text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 transition-all duration-200";
-  const actionButtonClasses = "inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-medium shadow-lg shadow-blue-500/20 hover:from-blue-600 hover:to-indigo-700 active:scale-[0.985] transition-all duration-200";
-  const tableInputClasses = "w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200";
+  const inputClasses = "sb-input px-2 rounded-md border border-gray-200 bg-white text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 transition-all duration-200";
+  const actionButtonClasses = "sb-input inline-flex items-center justify-center gap-2 px-3 rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-medium shadow-lg shadow-blue-500/20 hover:from-blue-600 hover:to-indigo-700 active:scale-[0.985] transition-all duration-200";
+  const tableInputClasses = "sb-table-input w-full px-2 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200";
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 p-2 md:p-3 space-y-2 lg:h-[100svh] lg:overflow-hidden lg:flex lg:flex-col">
+    <div className="sb-page min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 lg:h-[100svh] lg:overflow-hidden lg:flex lg:flex-col">
       <Modal
         isOpen={modal.isOpen}
         message={modal.message}
@@ -1033,9 +1033,9 @@ export default function SaleBillPage() {
         buttons={modal.buttons}
       />
 
-      <div className="flex flex-col gap-2 lg:flex-1 lg:min-h-0">
-        <div className={`${cardClasses} p-2`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-1.5">
+      <div className="sb-layout flex flex-col lg:flex-1 lg:min-h-0">
+        <div className={`${cardClasses} sb-card`}>
+          <div className="sb-form-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             <input
               type="text"
               name="bill_no"
@@ -1266,38 +1266,38 @@ export default function SaleBillPage() {
           </div>
         </div>
 
-        <div className={`${cardClasses} p-2 flex flex-col gap-1 lg:flex-1 lg:min-h-0`}>
-          <div className="flex items-center justify-end px-0.5 text-[11px] text-gray-600">
+        <div className={`${cardClasses} sb-card flex flex-col lg:flex-1 lg:min-h-0`}>
+          <div className="flex items-center justify-end px-0.5 sb-text-sm text-gray-600">
             <span className="font-semibold text-gray-800">Total: {totalValue.toFixed(2)}</span>
           </div>
 
           <div className="relative rounded-md border border-gray-100 overflow-hidden flex-1 min-h-0">
-            <div className="overflow-auto max-h-[60vh] min-h-[220px] lg:max-h-none lg:h-full lg:min-h-0">
-              <table className="w-full min-w-[820px] text-[11px]">
+            <div className="overflow-auto max-h-[60vh] min-h-[120px] lg:max-h-none lg:h-full lg:min-h-0">
+              <table className="w-full min-w-[820px] sb-text-sm">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white uppercase tracking-wide">
-                    <th className="px-2 py-1.5 text-left font-semibold w-[240px]">Item Name</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[60px]">Qty</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[80px]">Rate</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[70px]">Ex Rt</th>
-                    <th className="px-2 py-1.5 text-left font-semibold w-[80px]">Currency</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[60px]">Tax %</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[60px]">Disc %</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[90px]">Value</th>
-                    <th className="px-2 py-1.5 text-center font-semibold w-[40px]">Action</th>
+                    <th className="px-2 sb-th-py text-left font-semibold w-[240px]">Item Name</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Qty</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[80px]">Rate</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[70px]">Ex Rt</th>
+                    <th className="px-2 sb-th-py text-left font-semibold w-[80px]">Currency</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Tax %</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Disc %</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[90px]">Value</th>
+                    <th className="px-2 sb-th-py text-center font-semibold w-[40px]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {items.length === 0 ? (
                     <tr>
-                      <td colSpan="9" className="px-4 py-8 text-center text-gray-400 text-xs">
+                      <td colSpan="9" className="px-4 py-4 text-center text-gray-400 sb-text-sm">
                         No items added yet. Use the form below to add lines.
                       </td>
                     </tr>
                   ) : (
                     items.map((item, index) => (
                       <tr key={index} className="hover:bg-blue-50/40 transition-colors">
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="text"
                             value={item.itemName}
@@ -1306,7 +1306,7 @@ export default function SaleBillPage() {
                             style={item.isMalayalam ? { fontFamily: 'Noto Sans Malayalam, sans-serif' } : {}}
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.quantity}
@@ -1314,7 +1314,7 @@ export default function SaleBillPage() {
                             className={`${tableInputClasses} text-right`}
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.rate}
@@ -1322,7 +1322,7 @@ export default function SaleBillPage() {
                             className={`${tableInputClasses} text-right`}
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.exchangeRate}
@@ -1330,7 +1330,7 @@ export default function SaleBillPage() {
                             className={`${tableInputClasses} text-right`}
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <select
                             value={item.currency}
                             onChange={(e) => handleItemChange(index, 'currency', e.target.value)}
@@ -1342,7 +1342,7 @@ export default function SaleBillPage() {
                             ))}
                           </select>
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.tax}
@@ -1352,7 +1352,7 @@ export default function SaleBillPage() {
                             step="0.01"
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.discount || 0}
@@ -1362,10 +1362,10 @@ export default function SaleBillPage() {
                             step="0.01"
                           />
                         </td>
-                        <td className="px-2 py-1 text-right text-xs font-semibold text-gray-700">
+                        <td className="px-2 sb-td-py text-right sb-text-sm font-semibold text-gray-700">
                           {Number(item.value).toFixed(2)}
                         </td>
-                        <td className="px-2 py-1 text-center">
+                        <td className="px-2 sb-td-py text-center">
                           <button
                             onClick={() => handleDeleteItem(index)}
                             className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
@@ -1383,8 +1383,8 @@ export default function SaleBillPage() {
           </div>
         </div>
 
-        <div className={`${cardClasses} p-2 overflow-visible`}>
-          <div className="grid grid-cols-[410px_90px_120px_110px_120px_80px_80px_1fr] gap-4 w-full overflow-x-auto relative z-0">
+        <div className={`${cardClasses} sb-card overflow-visible`}>
+          <div className="sb-add-item-grid grid w-full overflow-x-auto relative z-0">
             <div className="relative">
               <input
                 type="text"
@@ -1568,8 +1568,8 @@ export default function SaleBillPage() {
                                 <button
                                   onClick={() => handleBatchSelect(batch)}
                                   className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-[10px] font-semibold transition-all ${index === batchActionIndex
-                                      ? 'bg-blue-600 text-white ring-2 ring-blue-300'
-                                      : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                                    ? 'bg-blue-600 text-white ring-2 ring-blue-300'
+                                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                                     }`}
                                   aria-selected={index === batchActionIndex}
                                 >
@@ -1603,7 +1603,7 @@ export default function SaleBillPage() {
           </div>
         )}
 
-        <div className={`${cardClasses} p-2`}>
+        <div className={`${cardClasses} sb-card`}>
           <div className="flex flex-col lg:flex-row gap-2 lg:items-center">
             <div className="flex flex-1 flex-col sm:flex-row gap-2">
               <input

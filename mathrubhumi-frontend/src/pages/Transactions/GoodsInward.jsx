@@ -1158,12 +1158,12 @@ export default function GoodsInwardPage() {
   const totalValue = items.reduce((sum, item) => sum + (parseFloat(item.value) || 0), 0);
 
   const cardClasses = "bg-white/90 border border-gray-200 rounded-lg shadow-sm";
-  const inputClasses = "px-2 py-1.5 rounded-md border border-gray-200 bg-white text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 transition-all duration-200";
-  const actionButtonClasses = "inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-medium shadow-lg shadow-blue-500/20 hover:from-blue-600 hover:to-indigo-700 active:scale-[0.985] transition-all duration-200";
-  const tableInputClasses = "w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200";
+  const inputClasses = "sb-input px-2 rounded-md border border-gray-200 bg-white text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 transition-all duration-200";
+  const actionButtonClasses = "sb-input inline-flex items-center justify-center gap-2 px-3 rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-medium shadow-lg shadow-blue-500/20 hover:from-blue-600 hover:to-indigo-700 active:scale-[0.985] transition-all duration-200";
+  const tableInputClasses = "sb-table-input w-full px-2 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200";
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 p-2 md:p-3 space-y-2 lg:h-[100svh] lg:overflow-hidden lg:flex lg:flex-col">
+    <div className="sb-page min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 lg:h-[100svh] lg:overflow-hidden lg:flex lg:flex-col">
       <Modal isOpen={modal.isOpen} message={modal.message} type={modal.type} buttons={modal.buttons} />
       {isMasterEntryOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
@@ -1464,9 +1464,9 @@ export default function GoodsInwardPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2 lg:flex-1 lg:min-h-0">
-        <div className={`${cardClasses} p-2`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-1.5">
+      <div className="sb-layout flex flex-col lg:flex-1 lg:min-h-0">
+        <div className={`${cardClasses} sb-card`}>
+          <div className="sb-form-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             <input
               type="text"
               name="srl_no"
@@ -1770,40 +1770,40 @@ export default function GoodsInwardPage() {
           </div>
         </div>
 
-        <div className={`${cardClasses} p-2 flex flex-col gap-1 lg:flex-1 lg:min-h-0`}>
-          <div className="flex items-center justify-between px-0.5 text-[11px] text-gray-600">
+        <div className={`${cardClasses} sb-card flex flex-col lg:flex-1 lg:min-h-0`}>
+          <div className="flex items-center justify-between px-0.5 sb-text-sm text-gray-600">
             <span className="font-medium text-gray-700">Line items</span>
             <span className="font-semibold text-gray-800">Total: {totalValue.toFixed(2)}</span>
           </div>
           <div className="relative rounded-md border border-gray-100 overflow-hidden flex-1 min-h-0">
-            <div className="overflow-auto max-h-[60vh] min-h-[220px] lg:max-h-none lg:h-full lg:min-h-0">
-              <table className="w-full min-w-[980px] text-[11px]">
+            <div className="overflow-auto max-h-[60vh] min-h-[120px] lg:max-h-none lg:h-full lg:min-h-0">
+              <table className="w-full min-w-[980px] sb-text-sm">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white uppercase tracking-wide">
-                    <th className="px-2 py-1.5 text-left font-semibold w-[240px]">Product</th>
-                    <th className="px-2 py-1.5 text-left font-semibold w-[100px]">I S B N</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[60px]">Qty</th>
-                    <th className="px-2 py-1.5 text-left font-semibold w-[80px]">Curr</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[70px]">ExRt</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[80px]">F Val</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[60px]">Tax%</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[60px]">Dis%</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[80px]">-/+Adj</th>
-                    <th className="px-2 py-1.5 text-right font-semibold w-[90px]">Nett</th>
-                    <th className="px-2 py-1.5 text-center font-semibold w-[40px]">Action</th>
+                    <th className="px-2 sb-th-py text-left font-semibold w-[240px]">Product</th>
+                    <th className="px-2 sb-th-py text-left font-semibold w-[100px]">I S B N</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Qty</th>
+                    <th className="px-2 sb-th-py text-left font-semibold w-[80px]">Curr</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[70px]">ExRt</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[80px]">F Val</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Tax%</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Dis%</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[80px]">-/+Adj</th>
+                    <th className="px-2 sb-th-py text-right font-semibold w-[90px]">Nett</th>
+                    <th className="px-2 sb-th-py text-center font-semibold w-[40px]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {items.length === 0 ? (
                     <tr>
-                      <td colSpan="11" className="px-4 py-8 text-center text-gray-400">
+                      <td colSpan="11" className="px-4 py-4 text-center text-gray-400 sb-text-sm">
                         No items added yet. Use the form below to add lines.
                       </td>
                     </tr>
                   ) : (
                     items.map((item, index) => (
                       <tr key={index} className="hover:bg-blue-50/40 transition-colors">
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="text"
                             value={item.itemName}
@@ -1812,7 +1812,7 @@ export default function GoodsInwardPage() {
                             style={item.isMalayalam ? { fontFamily: 'Noto Sans Malayalam, sans-serif' } : {}}
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="text"
                             value={item.isbn}
@@ -1820,7 +1820,7 @@ export default function GoodsInwardPage() {
                             className={tableInputClasses}
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.quantity}
@@ -1828,7 +1828,7 @@ export default function GoodsInwardPage() {
                             className={`${tableInputClasses} text-right`}
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <select
                             value={item.currency}
                             onChange={(e) => handleItemChange(index, 'currency', e.target.value)}
@@ -1840,7 +1840,7 @@ export default function GoodsInwardPage() {
                             ))}
                           </select>
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.exchangeRate}
@@ -1849,7 +1849,7 @@ export default function GoodsInwardPage() {
                             step="0.01"
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.purchaseRate}
@@ -1858,7 +1858,7 @@ export default function GoodsInwardPage() {
                             step="0.01"
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.tax}
@@ -1867,7 +1867,7 @@ export default function GoodsInwardPage() {
                             step="0.01"
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.discount}
@@ -1876,7 +1876,7 @@ export default function GoodsInwardPage() {
                             step="0.01"
                           />
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 sb-td-py">
                           <input
                             type="number"
                             value={item.discountAmount}
@@ -1885,10 +1885,10 @@ export default function GoodsInwardPage() {
                             step="0.01"
                           />
                         </td>
-                        <td className="px-2 py-1 text-right text-xs font-semibold text-gray-700">
+                        <td className="px-2 sb-td-py text-right sb-text-sm font-semibold text-gray-700">
                           {(item.value || 0).toFixed(2)}
                         </td>
-                        <td className="px-2 py-1 text-center">
+                        <td className="px-2 sb-td-py text-center">
                           <button
                             className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
                             title="Delete item"
@@ -1906,8 +1906,8 @@ export default function GoodsInwardPage() {
           </div>
         </div>
 
-        <div className={`${cardClasses} p-2 overflow-visible`}>
-          <div className="grid grid-cols-[320px_140px_70px_90px_90px_90px_70px_70px_90px_1fr] gap-4 w-full overflow-x-auto relative z-0">
+        <div className={`${cardClasses} sb-card overflow-visible`}>
+          <div className="sb-add-item-grid sb-add-item-grid--gi grid w-full overflow-x-auto relative z-0">
             <div className="relative">
               <input
                 type="text"
@@ -2028,7 +2028,7 @@ export default function GoodsInwardPage() {
           </ul>
         )}
 
-        <div className={`${cardClasses} p-2`}>
+        <div className={`${cardClasses} sb-card`}>
           <div className="flex flex-col lg:flex-row gap-2 lg:items-center">
             <div className="flex flex-1 flex-col sm:flex-row gap-2">
               <input

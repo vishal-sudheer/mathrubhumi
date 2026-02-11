@@ -89,6 +89,7 @@ textarea:focus-visible {
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -121,4 +122,157 @@ textarea:focus-visible {
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(59, 130, 246, 0.6);
+}
+
+/* ============================================================
+   Sale Bill page — viewport-height-responsive sizing
+   ============================================================
+   Three tiers: normal (>900px), compact (≤900px), ultra-compact (≤768px)
+   Uses plain CSS custom properties so every element stays in sync.
+   ============================================================ */
+
+/* --- defaults (tall screens / laptops >900px) --- */
+.sb-page {
+  --sb-page-pad: 0.5rem;
+  /* p-2 */
+  --sb-card-pad: 0.5rem;
+  /* p-2 */
+  --sb-gap: 0.5rem;
+  /* gap-2 */
+  --sb-form-gap: 0.375rem;
+  /* gap-1.5 */
+  --sb-input-py: 0.375rem;
+  /* py-1.5 */
+  --sb-table-input-py: 0.25rem;
+  /* py-1 */
+  --sb-th-py: 0.375rem;
+  /* py-1.5 */
+  --sb-td-py: 0.25rem;
+  /* py-1 */
+  --sb-text-sm: 11px;
+  --sb-add-grid: 410px 90px 120px 110px 120px 80px 80px 1fr;
+  --sb-add-gap: 1rem;
+  /* gap-4 */
+  padding: var(--sb-page-pad);
+}
+
+.sb-layout {
+  gap: var(--sb-gap);
+}
+
+.sb-card {
+  padding: var(--sb-card-pad);
+}
+
+.sb-form-grid {
+  gap: var(--sb-form-gap);
+}
+
+.sb-input {
+  padding-top: var(--sb-input-py);
+  padding-bottom: var(--sb-input-py);
+}
+
+.sb-table-input {
+  padding-top: var(--sb-table-input-py);
+  padding-bottom: var(--sb-table-input-py);
+}
+
+.sb-th-py {
+  padding-top: var(--sb-th-py);
+  padding-bottom: var(--sb-th-py);
+}
+
+.sb-td-py {
+  padding-top: var(--sb-td-py);
+  padding-bottom: var(--sb-td-py);
+}
+
+.sb-text-sm {
+  font-size: var(--sb-text-sm);
+}
+
+.sb-add-item-grid {
+  grid-template-columns: var(--sb-add-grid);
+  gap: var(--sb-add-gap);
+}
+
+/* --- compact tier (≤900px viewport height) --- */
+@media (max-height: 900px) {
+  .sb-page {
+    --sb-page-pad: 0.375rem;
+    --sb-card-pad: 0.375rem;
+    --sb-gap: 0.375rem;
+    --sb-form-gap: 0.25rem;
+    --sb-input-py: 0.25rem;
+    --sb-table-input-py: 0.1875rem;
+    --sb-th-py: 0.25rem;
+    --sb-td-py: 0.1875rem;
+    --sb-text-sm: 11px;
+    --sb-add-gap: 0.75rem;
+  }
+}
+
+.sb-add-item-grid.sb-add-item-grid--gi {
+  grid-template-columns: 320px 140px 70px 90px 90px 90px 70px 70px 90px 1fr;
+}
+
+.sb-add-item-grid.sb-add-item-grid--gir {
+  grid-template-columns: 360px 140px 80px 100px 100px 90px 80px 100px 1fr;
+}
+
+/* --- tight tier (≤800px viewport height) --- */
+@media (max-height: 800px) {
+  .sb-page {
+    --sb-page-pad: 0.25rem;
+    --sb-card-pad: 0.25rem;
+    --sb-gap: 0.25rem;
+    --sb-form-gap: 0.1875rem;
+    --sb-input-py: 0.1875rem;
+    --sb-table-input-py: 0.125rem;
+    --sb-th-py: 0.1875rem;
+    --sb-td-py: 0.125rem;
+    --sb-text-sm: 10px;
+    --sb-add-gap: 0.5rem;
+    --sb-add-grid: minmax(220px, 1.5fr) minmax(60px, 0.4fr) minmax(80px, 0.5fr) minmax(80px, 0.5fr) minmax(90px, 0.5fr) minmax(55px, 0.35fr) minmax(55px, 0.35fr) minmax(60px, 0.4fr);
+  }
+
+  .sb-add-item-grid.sb-add-item-grid--gi {
+    grid-template-columns: minmax(180px, 1.2fr) minmax(80px, 0.6fr) minmax(45px, 0.3fr) minmax(65px, 0.4fr) minmax(55px, 0.35fr) minmax(60px, 0.4fr) minmax(45px, 0.3fr) minmax(45px, 0.3fr) minmax(55px, 0.35fr) minmax(50px, 0.3fr);
+  }
+
+  .sb-add-item-grid.sb-add-item-grid--gir {
+    grid-template-columns: minmax(200px, 1.3fr) minmax(80px, 0.5fr) minmax(50px, 0.3fr) minmax(65px, 0.4fr) minmax(65px, 0.4fr) minmax(55px, 0.35fr) minmax(50px, 0.3fr) minmax(65px, 0.4fr) minmax(50px, 0.3fr);
+  }
+
+  .sb-form-grid {
+    /* force 5 columns to consume less vertical space */
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+/* --- ultra-compact tier (≤700px viewport height) --- */
+@media (max-height: 700px) {
+  .sb-page {
+    --sb-page-pad: 0.1875rem;
+    --sb-card-pad: 0.1875rem;
+    --sb-gap: 0.1875rem;
+    --sb-form-gap: 0.125rem;
+    --sb-input-py: 0.125rem;
+    --sb-table-input-py: 0.0625rem;
+    --sb-th-py: 0.125rem;
+    --sb-td-py: 0.0625rem;
+    --sb-text-sm: 10px;
+    --sb-add-gap: 0.375rem;
+  }
+
+  .sb-form-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  /* Smaller font for form inputs on very short screens */
+  .sb-input,
+  .sb-table-input {
+    font-size: 11px;
+  }
 }
