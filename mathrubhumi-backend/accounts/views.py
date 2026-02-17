@@ -363,8 +363,16 @@ def create_sale(request):
             for field, default in optional_fields.items():
                 data[field] = data.get(field, default) if data.get(field) is not None else default
 
-            # NEW: normalize branch_id & agent_id
-            data['branch_id'] = int(data.get('branch_id') or 0)
+            branch_id_header = request.headers.get('X-Branch-Id')
+            try:
+                branch_id = int(branch_id_header)
+                if branch_id <= 0:
+                    raise ValueError
+            except (TypeError, ValueError):
+                logger.error("Validation failed: Missing or invalid X-Branch-Id header")
+                return JsonResponse({'error': 'Branch context missing. Please log in again.'}, status=400)
+
+            # NEW: normalize agent_id
             data['agent_id'] = int(data.get('agent_id') or 0)
 
             if not isinstance(data['items'], list) or not data['items']:
@@ -425,6 +433,7 @@ def create_sale(request):
             with transaction.atomic():
                 bill_no = get_next_value(1, '2526', 'CREDIT_SALE')
                 bill_no = '2025-26/' + f"{bill_no:05d}"
+                user_id = int(getattr(request.user, 'id', 0) or 0)
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
@@ -433,13 +442,13 @@ def create_sale(request):
                             type, mode, class, cancel,
                             bill_discount, bill_discount_amount, gross, round_off, bill_amount,
                             note_1, note_2, freight_postage, processing_charge,
-                            bill_no, cr_customer_id, agent_id, branch_id
+                            bill_no, cr_customer_id, user_id, agent_id, company_id, branch_id
                         )
                         VALUES (%s, %s, %s, %s,
                                 %s, %s, %s, %s,
                                 %s, %s, %s, %s, %s,
                                 %s, %s, %s, %s,
-                                %s, %s, %s, %s)
+                                %s, %s, %s, %s, %s, %s)
                         RETURNING id
                         """,
                         [
@@ -462,8 +471,10 @@ def create_sale(request):
                             data['processing_charge'],
                             bill_no,
                             data['customer_id'],       # cr_customer_id
+                            user_id,
                             int(data.get('agent_id') or 0),
-                            int(data.get('branch_id') or 0),
+                            branch_id,
+                            branch_id,
                         ]
                     )
                     sale_id = cursor.fetchone()[0]
@@ -473,9 +484,9 @@ def create_sale(request):
                             """
                             INSERT INTO sale_items (
                                 sale_id, exchange_rate, quantity, rate, tax, discount_p, line_value, currency_id, title_id, allocated_bill_discount,
-                                purchase_company_id, purchase_id, purchase_item_id
+                                purchase_company_id, purchase_id, purchase_item_id, company_id
                             )
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                             """,
                             [
                                 sale_id,
@@ -491,6 +502,7 @@ def create_sale(request):
                                 item['purchaseCompanyId'],
                                 item['purchaseId'],
                                 item['purchaseItemId'],
+                                branch_id,
                             ]
                         )
 
@@ -518,6 +530,15 @@ def create_goods_inward(request):
                 if field not in data or data[field] is None or data[field] == '':
                     logger.error(f"Validation failed: Missing or null field: {field}")
                     return JsonResponse({'error': f'Missing or null field: {field}'}, status=400)
+
+            branch_id_header = request.headers.get('X-Branch-Id')
+            try:
+                branch_id = int(branch_id_header)
+                if branch_id <= 0:
+                    raise ValueError
+            except (TypeError, ValueError):
+                logger.error("Validation failed: Missing or invalid X-Branch-Id header")
+                return JsonResponse({'error': 'Branch context missing. Please log in again.'}, status=400)
 
             try:
                 gross = _coerce_float(data.get('gross'), 0.0)
@@ -559,9 +580,9 @@ def create_goods_inward(request):
                     cursor.execute(
                         """
                         INSERT INTO purchase (invoice_no, invoice_date, supplier_id, nett, inward_type, transaction_type, notes, gross, p_breakup_id1, p_breakup_amount1, 
-                                            p_breakup_id2, p_breakup_amount2, p_breakup_id3, p_breakup_amount3, p_breakup_id4, p_breakup_amount4, user_id, branch_id,
+                                            p_breakup_id2, p_breakup_amount2, p_breakup_id3, p_breakup_amount3, p_breakup_id4, p_breakup_amount4, user_id, branch_id, company_id,
                                             purchase_no)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         RETURNING id
                         """,
                         [
@@ -582,7 +603,8 @@ def create_goods_inward(request):
                             p_breakup_id4,
                             p_breakup_amt4,
                             data['user_id'],
-                            data['branches_id'],
+                            branch_id,
+                            branch_id,
                             purchase_no
                         ]
                     )
@@ -591,8 +613,8 @@ def create_goods_inward(request):
                     for item in data['items']:
                         cursor.execute(
                             """
-                            INSERT INTO purchase_items (purchase_id, title_id, rate, exchange_rate, discount_p, discount_a, quantity, closing, currency_id, sgst, cgst, isbn)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                            INSERT INTO purchase_items (purchase_id, title_id, rate, exchange_rate, discount_p, discount_a, quantity, closing, currency_id, sgst, cgst, isbn, company_id)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                             """,
                             [
                                 purchase_id,
@@ -606,7 +628,8 @@ def create_goods_inward(request):
                                 item['currencyIndex'],				
                                 item['tax'] / 2,
                                 item['tax'] / 2,
-                                item['isbn']
+                                item['isbn'],
+                                branch_id
                             ]
                         )
 
@@ -4624,6 +4647,14 @@ def goods_inward(request):
         pr = data.get('purchase_rt', {}) or {}
         rows = data.get('purchase_rt_items', []) or []
 
+        branch_id_header = request.headers.get('X-Branch-Id')
+        try:
+            company_id = int(branch_id_header)
+            if company_id <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return JsonResponse({'error': 'Branch context missing. Please log in again.'}, status=400)
+
         with transaction.atomic():
             with connection.cursor() as cur:
                 # resolve supplier id from id or supplier_nm
@@ -4633,8 +4664,6 @@ def goods_inward(request):
                     supplier_nm=pr.get('supplier_nm'),
                 )
 
-                # default company_id – adjust if needed
-                company_id = _int(pr.get('company_id', 1))
                 entry_date = _str(pr.get('entry_date')) or None  # let DB default if empty
 
                 # lock for id allocation
@@ -5163,6 +5192,14 @@ def sales_rt_create(request):
     if not rows:
         return JsonResponse({'error': 'At least one item is required'}, status=400)
 
+    branch_id_header = request.headers.get('X-Branch-Id')
+    try:
+        branch_id = int(branch_id_header)
+        if branch_id <= 0:
+            raise ValueError
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'Branch context missing. Please log in again.'}, status=400)
+
     entry_date = header.get('date')
     s_type = sale_type_reverse_mapping.get(header.get('type'), 0)
     cash = payment_type_reverse_mapping.get(header.get('pay'), 0)
@@ -5200,7 +5237,7 @@ def sales_rt_create(request):
                     RETURNING id
                     """,
                     [
-                        0,  # company_id
+                        branch_id,  # company_id
                         sales_rt_no,
                         entry_date,
                         s_type,
@@ -5227,7 +5264,7 @@ def sales_rt_create(request):
                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                         """,
                         [
-                            0,  # company_id
+                            branch_id,  # company_id
                             parent_id,
                             _int(it.get('title_id'), 0),
                             float(_num(it.get('qty'), 0.0)),
