@@ -25,6 +25,7 @@ const Sidebar = () => {
     Window: false,
     Help: false,
   });
+  const [expandedReportDivisions, setExpandedReportDivisions] = useState({});
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const profileButtonRef = useRef(null);
   const profileMenuRef = useRef(null);
@@ -38,6 +39,10 @@ const Sidebar = () => {
 
   const toggleMenu = (menu) => {
     setExpandedMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
+  };
+
+  const toggleReportDivision = (division) => {
+    setExpandedReportDivisions((prev) => ({ ...prev, [division]: !prev[division] }));
   };
 
   useEffect(() => {
@@ -122,21 +127,44 @@ const Sidebar = () => {
       { label: "Credit Realisation Entry", route: "/dashboard/credit-realisation-entry" },
     ],
     Reports: [
-      { label: "Author-Wise Title Sales", route: "/dashboard/author-wise-title-sales" },
-      { label: "Credit-Customer Wise Sales", route: "/dashboard/credit-customer-wise-sales" },
-      { label: "Bill-Wise Sale Register", route: "/dashboard/bill-wise-sale-register" },
-      { label: "Date-Wise Sale Register", route: "/dashboard/date-wise-sale-register" },
-      { label: "Type-Wise Sale Register", route: "/dashboard/type-wise-sale-register" },
-      { label: "CIAL Sale Register", route: "/dashboard/cial-sale-register" },
-      { label: "ABC Sale Register", route: "/dashboard/abc-sale-register" },
-      { label: "Category Wise Sales", route: "/dashboard/category-wise-sales" },
-      { label: "Sale Class Ratio", route: "/dashboard/sale-class-ratio" },
-      { label: "Sales Agent-Wise", route: "/dashboard/sales-agent-wise" },
-      { label: "Sale and Stock", route: "/dashboard/sale-and-stock" },
-      { label: "Author-Publisher Sales", route: "/dashboard/author-publisher-sales" },
-      { label: "Publisher-Author Wise Sales", route: "/dashboard/publisher-author-wise-sales" },
-      { label: "Sub-Category Mode Product-Wise Sales", route: "/dashboard/sub-category-mode-product-wise-sales" },
-      { label: "Category Publisher Author Wise Sales", route: "/dashboard/category-publisher-author-wise-sales" },
+      {
+        division: "Sale Reports",
+        items: [
+          { label: "Author-Wise Title Sales", route: "/dashboard/author-wise-title-sales" },
+          { label: "Credit-Customer Wise Sales", route: "/dashboard/credit-customer-wise-sales" },
+          { label: "Bill-Wise Sale Register", route: "/dashboard/bill-wise-sale-register" },
+          { label: "Date-Wise Sale Register", route: "/dashboard/date-wise-sale-register" },
+          { label: "Type-Wise Sale Register", route: "/dashboard/type-wise-sale-register" },
+          { label: "ABC Sale Register", route: "/dashboard/abc-sale-register" },
+          { label: "Category Wise Sales", route: "/dashboard/category-wise-sales" },
+          { label: "Sale Class Ratio", route: "/dashboard/sale-class-ratio" },
+          { label: "Sales Agent-Wise", route: "/dashboard/sales-agent-wise" },
+          { label: "Author-Publisher Sales", route: "/dashboard/author-publisher-sales" },
+          { label: "Publisher-Author Wise Sales", route: "/dashboard/publisher-author-wise-sales" },
+          { label: "Sub-Category Mode Product-Wise Sales", route: "/dashboard/sub-category-mode-product-wise-sales" },
+          { label: "Category Publisher Author Wise Sales", route: "/dashboard/category-publisher-author-wise-sales" },
+        ],
+      },
+      {
+        division: "Purchase Reports",
+        items: [],
+      },
+      {
+        division: "Stock Reports",
+        items: [
+          { label: "Sale and Stock", route: "/dashboard/sale-and-stock" },
+        ],
+      },
+      {
+        division: "P P Reports",
+        items: [],
+      },
+      {
+        division: "Miscellaneous Reports",
+        items: [
+          { label: "CIAL Sale Register", route: "/dashboard/cial-sale-register" },
+        ],
+      },
     ],
     Utilities: user.is_admin ? [{ label: "User Management", route: "/dashboard/users" }] : [],
     Window: [],
@@ -275,25 +303,71 @@ const Sidebar = () => {
               {/* Animated submenu with scroll */}
               <div
                 className={`transition-[max-height,opacity,transform] duration-300 ease-out
-                ${open && !collapsed ? "max-h-96 opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-1"}
+                ${open && !collapsed ? "max-h-[50rem] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-1"}
                 overflow-hidden`}
               >
                 {!collapsed && (
-                  <ul className="mt-1 ml-2 rounded-xl border border-blue-200/10 bg-blue-900/40 backdrop-blur-sm max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600/60 scrollbar-track-transparent">
+                  <ul className="mt-1 ml-2 rounded-xl border border-blue-200/10 bg-blue-900/40 backdrop-blur-sm max-h-[40rem] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600/60 scrollbar-track-transparent">
                     {menuStructure[menu].length === 0 && (
                       <li className="px-3 py-2 text-xs text-slate-300">No items</li>
                     )}
-                    {menuStructure[menu].map((item) => (
-                      <li
-                        key={item.label}
-                        onClick={() => navigate(item.route)}
-                        className="group relative flex items-center gap-2 px-3 py-2 text-sm text-slate-100
-                        hover:bg-blue-800/50 rounded-lg mx-1 my-0.5 cursor-pointer transition"
-                      >
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 group-hover:bg-blue-300" />
-                        <span className="truncate">{item.label}</span>
-                      </li>
-                    ))}
+                    {menuStructure[menu].map((item, idx) => {
+                      if (item.division) {
+                        const isDivisionExpanded = expandedReportDivisions[item.division];
+                        return (
+                          <div key={item.division || idx} className="mb-1 first:mt-1">
+                            <div
+                              className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-white/5 rounded-lg mx-1 transition select-none"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleReportDivision(item.division);
+                              }}
+                            >
+                              <span className="text-xs font-bold text-blue-200/90 uppercase tracking-wider">
+                                {item.division}
+                              </span>
+                              <svg
+                                className={`w-3.5 h-3.5 text-blue-300 transition-transform duration-200 ${isDivisionExpanded ? "rotate-90" : ""}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                            <div
+                              className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isDivisionExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
+                            >
+                              {item.items.length === 0 && (
+                                <div className="px-5 py-2 text-[11px] text-slate-400 italic">No reports</div>
+                              )}
+                              {item.items.map((subItem) => (
+                                <li
+                                  key={subItem.label}
+                                  onClick={() => navigate(subItem.route)}
+                                  className="group relative flex items-center gap-2 px-3 py-2 text-sm text-slate-100
+                                  hover:bg-blue-800/50 rounded-lg mx-1 my-0.5 cursor-pointer transition pl-5"
+                                >
+                                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 group-hover:bg-blue-300" />
+                                  <span className="truncate">{subItem.label}</span>
+                                </li>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return (
+                        <li
+                          key={item.label}
+                          onClick={() => navigate(item.route)}
+                          className="group relative flex items-center gap-2 px-3 py-2 text-sm text-slate-100
+                          hover:bg-blue-800/50 rounded-lg mx-1 my-0.5 cursor-pointer transition"
+                        >
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 group-hover:bg-blue-300" />
+                          <span className="truncate">{item.label}</span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
