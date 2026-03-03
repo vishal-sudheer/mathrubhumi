@@ -305,7 +305,9 @@ export default function SaleBillPage() {
           updated.branch_id = '';
         }
 
-        if (value === 'Credit Sale') {
+        if (value === 'Cash Sale' || value === 'Cash Memo') {
+          updated.mode = 'Cash';
+        } else {
           updated.mode = 'N.A.';
         }
       }
