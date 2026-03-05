@@ -44,6 +44,14 @@ payment_type_mapping = {
 }
 payment_type_reverse_mapping = {v: k for k, v in payment_type_mapping.items()}
 
+sale_mode_mapping = {
+    0: "Cash",
+    1: "Card",
+    2: "UPI",
+    3: "N.A."
+}
+sale_mode_reverse_mapping = {v: k for k, v in sale_mode_mapping.items()}
+
 class_type_mapping = {
     0: "Individual",
     1: "Educational Instt - School",
@@ -457,7 +465,7 @@ def create_sale(request):
                             data['sale_date'],
                             data['mobile_number'],
                             sale_type_reverse_mapping.get(data['type'], -1),
-                            payment_type_reverse_mapping.get(data['mode'], -1),
+                            sale_mode_reverse_mapping.get(data['mode'], -1),
                             class_type_reverse_mapping.get(data['class'], -1),
                             1 if data['cancel'] == 'Yes' else 0,
                             bill_discount,
@@ -693,7 +701,7 @@ def get_sale_by_id(request, sale_id):
                     return JsonResponse({'error': 'Sale not found'}, status=404)
 
                 sale_type_label = sale_type_mapping.get(sale[5], str(sale[5]))
-                payment_type_label = payment_type_mapping.get(sale[6], str(sale[6]))
+                payment_type_label = sale_mode_mapping.get(sale[6], str(sale[6]))
                 class_type_label = class_type_mapping.get(sale[7], str(sale[7]))
 
                 sale_data = {
@@ -794,12 +802,11 @@ def get_sale_by_id(request, sale_id):
                 return JsonResponse({'error': 'Items must be a non-empty list'}, status=400)
 
             sale_type_inverse = {v: k for k, v in sale_type_mapping.items()}
-            payment_type_inverse = {v: k for k, v in payment_type_mapping.items()}
             class_type_inverse = {v: k for k, v in class_type_mapping.items()}
 
             try:
                 type_code = sale_type_inverse[data['type']]
-                mode_code = payment_type_inverse[data['mode']]
+                mode_code = sale_mode_reverse_mapping[data['mode']]
                 class_code = class_type_inverse[data['class']]
             except KeyError as e:
                 logger.error(f"Invalid enum value for type/mode/class: {e}")
