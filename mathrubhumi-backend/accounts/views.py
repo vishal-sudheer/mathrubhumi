@@ -1306,7 +1306,7 @@ def product_search(request):
                      WHERE title_m ILIKE %s AND language_id = 1 AND title_m IS NOT NULL AND title_m !~ '^[[:space:]]*$'
                      LIMIT 10
                     """,
-                    [f'{search_query}%']
+                    [f'%{search_query}%']
                 )
             else:
                 cursor.execute(
@@ -1316,7 +1316,7 @@ def product_search(request):
                      WHERE title ILIKE %s AND title IS NOT NULL AND title !~ '^[[:space:]]*$'
                      LIMIT 10
                     """,
-                    [f'{query}%']
+                    [f'%{query}%']
                 )
             results = cursor.fetchall()
 

@@ -557,7 +557,7 @@ export default function PPBooksMaster() {
                   <tr>
                     <th className="w-[260px] px-3 py-2 text-left text-sm font-semibold tracking-wide">PP Book Name</th>
                     <th className="w-[90px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Code</th>
-                    <th className="w-[60px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Nos</th>
+                    <th className="w-[90px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Nos</th>
                     <th className="w-[120px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Face Value</th>
                     <th className="w-[140px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Reg Start</th>
                     <th className="w-[140px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Reg End</th>
@@ -611,7 +611,7 @@ export default function PPBooksMaster() {
                         <td className="px-3 py-2">
                           <input
                             type="number"
-                            value={item.nos || ''}
+                            value={item.nos ?? ''}
                             onChange={(e) => handleTableInputChange(item.id, 'nos', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, nos: e.target.value })}
                             className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm

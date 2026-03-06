@@ -277,22 +277,24 @@ const Sidebar = () => {
           return (
             <div key={menu} className="mb-1.5">
               <div
-                className={`flex items-center justify-between rounded-xl px-3 py-2.5 cursor-pointer
-                border border-transparent hover:border-white/10
-                bg-white/5 hover:bg-blue-900/40 transition`}
+                className={`flex items-center justify-between rounded-xl px-3 py-3 cursor-pointer
+                border transition-all duration-300 group
+                ${open 
+                  ? "bg-blue-600/20 border-blue-400/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] text-white" 
+                  : "bg-white/5 border-transparent hover:bg-white/10 hover:border-white/10 text-slate-200 hover:text-white"}`}
                 onClick={() => toggleMenu(menu)}
                 aria-expanded={open}
                 aria-label={`${menu} menu`}
               >
                 <span className="flex items-center">
-                  <span className="text-slate-200">{menuIcons[menu]}</span>
+                  <span className={`transition-colors duration-300 ${open ? "text-blue-300" : "text-slate-300 group-hover:text-blue-200"}`}>{menuIcons[menu]}</span>
                   {!collapsed && (
                     <span className="ml-3 text-sm font-medium tracking-wide">{menu}</span>
                   )}
                 </span>
                 {!collapsed && (
                   <svg
-                    className={`w-4 h-4 text-slate-300 transition-transform ${open ? "rotate-90" : ""}`}
+                    className={`w-4 h-4 transition-all duration-300 ${open ? "rotate-90 text-blue-300" : "text-slate-400 group-hover:text-slate-200"}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -302,12 +304,12 @@ const Sidebar = () => {
 
               {/* Animated submenu with scroll */}
               <div
-                className={`transition-[max-height,opacity,transform] duration-300 ease-out
-                ${open && !collapsed ? "max-h-[50rem] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-1"}
-                overflow-hidden`}
+                className={`grid transition-[grid-template-rows,opacity,transform] duration-300 ease-in-out
+                ${open && !collapsed ? "grid-rows-[1fr] opacity-100 translate-y-0" : "grid-rows-[0fr] opacity-0 -translate-y-2"}`}
               >
+                <div className="overflow-hidden">
                 {!collapsed && (
-                  <ul className="mt-1 ml-2 rounded-xl border border-blue-200/10 bg-blue-900/40 backdrop-blur-sm max-h-[40rem] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600/60 scrollbar-track-transparent">
+                  <ul className="mt-2 mb-2 ml-[22px] relative before:absolute before:inset-y-0 before:left-[3px] before:w-px before:bg-gradient-to-b before:from-blue-400/40 before:via-blue-400/10 before:to-transparent rounded-xl bg-black/10 backdrop-blur-md max-h-[40rem] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/40 scrollbar-track-transparent py-1.5 shadow-inner">
                     {menuStructure[menu].length === 0 && (
                       <li className="px-3 py-2 text-xs text-slate-300">No items</li>
                     )}
@@ -317,17 +319,17 @@ const Sidebar = () => {
                         return (
                           <div key={item.division || idx} className="mb-1 first:mt-1">
                             <div
-                              className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-white/5 rounded-lg mx-1 transition select-none"
+                              className={`flex items-center justify-between px-3 py-2 cursor-pointer rounded-lg mx-2 transition-all duration-200 select-none ${isDivisionExpanded ? "bg-blue-900/40 text-blue-100 border border-blue-500/10" : "hover:bg-white/5 text-blue-200/80 border border-transparent"}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleReportDivision(item.division);
                               }}
                             >
-                              <span className="text-xs font-bold text-blue-200/90 uppercase tracking-wider">
+                              <span className="text-[11px] font-bold uppercase tracking-wider">
                                 {item.division}
                               </span>
                               <svg
-                                className={`w-3.5 h-3.5 text-blue-300 transition-transform duration-200 ${isDivisionExpanded ? "rotate-90" : ""}`}
+                                className={`w-3.5 h-3.5 transition-all duration-300 ${isDivisionExpanded ? "rotate-90 text-blue-300" : "text-blue-300/60"}`}
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -336,8 +338,9 @@ const Sidebar = () => {
                               </svg>
                             </div>
                             <div
-                              className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isDivisionExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}
+                              className={`grid transition-[grid-template-rows,opacity,transform] duration-300 ease-in-out ${isDivisionExpanded ? "grid-rows-[1fr] opacity-100 translate-y-0" : "grid-rows-[0fr] opacity-0 -translate-y-1"}`}
                             >
+                              <div className="overflow-hidden">
                               {item.items.length === 0 && (
                                 <div className="px-5 py-2 text-[11px] text-slate-400 italic">No reports</div>
                               )}
@@ -345,13 +348,15 @@ const Sidebar = () => {
                                 <li
                                   key={subItem.label}
                                   onClick={() => navigate(subItem.route)}
-                                  className="group relative flex items-center gap-2 px-3 py-2 text-sm text-slate-100
-                                  hover:bg-blue-800/50 rounded-lg mx-1 my-0.5 cursor-pointer transition pl-5"
+                                  className="group relative flex items-center gap-3 px-3 py-1.5 min-h-[32px] text-[12px] font-medium text-slate-400
+                                  hover:text-white hover:bg-blue-500/10 rounded-lg mx-3 my-0.5 cursor-pointer transition-all duration-200 pl-4"
                                 >
-                                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 group-hover:bg-blue-300" />
-                                  <span className="truncate">{subItem.label}</span>
+                                  <span className={`absolute -left-[3px] w-[3px] h-0 bg-blue-400 rounded-r-full transition-all duration-300 group-hover:h-[60%] top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 shadow-[0_0_6px_rgba(96,165,250,0.6)]`} />
+                                  <span className="inline-block w-1 h-1 rounded-full bg-slate-600 group-hover:bg-blue-400 group-hover:shadow-[0_0_6px_rgba(96,165,250,0.8)] transition-all duration-300 relative z-10" />
+                                  <span className="truncate group-hover:translate-x-1 transition-transform duration-200">{subItem.label}</span>
                                 </li>
                               ))}
+                              </div>
                             </div>
                           </div>
                         );
@@ -360,16 +365,18 @@ const Sidebar = () => {
                         <li
                           key={item.label}
                           onClick={() => navigate(item.route)}
-                          className="group relative flex items-center gap-2 px-3 py-2 text-sm text-slate-100
-                          hover:bg-blue-800/50 rounded-lg mx-1 my-0.5 cursor-pointer transition"
+                          className="group relative flex items-center gap-3 px-3 py-2 min-h-[36px] text-[13px] font-medium text-slate-300
+                          hover:text-white hover:bg-blue-500/10 rounded-lg mx-2 my-0.5 cursor-pointer transition-all duration-200"
                         >
-                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 group-hover:bg-blue-300" />
-                          <span className="truncate">{item.label}</span>
+                          <span className={`absolute -left-[5px] w-[5px] h-0 bg-blue-400 rounded-r-full transition-all duration-300 group-hover:h-[60%] top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 shadow-[0_0_8px_rgba(96,165,250,0.6)]`} />
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-500/60 group-hover:bg-blue-400 group-hover:shadow-[0_0_6px_rgba(96,165,250,0.8)] transition-all duration-300 relative z-10" />
+                          <span className="truncate group-hover:translate-x-1 transition-transform duration-200">{item.label}</span>
                         </li>
                       );
                     })}
                   </ul>
                 )}
+                </div>
               </div>
             </div>
           );
