@@ -190,27 +190,33 @@ def pp_books_title_search(request):
 @permission_classes([IsAuthenticated])
 def pp_customers_name_search(request):
     """
-    Returns distinct pp_customer_nm from pp_customers for suggestions.
+    Returns pp_customer suggestions with customer details used by PP Receipt Entry.
     """
     try:
       q = request.GET.get('q', '')
       if len(q) < 2:
           return JsonResponse({'error': 'Query must be at least 2 characters'}, status=400)
       with connection.cursor() as cur:
-          # distinct names; pick the smallest id as representative
           cur.execute(
               """
-              SELECT MIN(id) AS id, pp_customer_nm 
+              SELECT id, pp_customer_nm, address1, address2, city, telephone, pin
                 FROM pp_customers
                WHERE pp_customer_nm ILIKE %s
-               GROUP BY pp_customer_nm
                ORDER BY pp_customer_nm
                LIMIT 50
               """,
               [f'%{q}%']
           )
           rows = cur.fetchall()
-      out = [{'id': r[0], 'pp_customer_nm': r[1] or ''} for r in rows]
+      out = [{
+          'id': r[0],
+          'pp_customer_nm': r[1] or '',
+          'address1': r[2] or '',
+          'address2': r[3] or '',
+          'city': r[4] or '',
+          'telephone': r[5] or '',
+          'pin': (r[6] or '').strip(),
+      } for r in rows]
       return JsonResponse(out, safe=False, json_dumps_params={'ensure_ascii': False})
     except Exception as e:
       logger.exception("Error in pp_customers_name_search")

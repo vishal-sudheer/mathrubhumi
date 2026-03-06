@@ -505,7 +505,15 @@ export default function PPReceiptEntry() {
                     key={`${m.id ?? i}`}
                     className="px-3 py-2 cursor-pointer hover:bg-gray-100"
                     onMouseDown={() => {
-                      setForm((p) => ({ ...p, name: m.pp_customer_nm || "" }));
+                      setForm((p) => ({
+                        ...p,
+                        name: m.pp_customer_nm || "",
+                        address1: m.address1 || "",
+                        address2: m.address2 || "",
+                        city: m.city || "",
+                        phone: m.telephone || "",
+                        pin: m.pin || "",
+                      }));
                       setPpCustomerId(m.id ?? null);
                       setShowPPCustomerSuggestions(false);
                     }}
