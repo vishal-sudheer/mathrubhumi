@@ -765,7 +765,7 @@ export default function PPBooksMaster() {
                 autoComplete="off"
               />
               {showTitleSuggestions && titleSuggestions.length > 0 && formData.ppBookName.trim() && (
-                <ul className="absolute z-10 bg-white border mt-1 w-full shadow-md rounded-lg text-sm max-h-48 overflow-y-auto">
+                <ul className="absolute z-10 bottom-full mb-1 bg-white border w-full shadow-md rounded-lg text-sm max-h-48 overflow-y-auto">
                   {titleSuggestions.map((ppbook, index) => (
                     <li
                       key={ppbook.id}
@@ -898,7 +898,7 @@ export default function PPBooksMaster() {
                 autoComplete="off"
               />
               {showPublisherSuggestions && publisherSuggestions.length > 0 && formData.ppBookFirm.trim() && (
-                <ul className="absolute z-10 bg-white border mt-1 w-full shadow-md rounded-lg text-sm max-h-48 overflow-y-auto">
+                <ul className="absolute z-10 bottom-full mb-1 bg-white border w-full shadow-md rounded-lg text-sm max-h-48 overflow-y-auto">
                   {publisherSuggestions.map((ppbook, index) => (
                     <li
                       key={ppbook.id}

@@ -501,7 +501,7 @@ export default function AgentsMaster() {
                 name="agentName"
                 value={formData.agentName}
                 onChange={handleInputChange}
-                placeholder="Enter agent name"
+                placeholder="Agent name"
                 className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"

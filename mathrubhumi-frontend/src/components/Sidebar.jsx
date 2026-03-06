@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Modal from "./Modal";
 import { clearSession, getInitials, getSession } from "../utils/session";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { user: sessionUser, branch: sessionBranch } = getSession();
   const user = {
@@ -348,12 +349,24 @@ const Sidebar = () => {
                                 <li
                                   key={subItem.label}
                                   onClick={() => navigate(subItem.route)}
-                                  className="group relative flex items-center gap-3 px-3 py-1.5 min-h-[32px] text-[12px] font-medium text-slate-400
-                                  hover:text-white hover:bg-blue-500/10 rounded-lg mx-3 my-0.5 cursor-pointer transition-all duration-200 pl-4"
+                                  className={`group relative flex items-center gap-3 px-3 py-1.5 min-h-[32px] text-[12px] font-medium rounded-lg mx-3 my-0.5 cursor-pointer transition-all duration-200 pl-4
+                                  ${location.pathname === subItem.route
+                                    ? "text-white bg-blue-500/15" 
+                                    : "text-slate-400 hover:text-white hover:bg-blue-500/5"}`}
                                 >
-                                  <span className={`absolute -left-[3px] w-[3px] h-0 bg-blue-400 rounded-r-full transition-all duration-300 group-hover:h-[60%] top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 shadow-[0_0_6px_rgba(96,165,250,0.6)]`} />
-                                  <span className="inline-block w-1 h-1 rounded-full bg-slate-600 group-hover:bg-blue-400 group-hover:shadow-[0_0_6px_rgba(96,165,250,0.8)] transition-all duration-300 relative z-10" />
-                                  <span className="truncate group-hover:translate-x-1 transition-transform duration-200">{subItem.label}</span>
+                                  {/* Active State Indicator Strip */}
+                                  <span className={`absolute -left-[3px] w-[3px] rounded-r-full transition-all duration-300 top-1/2 -translate-y-1/2 shadow-[0_0_6px_rgba(96,165,250,0.6)]
+                                    ${location.pathname === subItem.route ? "bg-blue-400 h-[60%] opacity-100" : "bg-blue-400 h-0 opacity-0 group-hover:h-[40%] group-hover:opacity-100"}`} />
+                                  
+                                  {/* Replaced dot with a chevron-like dash icon */}
+                                  <span className={`flex-shrink-0 relative z-10 transition-all duration-300
+                                    ${location.pathname === subItem.route ? "text-blue-400 translate-x-1" : "text-slate-500/60 group-hover:text-blue-400 group-hover:translate-x-0.5"}`}>
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                  </span>
+                                  
+                                  <span className={`truncate transition-transform duration-200 ${location.pathname === subItem.route ? "translate-x-1 font-semibold" : "group-hover:translate-x-0.5"}`}>{subItem.label}</span>
                                 </li>
                               ))}
                               </div>
@@ -365,12 +378,24 @@ const Sidebar = () => {
                         <li
                           key={item.label}
                           onClick={() => navigate(item.route)}
-                          className="group relative flex items-center gap-3 px-3 py-2 min-h-[36px] text-[13px] font-medium text-slate-300
-                          hover:text-white hover:bg-blue-500/10 rounded-lg mx-2 my-0.5 cursor-pointer transition-all duration-200"
+                          className={`group relative flex items-center gap-3 px-3 py-2 min-h-[36px] text-[13px] font-medium rounded-lg mx-2 my-0.5 cursor-pointer transition-all duration-200
+                          ${location.pathname === item.route
+                            ? "text-white bg-blue-500/15" 
+                            : "text-slate-300 hover:text-white hover:bg-blue-500/5"}`}
                         >
-                          <span className={`absolute -left-[5px] w-[5px] h-0 bg-blue-400 rounded-r-full transition-all duration-300 group-hover:h-[60%] top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 shadow-[0_0_8px_rgba(96,165,250,0.6)]`} />
-                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-500/60 group-hover:bg-blue-400 group-hover:shadow-[0_0_6px_rgba(96,165,250,0.8)] transition-all duration-300 relative z-10" />
-                          <span className="truncate group-hover:translate-x-1 transition-transform duration-200">{item.label}</span>
+                          {/* Active State Indicator Strip */}
+                          <span className={`absolute -left-[5px] w-[5px] rounded-r-full transition-all duration-300 top-1/2 -translate-y-1/2 shadow-[0_0_8px_rgba(96,165,250,0.6)]
+                            ${location.pathname === item.route ? "bg-blue-400 h-[60%] opacity-100" : "bg-blue-400 h-0 opacity-0 group-hover:h-[40%] group-hover:opacity-100"}`} />
+                          
+                          {/* Replaced dot with a stylish icon */}
+                          <span className={`flex-shrink-0 relative z-10 transition-all duration-300
+                            ${location.pathname === item.route ? "text-blue-400 translate-x-1" : "text-slate-500/60 group-hover:text-blue-400 group-hover:translate-x-0.5"}`}>
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </span>
+                          
+                          <span className={`truncate transition-transform duration-200 ${location.pathname === item.route ? "translate-x-1 font-semibold" : "group-hover:translate-x-0.5"}`}>{item.label}</span>
                         </li>
                       );
                     })}
