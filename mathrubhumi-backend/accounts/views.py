@@ -90,6 +90,14 @@ def _coerce_float(value, default=0.0):
             return default
     return float(value)
 
+
+def _decimal_to_float(value, default=0.0):
+    if value is None:
+        return default
+    if isinstance(value, decimal.Decimal):
+        return float(value)
+    return float(value)
+
 def get_next_value(company_id: int, fin_year: str, code: str) -> int:
     query = """
            UPDATE public."last_values" SET last_value = last_value + 1
@@ -6319,6 +6327,392 @@ def sale_and_stock_report(request):
         }, status=200)
     except Exception as e:
         logger.exception("Error in sale_and_stock_report")
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def daily_stock_statement_report(request):
+    """Generate daily stock statement report"""
+    try:
+        branch_id = request.GET.get('branch_id')
+        as_on_date = request.GET.get('as_on_date')
+
+        if not branch_id:
+            return JsonResponse({'error': 'branch_id is required'}, status=400)
+        if not as_on_date:
+            return JsonResponse({'error': 'as_on_date is required'}, status=400)
+
+        try:
+            branch_id_int = int(branch_id)
+        except (ValueError, TypeError) as e:
+            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+
+        as_on_date_obj = parse_date(as_on_date)
+        if not as_on_date_obj:
+            return JsonResponse({'error': 'Invalid date format. Expected YYYY-MM-DD.'}, status=400)
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    o_particulars,
+                    o_type_id,
+                    o_language_id,
+                    o_own,
+                    CAST(o_item_value AS numeric(18,2)) AS o_item_value
+                FROM get_dss(%s, %s::date)
+                ORDER BY o_type_id, o_particulars, o_language_id, o_own
+                """,
+                [branch_id_int, as_on_date]
+            )
+            dss_rows = cursor.fetchall()
+
+            cursor.execute(
+                """
+                SELECT
+                    o_bill_no,
+                    o_sale_type,
+                    CAST(o_bill_amount AS numeric(18,2)) AS o_bill_amount
+                FROM get_cancelled_sale_bills(%s, %s::date)
+                ORDER BY o_bill_no, o_sale_type
+                """,
+                [branch_id_int, as_on_date]
+            )
+            cancelled_bill_rows = cursor.fetchall()
+
+            cursor.execute(
+                """
+                SELECT
+                    o_title,
+                    CAST(o_quantity AS numeric(18,2)) AS o_quantity,
+                    CAST(o_inward_rate AS numeric(18,2)) AS o_inward_rate,
+                    CAST(o_outward_rate AS numeric(18,2)) AS o_outward_rate
+                FROM get_sold_items_with_more_less_value(%s, %s::date)
+                ORDER BY o_title
+                """,
+                [branch_id_int, as_on_date]
+            )
+            modified_rate_rows = cursor.fetchall()
+
+        report_data = {
+            'stock_rows': [
+                {
+                    'particulars': row[0] or '',
+                    'type_id': int(row[1]) if row[1] is not None else 0,
+                    'language_id': int(row[2]) if row[2] is not None else 0,
+                    'own': int(row[3]) if row[3] is not None else 0,
+                    'item_value': _decimal_to_float(row[4]),
+                }
+                for row in dss_rows
+            ],
+            'cancelled_sale_bills': [
+                {
+                    'bill_no': row[0] or '',
+                    'sale_type': row[1] or '',
+                    'bill_amount': _decimal_to_float(row[2]),
+                }
+                for row in cancelled_bill_rows
+            ],
+            'sold_items_with_more_less_value': [
+                {
+                    'title': row[0] or '',
+                    'quantity': _decimal_to_float(row[1]),
+                    'inward_rate': _decimal_to_float(row[2]),
+                    'outward_rate': _decimal_to_float(row[3]),
+                }
+                for row in modified_rate_rows
+            ],
+        }
+
+        return JsonResponse({
+            'report_data': report_data,
+            'parameters': {
+                'branch_id': branch_id_int,
+                'as_on_date': as_on_date,
+            },
+            'total_records': {
+                'stock_rows': len(report_data['stock_rows']),
+                'cancelled_sale_bills': len(report_data['cancelled_sale_bills']),
+                'sold_items_with_more_less_value': len(report_data['sold_items_with_more_less_value']),
+            }
+        }, status=200)
+    except Exception as e:
+        logger.exception("Error in daily_stock_statement_report")
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def daily_account_statement_report(request):
+    """Generate daily account statement report"""
+    try:
+        branch_id = request.GET.get('branch_id')
+        date_from = request.GET.get('date_from')
+        date_to = request.GET.get('date_to')
+
+        if not branch_id:
+            return JsonResponse({'error': 'branch_id is required'}, status=400)
+        if not date_from:
+            return JsonResponse({'error': 'date_from is required'}, status=400)
+        if not date_to:
+            return JsonResponse({'error': 'date_to is required'}, status=400)
+
+        try:
+            branch_id_int = int(branch_id)
+        except (ValueError, TypeError) as e:
+            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+
+        from_date_obj = parse_date(date_from)
+        to_date_obj = parse_date(date_to)
+        if not from_date_obj or not to_date_obj:
+            return JsonResponse({'error': 'Invalid date format. Expected YYYY-MM-DD.'}, status=400)
+        if from_date_obj > to_date_obj:
+            return JsonResponse({'error': 'date_from cannot be greater than date_to'}, status=400)
+
+        balance_keys = [
+            'cl_cash',
+            'cl_cheque',
+            'cl_card_books',
+            'cl_card_periodicals',
+            'cl_card_calendar',
+            'cl_card_diary',
+            'cl_card_paperbox',
+            'cl_card_others',
+            'cl_upi_books',
+            'cl_upi_periodicals',
+            'cl_upi_calendar',
+            'cl_upi_diary',
+            'cl_upi_paperbox',
+            'cl_upi_others',
+        ]
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    o_sale_type,
+                    o_bill_from,
+                    o_bill_to,
+                    CAST(o_gross_sale AS numeric(18,2)) AS o_gross_sale,
+                    CAST(o_nett_sale AS numeric(18,2)) AS o_nett_sale,
+                    CAST(o_total_discount AS numeric(18,2)) AS o_total_discount
+                FROM get_sales_type_wise(%s, %s::date, %s::date)
+                ORDER BY o_sale_type, o_bill_from, o_bill_to
+                """,
+                [branch_id_int, date_from, date_to]
+            )
+            sales_type_rows = cursor.fetchall()
+
+            cursor.execute(
+                """
+                SELECT
+                    o_language_id,
+                    CAST(o_gross_sale AS numeric(18,2)) AS o_gross_sale,
+                    CAST(o_nett_sale AS numeric(18,2)) AS o_nett_sale,
+                    CAST(o_total_discount AS numeric(18,2)) AS o_total_discount
+                FROM get_sales_language_wise(%s, %s::date, %s::date)
+                ORDER BY o_language_id
+                """,
+                [branch_id_int, date_from, date_to]
+            )
+            language_rows = cursor.fetchall()
+
+            cursor.execute(
+                """
+                SELECT
+                    o_sale_type,
+                    o_bill_from,
+                    o_bill_to,
+                    CAST(o_nett AS numeric(18,2)) AS o_nett
+                FROM get_sales_return_type_wise(%s, %s::date, %s::date)
+                ORDER BY o_sale_type, o_bill_from, o_bill_to
+                """,
+                [branch_id_int, date_from, date_to]
+            )
+            sale_return_rows = cursor.fetchall()
+
+            cursor.execute(
+                """
+                SELECT
+                    COALESCE(SUM(cl_cash), 0.00) AS cl_cash,
+                    COALESCE(SUM(cl_cheque), 0.00) AS cl_cheque,
+                    COALESCE(SUM(cl_card_books), 0.00) AS cl_card_books,
+                    COALESCE(SUM(cl_card_periodicals), 0.00) AS cl_card_periodicals,
+                    COALESCE(SUM(cl_card_calendar), 0.00) AS cl_card_calendar,
+                    COALESCE(SUM(cl_card_diary), 0.00) AS cl_card_diary,
+                    COALESCE(SUM(cl_card_paperbox), 0.00) AS cl_card_paperbox,
+                    COALESCE(SUM(cl_card_others), 0.00) AS cl_card_others,
+                    COALESCE(SUM(cl_upi_books), 0.00) AS cl_upi_books,
+                    COALESCE(SUM(cl_upi_periodicals), 0.00) AS cl_upi_periodicals,
+                    COALESCE(SUM(cl_upi_calendar), 0.00) AS cl_upi_calendar,
+                    COALESCE(SUM(cl_upi_diary), 0.00) AS cl_upi_diary,
+                    COALESCE(SUM(cl_upi_paperbox), 0.00) AS cl_upi_paperbox,
+                    COALESCE(SUM(cl_upi_others), 0.00) AS cl_upi_others
+                FROM closed_dates
+                WHERE company_id = %s
+                  AND closed_date >= %s::date
+                  AND closed_date <= %s::date
+                """,
+                [branch_id_int, date_from, date_to]
+            )
+            opening_balance_row = cursor.fetchone()
+
+            cursor.execute(
+                """
+                SELECT
+                    o_data_type,
+                    o_trn_id,
+                    o_entity_1,
+                    o_entity_2,
+                    o_description,
+                    CAST(o_receipt AS numeric(18,2)) AS o_receipt,
+                    CAST(o_payment AS numeric(18,2)) AS o_payment
+                FROM get_incomes_and_expenses(%s, %s::date, %s::date)
+                ORDER BY o_data_type, o_trn_id
+                """,
+                [branch_id_int, date_from, date_to]
+            )
+            income_expense_rows = cursor.fetchall()
+
+            cursor.execute(
+                """
+                SELECT pronargs
+                FROM pg_proc p
+                JOIN pg_namespace n ON p.pronamespace = n.oid
+                WHERE n.nspname = 'public'
+                  AND p.proname = 'arrive_daily_account_closing'
+                ORDER BY pronargs DESC
+                LIMIT 1
+                """
+            )
+            closing_signature = cursor.fetchone()
+            closing_arg_count = closing_signature[0] if closing_signature else 0
+
+            if closing_arg_count >= 3:
+                cursor.execute(
+                    """
+                    SELECT
+                        COALESCE(SUM(o_amount_cash), 0.00) AS cl_cash,
+                        COALESCE(SUM(o_amount_cheque), 0.00) AS cl_cheque,
+                        COALESCE(SUM(o_amount_card_books), 0.00) AS cl_card_books,
+                        COALESCE(SUM(o_amount_card_periodicals), 0.00) AS cl_card_periodicals,
+                        COALESCE(SUM(o_amount_card_calendar), 0.00) AS cl_card_calendar,
+                        COALESCE(SUM(o_amount_card_diary), 0.00) AS cl_card_diary,
+                        COALESCE(SUM(o_amount_card_paperbox), 0.00) AS cl_card_paperbox,
+                        COALESCE(SUM(o_amount_card_others), 0.00) AS cl_card_others,
+                        COALESCE(SUM(o_amount_upi_books), 0.00) AS cl_upi_books,
+                        COALESCE(SUM(o_amount_upi_periodicals), 0.00) AS cl_upi_periodicals,
+                        COALESCE(SUM(o_amount_upi_calendar), 0.00) AS cl_upi_calendar,
+                        COALESCE(SUM(o_amount_upi_diary), 0.00) AS cl_upi_diary,
+                        COALESCE(SUM(o_amount_upi_paper_box), 0.00) AS cl_upi_paperbox,
+                        COALESCE(SUM(o_amount_upi_others), 0.00) AS cl_upi_others
+                    FROM arrive_daily_account_closing(%s, %s::date, %s::date)
+                    """,
+                    [branch_id_int, date_from, date_to]
+                )
+            else:
+                cursor.execute(
+                    """
+                    SELECT
+                        COALESCE(SUM(o_amount_cash), 0.00) AS cl_cash,
+                        COALESCE(SUM(o_amount_cheque), 0.00) AS cl_cheque,
+                        COALESCE(SUM(o_amount_card_books), 0.00) AS cl_card_books,
+                        COALESCE(SUM(o_amount_card_periodicals), 0.00) AS cl_card_periodicals,
+                        COALESCE(SUM(o_amount_card_calendar), 0.00) AS cl_card_calendar,
+                        COALESCE(SUM(o_amount_card_diary), 0.00) AS cl_card_diary,
+                        COALESCE(SUM(o_amount_card_paperbox), 0.00) AS cl_card_paperbox,
+                        COALESCE(SUM(o_amount_card_others), 0.00) AS cl_card_others,
+                        COALESCE(SUM(o_amount_upi_books), 0.00) AS cl_upi_books,
+                        COALESCE(SUM(o_amount_upi_periodicals), 0.00) AS cl_upi_periodicals,
+                        COALESCE(SUM(o_amount_upi_calendar), 0.00) AS cl_upi_calendar,
+                        COALESCE(SUM(o_amount_upi_diary), 0.00) AS cl_upi_diary,
+                        COALESCE(SUM(o_amount_upi_paper_box), 0.00) AS cl_upi_paperbox,
+                        COALESCE(SUM(o_amount_upi_others), 0.00) AS cl_upi_others
+                    FROM arrive_daily_account_closing(%s, %s::date)
+                    """,
+                    [branch_id_int, date_to]
+                )
+            closing_balance_row = cursor.fetchone()
+
+        sales_type_summary = [
+            {
+                'sale_type': row[0] or '',
+                'bill_from': row[1] or '',
+                'bill_to': row[2] or '',
+                'gross_sale': _decimal_to_float(row[3]),
+                'nett_sale': _decimal_to_float(row[4]),
+                'total_discount': _decimal_to_float(row[5]),
+            }
+            for row in sales_type_rows
+        ]
+
+        language_wise_sale = [
+            {
+                'language_id': int(row[0]) if row[0] is not None else 0,
+                'gross_sale': _decimal_to_float(row[1]),
+                'nett_sale': _decimal_to_float(row[2]),
+                'total_discount': _decimal_to_float(row[3]),
+            }
+            for row in language_rows
+        ]
+
+        sale_return_summary = [
+            {
+                'sale_type': row[0] or '',
+                'bill_from': int(row[1]) if row[1] is not None else 0,
+                'bill_to': int(row[2]) if row[2] is not None else 0,
+                'nett': _decimal_to_float(row[3]),
+            }
+            for row in sale_return_rows
+        ]
+
+        opening_balance = {
+            key: _decimal_to_float(opening_balance_row[index]) if opening_balance_row else 0.0
+            for index, key in enumerate(balance_keys)
+        }
+
+        incomes_and_expenses = [
+            {
+                'data_type': row[0] or '',
+                'trn_id': int(row[1]) if row[1] is not None else 0,
+                'entity_1': row[2] or '',
+                'entity_2': row[3] or '',
+                'description': row[4] or '',
+                'receipt': _decimal_to_float(row[5]),
+                'payment': _decimal_to_float(row[6]),
+            }
+            for row in income_expense_rows
+        ]
+
+        closing_balance = {
+            key: _decimal_to_float(closing_balance_row[index]) if closing_balance_row else 0.0
+            for index, key in enumerate(balance_keys)
+        }
+
+        return JsonResponse({
+            'report_data': {
+                'sales_type_summary': sales_type_summary,
+                'language_wise_sale': language_wise_sale,
+                'sale_return_summary': sale_return_summary,
+                'opening_balance': opening_balance,
+                'incomes_and_expenses': incomes_and_expenses,
+                'closing_balance': closing_balance,
+            },
+            'parameters': {
+                'branch_id': branch_id_int,
+                'date_from': date_from,
+                'date_to': date_to,
+            },
+            'total_records': {
+                'sales_type_summary': len(sales_type_summary),
+                'language_wise_sale': len(language_wise_sale),
+                'sale_return_summary': len(sale_return_summary),
+                'incomes_and_expenses': len(incomes_and_expenses),
+            }
+        }, status=200)
+    except Exception as e:
+        logger.exception("Error in daily_account_statement_report")
         return JsonResponse({'error': str(e)}, status=400)
 
 

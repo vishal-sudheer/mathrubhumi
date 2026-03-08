@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="daily_stock_statement_master" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0d51053a-b823-46b7-98db-d407ab729052">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Mathrubhumi"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<subDataset name="DatasetCompanyDetails" uuid="0c180933-b427-445c-a36f-452a2dc9dc40">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Mathrubhumi"/>
+		<parameter name="p_company_id" class="java.lang.Integer"/>
+		<queryString language="SQL">
+			<![CDATA[select company_name
+            from get_company_details($P{p_company_id})]]>
+		</queryString>
+		<field name="company_name" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="company_name"/>
+		</field>
+	</subDataset>
+	<parameter name="p_company_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_as_on_date" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[java.sql.Date.valueOf("2025-12-31")]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[select        
+        o_particulars, o_type_id, o_language_id, o_own, o_item_value 
+    from get_dss(
+    	$P{p_company_id},
+        $P{p_as_on_date}
+        )]]>
+	</queryString>
+	<field name="o_particulars" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="o_particulars"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_particulars"/>
+	</field>
+	<field name="o_type_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="o_type_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_type_id"/>
+	</field>
+	<field name="o_language_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="o_language_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_language_id"/>
+	</field>
+	<field name="o_own" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="o_own"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_own"/>
+	</field>
+	<field name="o_item_value" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="o_item_value"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_item_value"/>
+	</field>
+	<variable name="v_malayalam_own" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($F{o_language_id} != null && $F{o_language_id}.intValue() == 1
+ && $F{o_own} != null && $F{o_own}.intValue() == 1)
+ ? $F{o_item_value}
+ : java.math.BigDecimal.ZERO]]></variableExpression>
+	</variable>
+	<variable name="v_malayalam_others" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($F{o_language_id} != null && $F{o_language_id}.intValue() == 1
+ && $F{o_own} != null && $F{o_own}.intValue() == 0)
+ ? $F{o_item_value}
+ : java.math.BigDecimal.ZERO]]></variableExpression>
+	</variable>
+	<variable name="v_english_own" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($F{o_language_id} != null && $F{o_language_id}.intValue() == 0
+ && $F{o_own} != null && $F{o_own}.intValue() == 1)
+ ? $F{o_item_value}
+ : java.math.BigDecimal.ZERO]]></variableExpression>
+	</variable>
+	<variable name="v_english_others" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($F{o_language_id} != null && $F{o_language_id}.intValue() == 0
+ && $F{o_own} != null && $F{o_own}.intValue() == 0)
+ ? $F{o_item_value}
+ : java.math.BigDecimal.ZERO]]></variableExpression>
+	</variable>
+	<variable name="v_tt_malayalam_own" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$V{v_malayalam_own}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
+	</variable>
+	<variable name="v_tt_malayalam_others" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$V{v_malayalam_others}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
+	</variable>
+	<variable name="v_tt_english_others" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$V{v_english_others}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
+	</variable>
+	<variable name="v_tt_english_own" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$V{v_english_own}]]></variableExpression>
+		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
+	</variable>
+	<title>
+		<band height="89" splitType="Stretch">
+			<componentElement>
+				<reportElement x="0" y="30" width="380" height="23" uuid="67731987-b11e-46e1-9749-8cdc72fbc98e"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="DatasetCompanyDetails" uuid="92133471-30e5-40fb-a12b-01919ecc998b">
+						<datasetParameter name="p_company_id">
+							<datasetParameterExpression><![CDATA[$P{p_company_id}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="23" width="380">
+						<textField>
+							<reportElement x="0" y="1" width="380" height="22" uuid="a0bdf9af-e8d2-419b-8ad4-31b98249f55c"/>
+							<textElement>
+								<font size="16" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<staticText>
+				<reportElement x="0" y="55" width="240" height="18" uuid="6c3676d3-4b48-4d16-ae34-82d1bf95708d"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sale Register (Date-wise)]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="72" width="520" height="16" uuid="3b918d87-bc37-40c4-b859-5bef2899c198"/>
+				<textFieldExpression><![CDATA["Stock Statement As On "
+                    + new java.text.SimpleDateFormat("dd-MM-yyyy").format($P{p_as_on_date})]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="45" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="1" width="555" height="1" forecolor="#B5B3B3" uuid="36362a14-0e5b-45bd-85a9-aa1715e30626"/>
+			</line>
+			<line>
+				<reportElement x="0" y="39" width="555" height="1" forecolor="#B5B3B3" uuid="1c48bf85-21a4-4026-a6c3-ba9e76bdcd5c"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="4" width="55" height="14" uuid="f462e0e3-7210-4a92-a48c-f5763f6aedec"/>
+				<text><![CDATA[Particulars]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="235" y="4" width="149" height="14" uuid="f8ac0e72-f15e-4858-82e4-284b5c0faece"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[<-------------Malayalam------------>]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="207" y="20" width="80" height="14" uuid="1bc878b0-72b5-4ba8-be67-ff676dfb0d19"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Own Books]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="301" y="20" width="80" height="14" uuid="c8312293-621b-4540-9a28-22bf51fa4e41"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Other`s Books]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="409" y="3" width="149" height="14" uuid="22bafcda-62d5-4660-a16b-05fa40ff5ebc"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[<-------------English------------>]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="466" y="20" width="90" height="14" uuid="949a857f-a5b2-47ae-a72b-03f04a1d1b76">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Other`s Books]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="376" y="20" width="90" height="14" uuid="2d42adcc-e774-492f-a6cc-d7f9716a3e65">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Own Books]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22">
+			<textField>
+				<reportElement x="0" y="3" width="195" height="15" uuid="97dab8c2-bc60-4462-9951-b5b470cf02a8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="750c6ae9-8302-4c89-8a2c-65375700631c"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{o_particulars}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="197" y="3" width="90" height="15" uuid="f4eb6a2f-c2e8-490d-90ba-b95adb1e949a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{v_malayalam_own}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="291" y="3" width="90" height="15" uuid="ef87e0b3-66f0-4d7a-a976-6a5f9386d8ca">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{v_malayalam_others}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="382" y="3" width="85" height="15" uuid="9fad4acd-5a64-4e65-a85d-8cf7c2e8f27d">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{v_english_own}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="469" y="3" width="85" height="15" uuid="45dc1e2d-bebe-4d06-b20f-04094d369b2f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{v_english_others}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="242" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="21" width="555" height="1" forecolor="#B5B3B3" uuid="ea93ea5c-1241-4525-afd3-4487d5556892"/>
+			</line>
+			<frame>
+				<reportElement positionType="Float" stretchType="ElementGroupHeight" x="0" y="23" width="555" height="180" uuid="7eb4adbf-a586-4b41-86cf-8927e98273ea"/>
+				<subreport>
+					<reportElement x="0" y="2" width="200" height="48" uuid="1288c37b-5cd5-4964-8686-a33314204da5">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<subreportParameter name="p_company_id">
+						<subreportParameterExpression><![CDATA[$P{p_company_id}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="p_as_on_date">
+						<subreportParameterExpression><![CDATA[$P{p_as_on_date}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["daily_stock_statement_cancelled_sale_bills.jasper"]]></subreportExpression>
+				</subreport>
+				<subreport>
+					<reportElement x="0" y="57" width="554" height="155" uuid="9a5aa1c6-d293-477b-b5ea-b3ecc6ca55d9"/>
+					<subreportParameter name="p_company_id">
+						<subreportParameterExpression><![CDATA[$P{p_company_id}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="p_as_on_date">
+						<subreportParameterExpression><![CDATA[$P{p_as_on_date}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["daily_stock_statement_sold_items_with_more_less_value.jasper"]]></subreportExpression>
+				</subreport>
+			</frame>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="291" y="4" width="90" height="15" uuid="a4b86d99-ae35-4662-8590-dfc8e60087cf">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{v_tt_malayalam_others}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="197" y="4" width="90" height="15" uuid="7afc877d-f728-46f3-9779-5fafedafb1ce">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{v_tt_malayalam_own}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="382" y="4" width="85" height="15" uuid="a71934da-0830-4f6a-a324-841a27a938b6">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{v_tt_english_own}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="469" y="4" width="85" height="15" uuid="d3fc8ce1-2b86-4688-b259-507fd5c58a70">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{v_tt_english_others}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="2" width="555" height="1" forecolor="#B5B3B3" uuid="d441974b-413b-40ad-8d64-c539fc0f4e72"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

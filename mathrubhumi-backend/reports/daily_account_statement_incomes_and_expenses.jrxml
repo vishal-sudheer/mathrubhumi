@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="daily_account_statement_incomes_and_expenses" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="f4c782a0-2c91-445f-be4b-2f2147cec163">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Mathrubhumi"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="674"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="p_company_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_from_date" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[java.sql.Date.valueOf("2025-04-01")]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_to_date" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[java.sql.Date.valueOf("2025-12-31")]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT o_data_type, o_trn_id, o_entity_1, o_entity_2, o_description, o_receipt, o_payment 
+FROM get_incomes_and_expenses(
+    $P{p_company_id},
+    $P{p_from_date},
+    $P{p_to_date}
+)
+ORDER BY o_data_type, o_trn_id]]>
+	</queryString>
+	<field name="o_data_type" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="o_data_type"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_data_type"/>
+	</field>
+	<field name="o_trn_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="o_trn_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_trn_id"/>
+	</field>
+	<field name="o_entity_1" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="o_entity_1"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_entity_1"/>
+	</field>
+	<field name="o_entity_2" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="o_entity_2"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_entity_2"/>
+	</field>
+	<field name="o_description" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="o_description"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_description"/>
+	</field>
+	<field name="o_receipt" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="o_receipt"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_receipt"/>
+	</field>
+	<field name="o_payment" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="o_payment"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_payment"/>
+	</field>
+	<variable name="v_transaction_type" class="java.lang.String">
+		<variableExpression><![CDATA[$F{o_data_type}.equals("1REMI") ? "Remittance" :
+$F{o_data_type}.equals("2SLTT") ? "Sale Total" :
+$F{o_data_type}.equals("3SRTT") ? "Sale Return Total" :
+$F{o_data_type}.equals("4COLL") ? "Collections" :
+$F{o_data_type}.equals("5CRRL") ? "Credit Realisation" :
+$F{o_data_type}.equals("6CRSL") ? "Credit Sale" :
+$F{o_data_type}.equals("7CRSR") ? "Credit Sale Return" :
+$F{o_data_type}.equals("8ORTC") ? "Other Receipts" :
+""]]></variableExpression>
+	</variable>
+	<group name="Group1">
+		<groupExpression><![CDATA[$F{o_data_type}]]></groupExpression>
+		<groupHeader>
+			<band height="19">
+				<textField>
+					<reportElement x="2" y="0" width="146" height="18" uuid="b759a86b-7cb4-42e4-bbcf-4e377b5bcf32">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<textElement>
+						<font size="12" isBold="true" isUnderline="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{o_data_type}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="6"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement x="500" y="2" width="64" height="14" uuid="3bfe086f-9cc7-4e77-b8da-cfe5cc7bec38"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Payments]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="8" y="2" width="92" height="14" uuid="9040b530-4ac9-4022-ac46-3916ce300536"/>
+				<textElement textAlignment="Left"/>
+				<text><![CDATA[Particulars]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="426" y="3" width="64" height="14" uuid="2f2b692e-81d5-4548-89ad-2703ca37ebe3"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Receipts]]></text>
+			</staticText>
+			<line>
+				<reportElement x="3" y="19" width="561" height="1" uuid="3eab65a7-2881-45b2-8530-b5f034a2e1eb"/>
+			</line>
+			<line>
+				<reportElement x="3" y="0" width="561" height="1" uuid="e6962c07-284d-4a79-a6ef-1ab38419340c"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<textField>
+				<reportElement x="8" y="0" width="192" height="14" uuid="2eb5b5bc-467b-426c-978d-b72500253dee">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6ccde9f7-e225-412d-bef5-0a4d6ea68ed1"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{o_entity_1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="203" y="0" width="136" height="14" uuid="28907499-2c28-4436-9479-e9e8632a1741">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="38010fe7-6b81-424d-b595-f2352c3e2bc3"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{o_entity_2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="340" y="0" width="75" height="14" uuid="90d3ec90-825d-4eb8-b744-6a405765b650">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="39988c5f-edad-46ab-a147-682701d6ceaf"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{o_description}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="417" y="0" width="72" height="14" uuid="b2d88db5-757f-4fb8-950e-0f4007902aca">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="84647730-42c6-44f9-9a44-306d9f76f166"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{o_receipt}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="492" y="0" width="72" height="14" uuid="7e84142d-92de-42f5-a6ed-959d4e073c46">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4981c60d-d490-45f1-b443-33b540d54211"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{o_payment}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="38" splitType="Stretch"/>
+	</summary>
+</jasperReport>

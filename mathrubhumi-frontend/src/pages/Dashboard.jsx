@@ -26,8 +26,10 @@ import RoyaltyRecipientsMaster from "./Masters/RoyaltyRecipientsMaster";
 import UserManagement from "./Admin/UserManagement";
 import BillWiseSaleRegister from "./Reports/BillWiseSaleRegister";
 import CialSaleRegister from "./Reports/CialSaleRegister";
+import DailyAccountStatement from "./Reports/DailyAccountStatement";
 import AbcSaleRegister from "./Reports/AbcSaleRegister";
 import SalesAgentWise from "./Reports/SalesAgentWise";
+import DailyStockStatement from "./Reports/DailyStockStatement";
 import SaleAndStock from "./Reports/SaleAndStock";
 import AuthorPublisherSales from "./Reports/AuthorPublisherSales";
 import AuthorWiseTitleSales from "./Reports/AuthorWiseTitleSales";
@@ -79,8 +81,10 @@ const Dashboard = () => {
           <Route path="users" element={<UserManagement />} />
           <Route path="bill-wise-sale-register" element={<BillWiseSaleRegister />} />
           <Route path="cial-sale-register" element={<CialSaleRegister />} />
+          <Route path="daily-account-statement" element={<DailyAccountStatement />} />
           <Route path="abc-sale-register" element={<AbcSaleRegister />} />
           <Route path="sales-agent-wise" element={<SalesAgentWise />} />
+          <Route path="daily-stock-statement" element={<DailyStockStatement />} />
           <Route path="sale-and-stock" element={<SaleAndStock />} />
           <Route path="author-publisher-sales" element={<AuthorPublisherSales />} />
           <Route path="author-wise-title-sales" element={<AuthorWiseTitleSales />} />

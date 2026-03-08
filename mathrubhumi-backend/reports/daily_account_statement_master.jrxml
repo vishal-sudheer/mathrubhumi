@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="daily_account_statement_master" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0d51053a-b823-46b7-98db-d407ab729052">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Mathrubhumi"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<subDataset name="DatasetCompanyDetails" uuid="0c180933-b427-445c-a36f-452a2dc9dc40">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Mathrubhumi"/>
+		<parameter name="p_company_id" class="java.lang.Integer"/>
+		<queryString language="SQL">
+			<![CDATA[select company_name
+            from get_company_details($P{p_company_id})]]>
+		</queryString>
+		<field name="company_name" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="company_name"/>
+		</field>
+	</subDataset>
+	<parameter name="p_company_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_from_date" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[java.sql.Date.valueOf("2025-04-01")]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_to_date" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[java.sql.Date.valueOf("2025-12-31")]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[select
+           o_sale_type, o_bill_from, o_bill_to, o_gross_sale, o_nett_sale, o_total_discount
+        from get_sales_type_wise(
+            $P{p_company_id},
+            $P{p_from_date},
+            $P{p_to_date}
+        )]]>
+	</queryString>
+	<field name="o_sale_type" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="o_sale_type"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_sale_type"/>
+	</field>
+	<field name="o_bill_from" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="o_bill_from"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_bill_from"/>
+	</field>
+	<field name="o_bill_to" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="o_bill_to"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_bill_to"/>
+	</field>
+	<field name="o_gross_sale" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="o_gross_sale"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_gross_sale"/>
+	</field>
+	<field name="o_nett_sale" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="o_nett_sale"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_nett_sale"/>
+	</field>
+	<field name="o_total_discount" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="o_total_discount"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_total_discount"/>
+	</field>
+	<variable name="v_nett_sale" class="java.math.BigDecimal">
+		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
+	</variable>
+	<variable name="v_nett_sale_return" class="java.math.BigDecimal">
+		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
+	</variable>
+	<title>
+		<band height="89" splitType="Stretch">
+			<componentElement>
+				<reportElement x="0" y="30" width="380" height="23" uuid="67731987-b11e-46e1-9749-8cdc72fbc98e"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="DatasetCompanyDetails" uuid="92133471-30e5-40fb-a12b-01919ecc998b">
+						<datasetParameter name="p_company_id">
+							<datasetParameterExpression><![CDATA[$P{p_company_id}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="23" width="380">
+						<textField>
+							<reportElement x="0" y="1" width="380" height="22" uuid="a0bdf9af-e8d2-419b-8ad4-31b98249f55c"/>
+							<textElement>
+								<font size="16" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{company_name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<staticText>
+				<reportElement x="0" y="55" width="240" height="18" uuid="6c3676d3-4b48-4d16-ae34-82d1bf95708d"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sale Register (Date-wise)]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="72" width="520" height="16" uuid="3b918d87-bc37-40c4-b859-5bef2899c198"/>
+				<textFieldExpression><![CDATA["Bill wise Sale Register from "
+                    + new java.text.SimpleDateFormat("dd-MM-yyyy").format($P{p_from_date})
+                    + " to "
+                    + new java.text.SimpleDateFormat("dd-MM-yyyy").format($P{p_to_date})]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="1" width="555" height="1" forecolor="#B5B3B3" uuid="36362a14-0e5b-45bd-85a9-aa1715e30626"/>
+			</line>
+			<line>
+				<reportElement x="0" y="21" width="555" height="1" forecolor="#B5B3B3" uuid="1c48bf85-21a4-4026-a6c3-ba9e76bdcd5c"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="4" width="55" height="14" uuid="f462e0e3-7210-4a92-a48c-f5763f6aedec"/>
+				<text><![CDATA[Type]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="83" y="4" width="100" height="14" uuid="b367fd79-cb66-43c9-8f47-9308bcb1f9a4"/>
+				<text><![CDATA[From]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="4" width="80" height="14" uuid="6d05a363-917c-4ca7-b8ea-8ad3f7430d82"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Face]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="393" y="4" width="74" height="14" uuid="ca13c395-960c-4234-bff9-dbc1fa20e357"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Commission]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="191" y="4" width="100" height="14" uuid="f8ac0e72-f15e-4858-82e4-284b5c0faece"/>
+				<textElement textAlignment="Left"/>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="473" y="4" width="82" height="14" uuid="0096c378-e8be-4ac8-a575-2f715723d6aa"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Nett]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="17">
+			<textField>
+				<reportElement x="0" y="0" width="74" height="15" uuid="ce18d45b-7cbd-4700-899a-c0c729cd89b3">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{o_sale_type}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="83" y="0" width="100" height="15" uuid="daed59e6-bf0e-4b84-83c1-2befa15b2020">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{o_bill_from}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="191" y="0" width="100" height="15" uuid="522f9e43-fadc-45f9-b4e7-f8c2f9fb54aa">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{o_bill_to}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="300" y="0" width="80" height="15" uuid="4c46a538-c7d5-456b-b0db-d7725a30705e">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{o_gross_sale}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="393" y="0" width="76" height="15" uuid="a0721aca-a1dc-452f-940c-b56446c35c2b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{o_total_discount}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="473" y="0" width="82" height="15" uuid="4746ca6a-ff30-4b2b-b4e0-a5a0c02fc5cb">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{o_nett_sale}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="650" splitType="Stretch">
+			<frame>
+				<reportElement positionType="Float" stretchType="ElementGroupHeight" x="0" y="-2" width="555" height="642" uuid="7eb4adbf-a586-4b41-86cf-8927e98273ea"/>
+				<subreport>
+					<reportElement positionType="Float" stretchType="ContainerHeight" x="0" y="4" width="270" height="48" isRemoveLineWhenBlank="true" uuid="4808e477-2239-4e88-a51c-f045de39a5c0">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["daily_account_statement_language_wise_sale.jasper"]]></subreportExpression>
+				</subreport>
+				<subreport>
+					<reportElement positionType="Float" stretchType="ContainerHeight" x="0" y="56" width="270" height="40" isRemoveLineWhenBlank="true" uuid="dc8b0846-f76b-4c32-bc18-8e213d92b516">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					</reportElement>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["daily_account_statement_sale_return.jasper"]]></subreportExpression>
+				</subreport>
+				<subreport>
+					<reportElement positionType="Float" stretchType="ContainerHeight" x="0" y="101" width="270" height="47" isRemoveLineWhenBlank="true" uuid="4cd82f1c-4934-4e58-a12a-26cd72490d69">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					</reportElement>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["daily_account_statement_opening_balance.jasper"]]></subreportExpression>
+				</subreport>
+				<subreport>
+					<reportElement positionType="Float" stretchType="ContainerHeight" x="0" y="153" width="555" height="60" isRemoveLineWhenBlank="true" uuid="19b9df03-7d16-4661-ad70-a145888c2319"/>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["daily_account_statement_incomes_and_expenses.jasper"]]></subreportExpression>
+				</subreport>
+				<subreport>
+					<reportElement positionType="Float" stretchType="ContainerHeight" x="0" y="218" width="200" height="200" uuid="59d0def6-0f0f-419a-bb74-960a57c461c9"/>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["daily_account_statement_closing_balance.jasper"]]></subreportExpression>
+				</subreport>
+			</frame>
+		</band>
+	</summary>
+</jasperReport>

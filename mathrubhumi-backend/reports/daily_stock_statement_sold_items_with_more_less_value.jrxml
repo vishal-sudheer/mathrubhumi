@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="daily_stock_statement_sold_items_with_more_less_value" pageWidth="595" pageHeight="842" columnWidth="575" leftMargin="0" rightMargin="20" topMargin="20" bottomMargin="20" uuid="fbc96a26-ea74-4824-affe-f5ef0b425da4">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Mathrubhumi"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="674"/>
+	<subDataset name="DatasetCompanyDetails" uuid="3d698ecf-7837-410f-a72b-87e921f14c99">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Mathrubhumi"/>
+		<parameter name="p_company_id" class="java.lang.Integer"/>
+		<queryString language="SQL">
+			<![CDATA[select company_name, address1, address2, city_with_pin, email, contact_nos, gstin, pan, cin, for_whom
+from get_company_details($P{p_company_id})]]>
+		</queryString>
+		<field name="company_name" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="company_name"/>
+			<property name="com.jaspersoft.studio.field.label" value="company_name"/>
+		</field>
+		<field name="address1" class="java.lang.String"/>
+		<field name="address2" class="java.lang.String"/>
+		<field name="city_with_pin" class="java.lang.String"/>
+		<field name="email" class="java.lang.String"/>
+		<field name="contact_nos" class="java.lang.String"/>
+		<field name="gstin" class="java.lang.String"/>
+		<field name="pan" class="java.lang.String"/>
+		<field name="cin" class="java.lang.String"/>
+		<field name="for_whom" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="p_company_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_as_on_date" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[java.sql.Date.valueOf("2025-04-01")]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT o_title, o_quantity, o_inward_rate, o_outward_rate
+FROM get_sold_items_with_more_less_value(
+    $P{p_company_id},
+    $P{p_as_on_date}
+)]]>
+	</queryString>
+	<field name="o_title" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="o_title"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_title"/>
+	</field>
+	<field name="o_quantity" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="o_quantity"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_quantity"/>
+	</field>
+	<field name="o_inward_rate" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="o_inward_rate"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_inward_rate"/>
+	</field>
+	<field name="o_outward_rate" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="o_outward_rate"/>
+		<property name="com.jaspersoft.studio.field.label" value="o_outward_rate"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="17" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="0" width="258" height="16" uuid="5624bee2-a201-447c-9f25-46c9d24f7e33">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Titles sold with Rate/Exchange rate modified]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="26" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="3" width="69" height="14" uuid="2f436055-7e5a-4252-b552-cdc2da34830b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<text><![CDATA[Title]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="490" y="3" width="64" height="14" uuid="00dfeb47-db8d-4b79-a2cf-237e5c67d47c"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Outward Rate]]></text>
+			</staticText>
+			<line>
+				<reportElement x="1" y="0" width="553" height="1" forecolor="#B5B3B3" uuid="55eebf8c-824c-43a3-98ee-40c4737162ee">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</line>
+			<line>
+				<reportElement x="1" y="20" width="553" height="1" forecolor="#B5B3B3" uuid="eea57eb6-c19b-4605-bf6c-aa96c1c5b29a">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</line>
+			<staticText>
+				<reportElement x="320" y="3" width="69" height="14" uuid="c7d9620c-4f43-4b5c-bf11-918a53e825ec">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Quantity]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="405" y="3" width="80" height="14" uuid="425ec0af-8761-452e-a1a4-e0276cff0f20"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Inward Rate]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="19" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="2" width="329" height="14" uuid="fe3ab318-1415-4fe0-b081-b359a5dbb9f8"/>
+				<textElement>
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{o_title}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="340" y="2" width="50" height="14" uuid="fbb7ae31-0b5e-4171-aadd-0d3bf4b5851b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b84067a-3725-457f-8f5d-d405dfe1ee84"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{o_quantity}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="395" y="0" width="90" height="14" uuid="af7a9aad-3273-4f56-b711-f22c0c30af40">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6962509f-1562-4c26-9eeb-0eaa1a6ed6e8"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{o_inward_rate}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#;#,##0.00#-">
+				<reportElement x="490" y="0" width="64" height="14" uuid="e2a5fed7-14c7-4414-b6cf-5ca7a251a080">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6962509f-1562-4c26-9eeb-0eaa1a6ed6e8"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{o_outward_rate}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="4">
+			<line>
+				<reportElement x="0" y="1" width="553" height="1" forecolor="#B5B3B3" uuid="65ed4c89-45bf-41d6-a6cf-161d58a88a14">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

@@ -153,6 +153,7 @@ const Sidebar = () => {
       {
         division: "Stock Reports",
         items: [
+          { label: "Daily Stock Statement", route: "/dashboard/daily-stock-statement" },
           { label: "Sale and Stock", route: "/dashboard/sale-and-stock" },
         ],
       },
@@ -163,6 +164,7 @@ const Sidebar = () => {
       {
         division: "Miscellaneous Reports",
         items: [
+          { label: "Daily Account Statement", route: "/dashboard/daily-account-statement" },
           { label: "CIAL Sale Register", route: "/dashboard/cial-sale-register" },
         ],
       },
