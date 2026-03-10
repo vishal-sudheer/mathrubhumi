@@ -13,12 +13,12 @@ export default function CreditCustomerMaster() {
     city: '',
     phone: '',
     email: '',
-    debit: '0.00',
-    credit: '0.00',
-    credit_days: '0',
-    credit_limit: '0.00',
+    debit: '',
+    credit: '',
+    credit_days: '',
+    credit_limit: '',
     gstin: '',
-    class: '0'
+    class: ''
   });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
@@ -47,7 +47,7 @@ export default function CreditCustomerMaster() {
 
     return () => clearTimeout(timer);
   }, [searchInput]);
-  
+
   const classOptions = [
     { value: '0', label: 'Individual' },
     { value: '1', label: 'Educational Instt - School' },
@@ -184,12 +184,12 @@ export default function CreditCustomerMaster() {
       city: '',
       phone: '',
       email: '',
-      debit: '0.00',
-      credit: '0.00',
-      credit_days: '0',
-      credit_limit: '0.00',
+      debit: '',
+      credit: '',
+      credit_days: '',
+      credit_limit: '',
       gstin: '',
-      class: '0'
+      class: ''
     });
   };
 
@@ -228,12 +228,12 @@ export default function CreditCustomerMaster() {
         city: item.city || '',
         phone: item.telephone || '',
         email: item.email_id || '',
-        debit: (item.debit ?? 0).toString(),
-        credit: (item.credit ?? 0).toString(),
-        credit_days: (item.credit_days ?? 0).toString(),
-        credit_limit: (item.credit_limit ?? 0).toString(),
+        debit: (item.debit && parseFloat(item.debit) !== 0) ? item.debit.toString() : '',
+        credit: (item.credit && parseFloat(item.credit) !== 0) ? item.credit.toString() : '',
+        credit_days: (item.credit_days && parseInt(item.credit_days) !== 0) ? item.credit_days.toString() : '',
+        credit_limit: (item.credit_limit && parseFloat(item.credit_limit) !== 0) ? item.credit_limit.toString() : '',
         gstin: item.gstin || '',
-        class: (item.class ?? 0).toString()
+        class: item.class !== null && item.class !== undefined ? item.class.toString() : ''
       }));
       setItems(fetchedItems);
       console.log('Updated items state:', fetchedItems);
@@ -556,13 +556,14 @@ export default function CreditCustomerMaster() {
                         </td>
                         <td className="px-4 py-2">
                           <select
-                            value={item.class || '0'}
+                            value={item.class ?? ''}
                             onChange={(e) => handleTableInputChange(item.id, 'class', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, class: e.target.value })}
                             className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
                                        focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           >
+                            <option value="" disabled hidden>Class</option>
                             {classOptions.map((option) => (
                               <option key={option.value} value={option.value}>
                                 {option.label}
@@ -691,7 +692,7 @@ export default function CreditCustomerMaster() {
                     className="w-full sm:w-28 px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                                focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                                transition-all duration-200 input-premium"
-                    step="0.001"
+                    step="1"
                     autoComplete="off"
                   />
                   <input
@@ -703,7 +704,7 @@ export default function CreditCustomerMaster() {
                     className="w-full sm:w-28 px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                                focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                                transition-all duration-200 input-premium"
-                    step="0.001"
+                    step="1"
                     autoComplete="off"
                   />
                   <input
@@ -727,7 +728,7 @@ export default function CreditCustomerMaster() {
                     className="w-full sm:w-28 px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                                focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                                transition-all duration-200 input-premium"
-                    step="0.001"
+                    step="1"
                     autoComplete="off"
                   />
                   <select
@@ -738,6 +739,7 @@ export default function CreditCustomerMaster() {
                                focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                                transition-all duration-200 input-premium"
                   >
+                    <option value="" disabled hidden>Class</option>
                     {classOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}

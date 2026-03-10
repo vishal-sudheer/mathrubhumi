@@ -213,17 +213,17 @@ export default function PublisherMaster() {
       const fetchedItems = results.map((item) => {
         const normalizedOwn = item.own === 1 || item.own === '1' ? '1' : '0';
         return ({
-        id: item.id,
-        code: item.id?.toString() || '',
-        name: item.publisher_nm || '',
-        contact: item.contact || '',
-        own: normalizedOwn,
-        email: item.email || '',
-        address1: item.address1 || '',
-        address2: item.address2 || '',
-        phone: item.telephone || '',
-        city: item.city || '',
-        discount: (item.max_discount_p ?? '').toString()
+          id: item.id,
+          code: item.id?.toString() || '',
+          name: item.publisher_nm || '',
+          contact: item.contact || '',
+          own: normalizedOwn,
+          email: item.email || '',
+          address1: item.address1 || '',
+          address2: item.address2 || '',
+          phone: item.telephone || '',
+          city: item.city || '',
+          discount: (item.max_discount_p ?? '').toString()
         });
       });
       setItems(fetchedItems);
@@ -718,7 +718,7 @@ export default function PublisherMaster() {
                 className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
-                step="0.01"
+                step="1"
                 autoComplete="off"
               />
             </div>

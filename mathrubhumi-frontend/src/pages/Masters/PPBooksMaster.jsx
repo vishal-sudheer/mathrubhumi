@@ -16,11 +16,11 @@ export default function PPBooksMaster() {
     regEndDate: '',
     dateOfRelease: '',
     notes: '',
-    closed: '0',
+    closed: '',
     ppBookFirm: '',
     ppBookFirmId: '',
-    nosEx: '5000',
-    productId: '0',
+    nosEx: '',
+    productId: '',
     inserted: '',
     modified: ''
   });
@@ -161,8 +161,8 @@ export default function PPBooksMaster() {
         closed: item.closed ?? '0',
         ppBookFirmId: item.pp_book_firm_id ?? '',
         ppBookFirm: item.pp_book_firm || '',
-        nosEx: item.nos_ex ?? '5000',
-        productId: item.product_id ?? '0',
+        nosEx: item.nos_ex ?? '',
+        productId: item.product_id ?? '',
         inserted: item.inserted || '',
         modified: item.modified || ''
       }));
@@ -295,7 +295,7 @@ export default function PPBooksMaster() {
       notes: updatedItem.notes || null,
       closed: Number(updatedItem.closed ?? 0),
       pp_book_firm_id: updatedItem.ppBookFirmId ? parseInt(updatedItem.ppBookFirmId) : 0,
-      nos_ex: updatedItem.nosEx ? parseInt(updatedItem.nosEx) : 5000,
+      nos_ex: updatedItem.nosEx ? parseInt(updatedItem.nosEx) : 0,
       product_id: updatedItem.productId ? parseInt(updatedItem.productId) : 0
     };
 
@@ -343,9 +343,9 @@ export default function PPBooksMaster() {
       reg_end_date: formData.regEndDate || null,
       date_of_release: formData.dateOfRelease || null,
       notes: formData.notes || null,
-      closed: Number(formData.closed ?? 0),
+      closed: formData.closed ? Number(formData.closed) : 0,
       pp_book_firm_id: parseInt(formData.ppBookFirmId, 10),
-      nos_ex: formData.nosEx ? parseInt(formData.nosEx, 10) : 5000,
+      nos_ex: formData.nosEx ? parseInt(formData.nosEx, 10) : 0,
       product_id: formData.productId ? parseInt(formData.productId, 10) : 0
     };
 
@@ -375,11 +375,11 @@ export default function PPBooksMaster() {
         regEndDate: '',
         dateOfRelease: '',
         notes: '',
-        closed: '0',
+        closed: '',
         ppBookFirm: '',
         ppBookFirmId: '',
-        nosEx: '5000',
-        productId: '0',
+        nosEx: '',
+        productId: '',
         inserted: '',
         modified: ''
       });
@@ -821,7 +821,9 @@ export default function PPBooksMaster() {
             </div>
             <div>
               <input
-                type="date"
+                type={formData.regStartDate ? 'date' : 'text'}
+                onFocus={(e) => (e.target.type = 'date')}
+                onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
                 name="regStartDate"
                 value={formData.regStartDate}
                 onChange={handleInputChange}
@@ -834,7 +836,9 @@ export default function PPBooksMaster() {
             </div>
             <div>
               <input
-                type="date"
+                type={formData.regEndDate ? 'date' : 'text'}
+                onFocus={(e) => (e.target.type = 'date')}
+                onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
                 name="regEndDate"
                 value={formData.regEndDate}
                 onChange={handleInputChange}
@@ -847,7 +851,9 @@ export default function PPBooksMaster() {
             </div>
             <div>
               <input
-                type="date"
+                type={formData.dateOfRelease ? 'date' : 'text'}
+                onFocus={(e) => (e.target.type = 'date')}
+                onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
                 name="dateOfRelease"
                 value={formData.dateOfRelease}
                 onChange={handleInputChange}
@@ -880,6 +886,7 @@ export default function PPBooksMaster() {
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
               >
+                <option value="" disabled hidden>Closed</option>
                 <option value="0">No</option>
                 <option value="1">Yes</option>
               </select>

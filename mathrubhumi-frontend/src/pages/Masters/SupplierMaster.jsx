@@ -13,8 +13,8 @@ export default function SupplierMaster() {
     city: '',
     phone: '',
     email: '',
-    debit: '0.00',
-    credit: '0.00',
+    debit: '',
+    credit: '',
     gstin: ''
   });
   const [page, setPage] = useState(1);
@@ -187,8 +187,8 @@ export default function SupplierMaster() {
       city: '',
       phone: '',
       email: '',
-      debit: '0.00',
-      credit: '0.00',
+      debit: '',
+      credit: '',
       gstin: ''
     });
   };
@@ -228,8 +228,8 @@ export default function SupplierMaster() {
         city: item.city || '',
         phone: item.telephone || '',
         email: item.email_id || '',
-        debit: (item.debit ?? 0).toString(),
-        credit: (item.credit ?? 0).toString(),
+        debit: (item.debit && parseFloat(item.debit) !== 0) ? item.debit.toString() : '',
+        credit: (item.credit && parseFloat(item.credit) !== 0) ? item.credit.toString() : '',
         gstin: item.gstin || ''
       }));
       setItems(fetchedItems);
@@ -483,7 +483,7 @@ export default function SupplierMaster() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Name"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
                   autoComplete="off"
@@ -496,7 +496,7 @@ export default function SupplierMaster() {
                   value={formData.address1}
                   onChange={handleInputChange}
                   placeholder="Address 1"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
                   autoComplete="off"
@@ -509,7 +509,7 @@ export default function SupplierMaster() {
                   value={formData.address2}
                   onChange={handleInputChange}
                   placeholder="Address 2"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
                   autoComplete="off"
@@ -522,7 +522,7 @@ export default function SupplierMaster() {
                   value={formData.city}
                   onChange={handleInputChange}
                   placeholder="City"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
                   autoComplete="off"
@@ -535,7 +535,7 @@ export default function SupplierMaster() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="Phone"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
                   autoComplete="off"
@@ -548,7 +548,7 @@ export default function SupplierMaster() {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="E-Mail"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
                   autoComplete="off"
@@ -561,10 +561,10 @@ export default function SupplierMaster() {
                   value={formData.debit}
                   onChange={handleInputChange}
                   placeholder="Debit"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
-                  step="0.001"
+                  step="1"
                   autoComplete="off"
                 />
               </div>
@@ -575,10 +575,10 @@ export default function SupplierMaster() {
                   value={formData.credit}
                   onChange={handleInputChange}
                   placeholder="Credit"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
-                  step="0.001"
+                  step="1"
                   autoComplete="off"
                 />
               </div>
@@ -589,7 +589,7 @@ export default function SupplierMaster() {
                   value={formData.gstin}
                   onChange={handleInputChange}
                   placeholder="GSTIN"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400
                            transition-all duration-200 input-premium"
                   autoComplete="off"
