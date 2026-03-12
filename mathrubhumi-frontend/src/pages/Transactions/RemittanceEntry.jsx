@@ -19,8 +19,8 @@ const fmtDmy = (isoOrDate) => {
   const d = new Date(isoOrDate);
   if (Number.isNaN(d.getTime())) return String(isoOrDate);
   return String(d.getDate()).padStart(2, "0") + "/" +
-         String(d.getMonth() + 1).padStart(2, "0") + "/" +
-         d.getFullYear();
+    String(d.getMonth() + 1).padStart(2, "0") + "/" +
+    d.getFullYear();
 };
 
 /* ---------- a_type map for Remittance ---------- */
@@ -48,9 +48,9 @@ const A_TYPE_OPTIONS = Object.keys(A_TYPE);
 export default function RemittanceEntry() {
   const [form, setForm] = useState({
     remittanceNo: "",
-    cancelled: "0", // 0 = No, 1 = Yes
-    date: today(),
-    type: "Cash",
+    cancelled: "", // 0 = No, 1 = Yes
+    date: "",
+    type: "",
     customer: "CASH/CARD/UPI",
     bank: "",
     receiptNo: "",
@@ -120,7 +120,7 @@ export default function RemittanceEntry() {
   const inputClasses = "w-full px-2.5 py-2 rounded-md border border-gray-200 bg-white text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 transition-all duration-200";
   const actionButtonClasses = "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-medium shadow-lg shadow-blue-500/20 hover:from-blue-600 hover:to-indigo-700 active:scale-[0.985] transition-all duration-200";
   const subduedInputClasses = "w-full px-2.5 py-2 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-200/60 focus:border-blue-300 transition-all duration-200";
-  
+
   /* ---------- API fetchers ---------- */
   const fetchCustomers = (q) => {
     const endpoint =
@@ -219,9 +219,9 @@ export default function RemittanceEntry() {
   const resetForm = () => {
     setForm({
       remittanceNo: "",
-      cancelled: "0",
-      date: today(),
-      type: "Cash",
+      cancelled: "",
+      date: "",
+      type: "",
       customer: "CASH/CARD/DIGITAL",
       bank: "",
       receiptNo: "",
@@ -316,13 +316,13 @@ export default function RemittanceEntry() {
 
       // Translate a_type back to label if possible
       const typeLabel =
-        Object.entries(A_TYPE).find(([, v]) => v === r.a_type)?.[0] || "Cash";
+        Object.entries(A_TYPE).find(([, v]) => v === r.a_type)?.[0] || "";
       const isLoadedChq = typeLabel === "Credit Sale Chq/DD" || typeLabel === "P P Chq/DD";
 
       setForm({
         remittanceNo: r.remittance_no != null ? String(r.remittance_no) : rn,
-        cancelled: String(r.cancelled ?? "0"),
-        date: r.entry_date || today(),
+        cancelled: r.cancelled != null ? String(r.cancelled) : "",
+        date: r.entry_date || "",
         type: typeLabel,
         customer: isLoadedChq ? (r.c_name || "") : "CASH/CARD/DIGITAL",
         bank: "", // bank_id is numeric; keep text empty (or wire your own bank name lookup)
@@ -382,10 +382,13 @@ export default function RemittanceEntry() {
             className={`${subduedInputClasses} font-semibold select-none pointer-events-none`}
           />
           <input
-            type="date"
+            type={form.date ? "date" : "text"}
+            onFocus={(e) => (e.target.type = "date")}
+            onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
             name="date"
             value={form.date}
             onChange={handleChange}
+            placeholder="Date"
             className={inputClasses}
           />
           <select
@@ -394,7 +397,7 @@ export default function RemittanceEntry() {
             onChange={handleChange}
             className={inputClasses}
           >
-            <option value="" disabled>Type</option>
+            <option value="" disabled hidden>Type</option>
             {A_TYPE_OPTIONS.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
@@ -407,7 +410,7 @@ export default function RemittanceEntry() {
             onChange={handleChange}
             className={inputClasses}
           >
-            <option value="" disabled>Cancelled</option>
+            <option value="" disabled hidden>Cancelled</option>
             <option value="0">No</option>
             <option value="1">Yes</option>
           </select>
@@ -438,9 +441,8 @@ export default function RemittanceEntry() {
                 }
               }}
               placeholder={isChqType ? "Customer" : "CASH/CARD/DIGITAL"}
-              className={`${inputClasses} ${
-                isChqType ? "" : "bg-gray-50 text-gray-600 border-gray-200 cursor-not-allowed"
-              }`}
+              className={`${inputClasses} ${isChqType ? "" : "bg-gray-50 text-gray-600 border-gray-200 cursor-not-allowed"
+                }`}
               autoComplete="off"
               readOnly={!isChqType}
               aria-readonly={!isChqType}
@@ -531,7 +533,7 @@ export default function RemittanceEntry() {
           />
           <input
             type="number"
-            step="0.01"
+            step="1"
             name="amount"
             value={form.amount}
             onChange={handleChange}

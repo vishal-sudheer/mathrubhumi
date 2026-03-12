@@ -77,15 +77,15 @@ export default function GoodsInwardReturnPage() {
 
   const [inwardMaster, setInwardMaster] = useState({
     srl_no: '',
-    entry_date: new Date().toISOString().split('T')[0],
+    entry_date: '',
     supplier_nm: '',
     supplier_id: '',
     bill_no: '',
     nett: '',
     notes: '',
-    is_local: 'Local',
+    is_local: '',
     gross: '',
-    type: 'Return',
+    type: '',
     user_id: 1,
     branch_id: 1,
   });
@@ -661,15 +661,15 @@ export default function GoodsInwardReturnPage() {
 
       setInwardMaster({
         srl_no: data.purchase_rt_no || '',
-        entry_date: data.entry_date || new Date().toISOString().split('T')[0],
+        entry_date: data.entry_date || '',
         supplier_nm: data.supplier_nm || '',
         supplier_id: data.supplier_id || '',
         bill_no: data.bill_no || '',
         nett: data.nett || '',
         notes: data.narration || '',
-        is_local: { 0: 'Local', 1: 'Int. State', 2: 'Imported' }[data.inter_state] || 'Local',
+        is_local: { 0: 'Local', 1: 'Int. State', 2: 'Imported' }[data.inter_state] ?? '',
         gross: data.gross || '',
-        type: { 0: 'Return', 1: 'Purchase', 2: 'Owner' }[data.pr_type] || 'Return',
+        type: { 0: 'Return', 1: 'Purchase', 2: 'Owner' }[data.pr_type] ?? '',
         user_id: data.user_id || 1,
         branch_id: data.branch_id || 1,
       });
@@ -708,15 +708,15 @@ export default function GoodsInwardReturnPage() {
   const resetForm = () => {
     setInwardMaster({
       srl_no: '',
-      entry_date: new Date().toISOString().split('T')[0],
+      entry_date: '',
       supplier_nm: '',
       supplier_id: '',
       bill_no: '',
       nett: '',
       notes: '',
-      is_local: 'Local',
+      is_local: '',
       gross: '',
-      type: 'Return',
+      type: '',
       user_id: 1,
       branch_id: 1,
     });
@@ -915,7 +915,9 @@ export default function GoodsInwardReturnPage() {
               disabled={loading}
             />
             <input
-              type="date"
+              type={inwardMaster.entry_date ? 'date' : 'text'}
+              onFocus={(e) => (e.target.type = 'date')}
+              onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="entry_date"
               value={inwardMaster.entry_date}
               onChange={handleInwardMasterChange}
@@ -1018,6 +1020,7 @@ export default function GoodsInwardReturnPage() {
               className={inputClasses}
               disabled={loading}
             >
+              <option value="" disabled hidden>Type</option>
               <option value="Return">Return</option>
               <option value="Purchase">Purchase</option>
               <option value="Owner">Owner</option>
@@ -1029,6 +1032,7 @@ export default function GoodsInwardReturnPage() {
               className={inputClasses}
               disabled={loading}
             >
+              <option value="" disabled hidden>Is Local</option>
               <option value="Local">Local</option>
               <option value="Int. State">Int. State</option>
               <option value="Imported">Imported</option>

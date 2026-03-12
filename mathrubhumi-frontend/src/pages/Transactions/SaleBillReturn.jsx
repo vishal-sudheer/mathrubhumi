@@ -47,9 +47,9 @@ export default function SaleBillReturn() {
   /* ---------- header / master ---------- */
   const [header, setHeader] = useState({
     no: '',
-    date: today(),
-    type: 'Credit Sale',
-    pay: 'Cash',
+    date: '',
+    type: '',
+    pay: '',
     customer: '',
     notes: '',
     disP: '',
@@ -100,7 +100,7 @@ export default function SaleBillReturn() {
   const total = useMemo(() => items.reduce((s, it) => s + asNum(it.value), 0), [items]);
 
   useEffect(() => {
-    setHeader(prev => ({ ...prev, nett: money(total) }));
+    setHeader(prev => ({ ...prev, nett: total === 0 ? '' : money(total) }));
   }, [total]);
 
   const cardClasses = "bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-lg shadow-sm";
@@ -286,9 +286,9 @@ export default function SaleBillReturn() {
 
       setHeader({
         no: String(data.sales_rt_no ?? ''),
-        date: data.entry_date || today(),
-        type: data.s_type_label || 'Credit Sale',
-        pay: data.cash_label || 'Cash',
+        date: data.entry_date || '',
+        type: data.s_type_label || '',
+        pay: data.cash_label || '',
         customer: data.cash_customer || '',
         notes: data.narration || '',
         disP: String(data.discount_p ?? ''),
@@ -425,9 +425,9 @@ export default function SaleBillReturn() {
   const resetForm = () => {
     setHeader({
       no: '',
-      date: today(),
-      type: 'Credit Sale',
-      pay: 'Cash',
+      date: '',
+      type: '',
+      pay: '',
       customer: '',
       notes: '',
       disP: '',
@@ -475,10 +475,13 @@ export default function SaleBillReturn() {
               className={`${inputClasses} bg-gray-50 font-semibold`}
             />
             <input
-              type="date"
+              type={header.date ? 'date' : 'text'}
+              onFocus={(e) => (e.target.type = 'date')}
+              onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="date"
               value={header.date}
               onChange={handleHeaderChange}
+              placeholder="Date"
               className={inputClasses}
             />
             <select
@@ -487,6 +490,7 @@ export default function SaleBillReturn() {
               onChange={handleHeaderChange}
               className={inputClasses}
             >
+              <option value="" disabled hidden>Type</option>
               {['Credit Sale', 'Cash Sale', 'P P Sale', 'Stock Transfer', 'Approval', 'Gift Voucher', 'Gift Bill', 'Cash Memo'].map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
@@ -497,6 +501,7 @@ export default function SaleBillReturn() {
               onChange={handleHeaderChange}
               className={inputClasses}
             >
+              <option value="" disabled hidden>Pay</option>
               {['Cash', 'Money Order', 'Cheque', 'Demand Draft', 'Cr/Dr Card', 'Digital Payment'].map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
@@ -544,7 +549,7 @@ export default function SaleBillReturn() {
             />
             <input
               type="number"
-              step="0.01"
+              step="1"
               name="amt"
               value={header.amt}
               onChange={handleHeaderChange}
@@ -553,7 +558,7 @@ export default function SaleBillReturn() {
             />
             <input
               type="number"
-              step="0.01"
+              step="1"
               name="nett"
               value={header.nett}
               onChange={handleHeaderChange}

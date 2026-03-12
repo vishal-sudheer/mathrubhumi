@@ -22,11 +22,11 @@ const A_TYPE_INV = Object.fromEntries(
 export default function CreditRealisationEntry() {
   const [form, setForm] = useState({
     receiptNo: "",
-    cancelled: "0", // 0 = No, 1 = Yes
-    date: today(),
+    cancelled: "", // 0 = No, 1 = Yes
+    date: "",
     name: "",
     address: "",
-    modeOfPay: "Cash",
+    modeOfPay: "",
     amount: "",
     bank: "",
     chqdd: "",
@@ -115,11 +115,11 @@ export default function CreditRealisationEntry() {
   const resetForm = () => {
     setForm({
       receiptNo: "",
-      cancelled: "0",
-      date: today(),
+      cancelled: "",
+      date: "",
       name: "",
       address: "",
-      modeOfPay: "Cash",
+      modeOfPay: "",
       amount: "",
       bank: "",
       chqdd: "",
@@ -193,11 +193,11 @@ export default function CreditRealisationEntry() {
       const r = res?.data || {};
       setForm({
         receiptNo: String(r.receipt_no ?? rn),
-        cancelled: String(r.cancelled ?? "0"),
-        date: r.entry_date || today(),
+        cancelled: r.cancelled != null ? String(r.cancelled) : "",
+        date: r.entry_date || "",
         name: r.customer_nm || "",
         address: r.address || "",
-        modeOfPay: A_TYPE_INV?.[r.a_type ?? 0] || "Cash",
+        modeOfPay: A_TYPE_INV?.[r.a_type ?? 0] || "",
         amount: r.amount != null ? String(r.amount) : "",
         bank: r.bank || "",
         chqdd: r.chq_dd_no || "",
@@ -253,10 +253,13 @@ export default function CreditRealisationEntry() {
             className={`${subduedInputClasses} font-semibold select-none pointer-events-none`}
           />
           <input
-            type="date"
+            type={form.date ? "date" : "text"}
+            onFocus={(e) => (e.target.type = "date")}
+            onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
             name="date"
             value={form.date}
             onChange={handleChange}
+            placeholder="Date"
             className={inputClasses}
           />
           <select
@@ -265,7 +268,7 @@ export default function CreditRealisationEntry() {
             onChange={handleChange}
             className={inputClasses}
           >
-            <option value="" disabled>Mode of Pay</option>
+            <option value="" disabled hidden>Mode of Pay</option>
             {Object.keys(A_TYPE).map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
@@ -278,7 +281,7 @@ export default function CreditRealisationEntry() {
             onChange={handleChange}
             className={inputClasses}
           >
-            <option value="" disabled>Cancelled</option>
+            <option value="" disabled hidden>Cancelled</option>
             <option value="0">No</option>
             <option value="1">Yes</option>
           </select>
@@ -353,7 +356,7 @@ export default function CreditRealisationEntry() {
           />
           <input
             type="number"
-            step="0.01"
+            step="1"
             name="amount"
             value={form.amount}
             onChange={handleChange}

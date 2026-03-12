@@ -62,12 +62,12 @@ export default function SaleBillPage() {
     customer_nm: '',
     customer_id: '',
     billing_address: '',
-    sale_date: new Date().toISOString().split('T')[0],
+    sale_date: '',
     mobile_number: '',
-    type: 'Cash Memo',
-    mode: 'Cash',
-    class: 'Individual',
-    cancel: 'No',
+    type: '',
+    mode: '',
+    class: '',
+    cancel: '',
     bill_discount: '',
     bill_discount_amount: '',
     gross: '',
@@ -756,8 +756,8 @@ export default function SaleBillPage() {
   useEffect(() => {
     setSaleMaster((prev) => ({
       ...prev,
-      gross: gross.toFixed(2),
-      bill_amount: billAmount.toFixed(2),
+      gross: gross === 0 ? '' : gross.toFixed(2),
+      bill_amount: billAmount === 0 ? '' : billAmount.toFixed(2),
     }));
   }, [gross, billDiscountPercent, billDiscountAmount, roundOff, hasItemDiscount]);
 
@@ -767,12 +767,12 @@ export default function SaleBillPage() {
       customer_nm: '',
       customer_id: '',
       billing_address: '',
-      sale_date: new Date().toISOString().split('T')[0],
+      sale_date: '',
       mobile_number: '',
-      type: 'Cash Memo',
-      mode: 'Cash',
-      class: 'Individual',
-      cancel: 'No',
+      type: '',
+      mode: '',
+      class: '',
+      cancel: '',
       bill_discount: '',
       bill_discount_amount: '',
       gross: '',
@@ -927,9 +927,9 @@ export default function SaleBillPage() {
         bill_discount_amount: data.bill_discount_amount
           ? String(data.bill_discount_amount)
           : '',
-        gross: data.gross ? String(data.gross) : '',
+        gross: (data.gross && parseFloat(data.gross) !== 0) ? String(data.gross) : '',
         round_off: data.round_off ? String(data.round_off) : '',
-        bill_amount: data.bill_amount ? String(data.bill_amount) : '',
+        bill_amount: (data.bill_amount && parseFloat(data.bill_amount) !== 0) ? String(data.bill_amount) : '',
         bill_no: data.bill_no,
         note_1: data.note_1,
         note_2: data.note_2,
@@ -1047,9 +1047,12 @@ export default function SaleBillPage() {
               readOnly
             />
             <input
-              type="date"
+              type={saleMaster.sale_date ? 'date' : 'text'}
+              onFocus={(e) => (e.target.type = 'date')}
+              onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="sale_date"
               value={saleMaster.sale_date}
+              placeholder="Sale Date"
               className={`${inputClasses} bg-gray-50 font-semibold`}
               readOnly
             />
@@ -1132,7 +1135,7 @@ export default function SaleBillPage() {
               onChange={handleSaleMasterChange}
               className={inputClasses}
             >
-              <option value="" disabled>Type</option>
+              <option value="" disabled hidden>Type</option>
               {['Credit Sale', 'Cash Sale', 'P P Sale', 'Stock Transfer', 'Approval', 'Gift Voucher', 'Gift Bill', 'Cash Memo'].map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
@@ -1143,7 +1146,7 @@ export default function SaleBillPage() {
               onChange={handleSaleMasterChange}
               className={inputClasses}
             >
-              <option value="" disabled>Mode</option>
+              <option value="" disabled hidden>Mode</option>
               {['Cash', 'Card', 'UPI', 'N.A.'].map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
@@ -1154,7 +1157,7 @@ export default function SaleBillPage() {
               onChange={handleSaleMasterChange}
               className={inputClasses}
             >
-              <option value="" disabled>Class</option>
+              <option value="" disabled hidden>Class</option>
               {[
                 'Individual',
                 'Educational Instt - School',
@@ -1181,7 +1184,7 @@ export default function SaleBillPage() {
               className={inputClasses}
               disabled={saleMaster.type === 'Stock Transfer'}
             >
-              <option value="" disabled>Cancel</option>
+              <option value="" disabled hidden>Cancel</option>
               {cancelOptions.map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
@@ -1194,7 +1197,7 @@ export default function SaleBillPage() {
               placeholder="Bill Ds%"
               className={`${inputClasses} text-right`}
               disabled={!!activeDiscountField && activeDiscountField !== 'bill_discount'}
-              step="0.01"
+              step="1"
             />
             <input
               type="number"
@@ -1204,7 +1207,7 @@ export default function SaleBillPage() {
               placeholder="Bill Discount Amount"
               className={`${inputClasses} text-right`}
               disabled={!!activeDiscountField && activeDiscountField !== 'bill_discount_amount'}
-              step="0.01"
+              step="1"
             />
             <input
               type="number"
@@ -1221,7 +1224,7 @@ export default function SaleBillPage() {
               onChange={handleSaleMasterChange}
               placeholder="Round Off"
               className={`${inputClasses} text-right`}
-              step="0.01"
+              step="1"
             />
             <input
               type="number"
@@ -1254,7 +1257,7 @@ export default function SaleBillPage() {
               onChange={handleSaleMasterChange}
               placeholder="Freight/Postage"
               className={`${inputClasses} text-right`}
-              step="0.01"
+              step="1"
             />
             <input
               type="number"
@@ -1263,7 +1266,7 @@ export default function SaleBillPage() {
               onChange={handleSaleMasterChange}
               placeholder="Processing Charge"
               className={`${inputClasses} text-right`}
-              step="0.01"
+              step="1"
             />
           </div>
         </div>

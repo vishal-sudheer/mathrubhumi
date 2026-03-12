@@ -34,10 +34,10 @@ const A_TYPE_INV = Object.fromEntries(Object.entries(A_TYPE).map(([k, v]) => [v,
 
 export default function PPReceiptEntry() {
   const [form, setForm] = useState({
-    receiptType: "Registration",
+    receiptType: "",
     receiptNo: "",
-    cancelled: "0",
-    date: today(),
+    cancelled: "",
+    date: "",
     ppRegNo: "",
     bookName: "",
     copies: "",
@@ -48,7 +48,7 @@ export default function PPReceiptEntry() {
     city: "",
     pin: "",
     phone: "",
-    modeOfPay: "Cash",
+    modeOfPay: "",
     amount: "",
     bank: "",
     chqdd: "",
@@ -270,13 +270,13 @@ export default function PPReceiptEntry() {
       const r = res.data;
 
       const receiptType = R_TYPE_INV[r.r_type] ?? "Registration";
-      const modeOfPay = A_TYPE_INV[r.a_type] ?? "Cash";
+      const modeOfPay = A_TYPE_INV[r.a_type] ?? "";
 
       setForm({
         receiptType,
         receiptNo: String(r.receipt_no ?? ""),
-        cancelled: "0",
-        date: r.entry_date || today(),
+        cancelled: "",
+        date: r.entry_date || "",
         ppRegNo: r.reg_no || "",
         bookName: r.title || "",
         copies: r.copies != null ? String(r.copies) : "",
@@ -388,6 +388,7 @@ export default function PPReceiptEntry() {
             className={inputClasses}
             aria-label="Receipt Type"
           >
+            <option value="" disabled hidden>Receipt Type</option>
             {Object.keys(R_TYPE).map((opt) => (
               <option key={opt} value={opt}>{opt}</option>
             ))}
@@ -410,15 +411,19 @@ export default function PPReceiptEntry() {
             className={inputClasses}
             aria-label="Cancelled"
           >
-            <option value="0">Cancelled: No</option>
-            <option value="1">Cancelled: Yes</option>
+            <option value="" disabled hidden>Cancelled</option>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
           </select>
 
           <input
-            type="date"
+            type={form.date ? "date" : "text"}
+            onFocus={(e) => (e.target.type = "date")}
+            onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
             name="date"
             value={form.date}
             onChange={handleChange}
+            placeholder="Date"
             className={inputClasses}
           />
 
@@ -561,6 +566,7 @@ export default function PPReceiptEntry() {
             className={inputClasses}
             aria-label="Mode of Pay"
           >
+            <option value="" disabled hidden>Mode of Pay</option>
             {Object.keys(A_TYPE).map((opt) => (
               <option key={opt} value={opt}>{opt}</option>
             ))}
@@ -617,7 +623,7 @@ export default function PPReceiptEntry() {
 
           <input
             type="number"
-            step="0.01"
+            step="1"
             name="amount"
             value={form.amount}
             onChange={handleChange}
@@ -695,10 +701,10 @@ export default function PPReceiptEntry() {
               className={`${actionButtonClasses} from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 min-w-[120px]`}
               onClick={() =>
                 setForm({
-                  receiptType: "Installment",
+                  receiptType: "",
                   receiptNo: "",
-                  cancelled: "0",
-                  date: today(),
+                  cancelled: "",
+                  date: "",
                   ppRegNo: "",
                   bookName: "",
                   copies: "",
@@ -709,7 +715,7 @@ export default function PPReceiptEntry() {
                   city: "",
                   pin: "",
                   phone: "",
-                  modeOfPay: "Cash",
+                  modeOfPay: "",
                   amount: "",
                   bank: "",
                   chqdd: "",
