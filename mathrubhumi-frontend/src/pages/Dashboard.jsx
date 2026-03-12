@@ -52,9 +52,9 @@ const Dashboard = () => {
   }, [navigate]);
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen overflow-hidden bg-slate-100">
       <Sidebar />
-      <main className="flex-1 overflow-auto">
+      <main className="min-w-0 flex-1 overflow-auto pt-16 xl:pt-0">
         <Routes>
           <Route path="/" element={<DashboardHome />} />
           <Route path="goods-inward" element={<GoodsInward />} />
