@@ -926,7 +926,7 @@ export default function GoodsInwardReturnPage() {
               disabled={loading}
             />
 
-            <div className="relative">
+            <div className="relative md:col-span-2">
               <input
                 type="text"
                 name="supplier_nm"
@@ -982,35 +982,37 @@ export default function GoodsInwardReturnPage() {
               )}
             </div>
 
-            <input
-              type="number"
-              name="gross"
-              value={inwardMaster.gross}
-              onChange={handleInwardMasterChange}
-              placeholder="Gross"
-              className={`${inputClasses} bg-gray-50 text-right font-semibold`}
-              readOnly
-              step="0.01"
-              disabled={loading}
-            />
-            <input
-              type="number"
-              name="nett"
-              value={inwardMaster.nett}
-              onChange={handleInwardMasterChange}
-              placeholder="Nett"
-              className={`${inputClasses} bg-gray-50 text-right font-semibold`}
-              readOnly
-              step="0.01"
-              disabled={loading}
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                name="gross"
+                value={inwardMaster.gross}
+                onChange={handleInwardMasterChange}
+                placeholder="Gross"
+                className={`${inputClasses} bg-gray-50 text-right font-semibold w-full`}
+                readOnly
+                step="0.01"
+                disabled={loading}
+              />
+              <input
+                type="number"
+                name="nett"
+                value={inwardMaster.nett}
+                onChange={handleInwardMasterChange}
+                placeholder="Nett"
+                className={`${inputClasses} bg-gray-50 text-right font-semibold w-full`}
+                readOnly
+                step="0.01"
+                disabled={loading}
+              />
+            </div>
             <input
               type="text"
               name="notes"
               value={inwardMaster.notes}
               onChange={handleInwardMasterChange}
               placeholder="Notes"
-              className={inputClasses}
+              className={`${inputClasses} md:col-span-2`}
               disabled={loading}
             />
             <select
@@ -1050,17 +1052,17 @@ export default function GoodsInwardReturnPage() {
             <div className="overflow-auto max-h-[60vh] min-h-[120px] lg:max-h-none lg:h-full lg:min-h-0">
               <table className="w-full min-w-[980px] sb-text-sm">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white uppercase tracking-wide">
-                    <th className="px-2 sb-th-py text-left font-semibold w-[240px]">Product</th>
-                    <th className="px-2 sb-th-py text-left font-semibold w-[100px]">I S B N</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Qty</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[80px]">F Val</th>
-                    <th className="px-2 sb-th-py text-left font-semibold w-[80px]">Curr</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[70px]">ExRt</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Dis%</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[70px]">-/+Adj</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[90px]">Value</th>
-                    <th className="px-2 sb-th-py text-center font-semibold w-[40px]">Action</th>
+                  <tr className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white uppercase tracking-wider text-xs shadow-md divide-x divide-white/20 border-b border-indigo-500">
+                    <th className="px-3 sb-th-py text-left font-medium w-[240px]">Product</th>
+                    <th className="px-3 sb-th-py text-left font-medium w-[100px]">I S B N</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Qty</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[80px]">F Val</th>
+                    <th className="px-3 sb-th-py text-left font-medium w-[80px]">Curr</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[70px]">ExRt</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Dis%</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[70px]">-/+Adj</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[90px]">Value</th>
+                    <th className="px-3 sb-th-py text-center font-medium w-[40px]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">

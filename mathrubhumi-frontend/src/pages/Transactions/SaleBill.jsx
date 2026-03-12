@@ -1189,58 +1189,62 @@ export default function SaleBillPage() {
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
-            <input
-              type="number"
-              name="bill_discount"
-              value={saleMaster.bill_discount}
-              onChange={handleSaleMasterChange}
-              placeholder="Bill Ds%"
-              className={`${inputClasses} text-right`}
-              disabled={!!activeDiscountField && activeDiscountField !== 'bill_discount'}
-              step="1"
-            />
-            <input
-              type="number"
-              name="bill_discount_amount"
-              value={saleMaster.bill_discount_amount}
-              onChange={handleSaleMasterChange}
-              placeholder="Bill Discount Amount"
-              className={`${inputClasses} text-right`}
-              disabled={!!activeDiscountField && activeDiscountField !== 'bill_discount_amount'}
-              step="1"
-            />
-            <input
-              type="number"
-              name="gross"
-              value={saleMaster.gross}
-              placeholder="Gross"
-              className={`${inputClasses} bg-gray-50 text-right font-semibold`}
-              readOnly
-            />
-            <input
-              type="number"
-              name="round_off"
-              value={saleMaster.round_off}
-              onChange={handleSaleMasterChange}
-              placeholder="Round Off"
-              className={`${inputClasses} text-right`}
-              step="1"
-            />
-            <input
-              type="number"
-              name="bill_amount"
-              value={saleMaster.bill_amount}
-              placeholder="Bill Amount"
-              className={`${inputClasses} bg-gray-50 text-right font-semibold`}
-              readOnly
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                name="bill_discount"
+                value={saleMaster.bill_discount}
+                onChange={handleSaleMasterChange}
+                placeholder="Bill Ds%"
+                className={`${inputClasses} text-right w-full`}
+                disabled={!!activeDiscountField && activeDiscountField !== 'bill_discount'}
+                step="1"
+              />
+              <input
+                type="number"
+                name="bill_discount_amount"
+                value={saleMaster.bill_discount_amount}
+                onChange={handleSaleMasterChange}
+                placeholder="Bill Ds Amt"
+                className={`${inputClasses} text-right w-full`}
+                disabled={!!activeDiscountField && activeDiscountField !== 'bill_discount_amount'}
+                step="1"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-3 md:col-span-2 xl:col-span-1">
+              <input
+                type="number"
+                name="gross"
+                value={saleMaster.gross}
+                placeholder="Gross"
+                className={`${inputClasses} bg-gray-50 text-right font-semibold w-full`}
+                readOnly
+              />
+              <input
+                type="number"
+                name="round_off"
+                value={saleMaster.round_off}
+                onChange={handleSaleMasterChange}
+                placeholder="Round Off"
+                className={`${inputClasses} text-right w-full`}
+                step="1"
+              />
+              <input
+                type="number"
+                name="bill_amount"
+                value={saleMaster.bill_amount}
+                placeholder="Bill Amount"
+                className={`${inputClasses} bg-gray-50 text-right font-semibold w-full`}
+                readOnly
+              />
+            </div>
             <input
               type="text"
               name="note_1"
               value={saleMaster.note_1}
               onChange={handleSaleMasterChange}
               placeholder="Note 1"
-              className={inputClasses}
+              className={`${inputClasses} md:col-span-2`}
             />
             <input
               type="text"
@@ -1248,26 +1252,28 @@ export default function SaleBillPage() {
               value={saleMaster.note_2}
               onChange={handleSaleMasterChange}
               placeholder="Note 2"
-              className={inputClasses}
+              className={`${inputClasses} md:col-span-2`}
             />
-            <input
-              type="number"
-              name="freight_postage"
-              value={saleMaster.freight_postage}
-              onChange={handleSaleMasterChange}
-              placeholder="Freight/Postage"
-              className={`${inputClasses} text-right`}
-              step="1"
-            />
-            <input
-              type="number"
-              name="processing_charge"
-              value={saleMaster.processing_charge}
-              onChange={handleSaleMasterChange}
-              placeholder="Processing Charge"
-              className={`${inputClasses} text-right`}
-              step="1"
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                name="freight_postage"
+                value={saleMaster.freight_postage}
+                onChange={handleSaleMasterChange}
+                placeholder="Freight/Post"
+                className={`${inputClasses} text-right w-full`}
+                step="1"
+              />
+              <input
+                type="number"
+                name="processing_charge"
+                value={saleMaster.processing_charge}
+                onChange={handleSaleMasterChange}
+                placeholder="Proc Chrg"
+                className={`${inputClasses} text-right w-full`}
+                step="1"
+              />
+            </div>
           </div>
         </div>
 
@@ -1280,16 +1286,16 @@ export default function SaleBillPage() {
             <div className="overflow-auto max-h-[60vh] min-h-[120px] lg:max-h-none lg:h-full lg:min-h-0">
               <table className="w-full min-w-[820px] sb-text-sm">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white uppercase tracking-wide">
-                    <th className="px-2 sb-th-py text-left font-semibold w-[240px]">Item Name</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Qty</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[80px]">Rate</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[70px]">Ex Rt</th>
-                    <th className="px-2 sb-th-py text-left font-semibold w-[80px]">Currency</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Tax %</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Disc %</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[90px]">Value</th>
-                    <th className="px-2 sb-th-py text-center font-semibold w-[40px]">Action</th>
+                  <tr className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white uppercase tracking-wider text-xs shadow-md divide-x divide-white/20 border-b border-indigo-500">
+                    <th className="px-3 sb-th-py text-left font-medium w-[240px]">Item Name</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Qty</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[80px]">Rate</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[70px]">Ex Rt</th>
+                    <th className="px-3 sb-th-py text-left font-medium w-[80px]">Currency</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Tax %</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Disc %</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[90px]">Value</th>
+                    <th className="px-3 sb-th-py text-center font-medium w-[40px]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">

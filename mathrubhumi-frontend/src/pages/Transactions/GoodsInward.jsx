@@ -95,13 +95,13 @@ export default function GoodsInwardPage() {
   const [inwardMaster, setInwardMaster] = useState({
     srl_no: '',
     id: '',
-    entry_date: new Date().toISOString().split('T')[0],
+    entry_date: '',
     bill_no: '',
-    bill_date: new Date().toISOString().split('T')[0],
+    bill_date: '',
     reference: '',
     gross: '',
     nett: '',
-    is_cash: 'No',
+    is_cash: '',
     type: '',
     notes: '',
     days: '',
@@ -167,8 +167,8 @@ export default function GoodsInwardPage() {
   useEffect(() => {
     setInwardMaster(prev => ({
       ...prev,
-      gross: grossAmount.toFixed(2),
-      nett: netAmount.toFixed(2),
+      gross: grossAmount > 0 ? grossAmount.toFixed(2) : '',
+      nett: netAmount > 0 ? netAmount.toFixed(2) : '',
     }));
   }, [
     grossAmount, inwardMaster.breakup_amt1, inwardMaster.breakup_amt2, inwardMaster.breakup_amt3, inwardMaster.breakup_amt4]);
@@ -940,13 +940,13 @@ export default function GoodsInwardPage() {
       setInwardMaster({
         srl_no: data.purchase_no || '',
         id: data.purchase_id || '',
-        entry_date: data.inward_date || new Date().toISOString().split('T')[0],
+        entry_date: data.inward_date || '',
         bill_no: data.bill_no || '',
-        bill_date: data.bill_date || new Date().toISOString().split('T')[0],
+        bill_date: data.bill_date || '',
         reference: data.reference || '',
-        gross: data.gross || '',
-        nett: data.nett || '',
-        is_cash: data.is_cash || 'No',
+        gross: data.gross !== null && data.gross !== undefined ? data.gross : '',
+        nett: data.nett !== null && data.nett !== undefined ? data.nett : '',
+        is_cash: data.is_cash || '',
         type: data.type || '',
         notes: data.notes || '',
         days: data.days || '',
@@ -1025,13 +1025,13 @@ export default function GoodsInwardPage() {
     setInwardMaster({
       srl_no: '',
       id: '',
-      entry_date: new Date().toISOString().split('T')[0],
+      entry_date: '',
       bill_no: '',
-      bill_date: new Date().toISOString().split('T')[0],
+      bill_date: '',
       reference: '',
       gross: '',
       nett: '',
-      is_cash: 'No',
+      is_cash: '',
       type: '',
       notes: '',
       days: '',
@@ -1457,7 +1457,9 @@ export default function GoodsInwardPage() {
               step="0.01"
             />
             <input
-              type="date"
+              type={inwardMaster.entry_date ? 'date' : 'text'}
+              onFocus={(e) => (e.target.type = 'date')}
+              onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="entry_date"
               value={inwardMaster.entry_date}
               onChange={(e) => setInwardMaster(prev => ({ ...prev, entry_date: e.target.value }))}
@@ -1473,7 +1475,9 @@ export default function GoodsInwardPage() {
               className={inputClasses}
             />
             <input
-              type="date"
+              type={inwardMaster.bill_date ? 'date' : 'text'}
+              onFocus={(e) => (e.target.type = 'date')}
+              onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="bill_date"
               value={inwardMaster.bill_date}
               onChange={(e) => setInwardMaster(prev => ({ ...prev, bill_date: e.target.value }))}
@@ -1514,6 +1518,7 @@ export default function GoodsInwardPage() {
               onChange={(e) => setInwardMaster(prev => ({ ...prev, is_cash: e.target.value }))}
               className={inputClasses}
             >
+              <option value="" disabled hidden>Is Cash</option>
               <option value="No">No</option>
               <option value="Yes">Yes</option>
             </select>
@@ -1528,7 +1533,7 @@ export default function GoodsInwardPage() {
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
-            <div className="relative">
+            <div className="relative md:col-span-2">
               <input
                 type="text"
                 name="supplier_nm"
@@ -1560,7 +1565,7 @@ export default function GoodsInwardPage() {
               value={inwardMaster.notes}
               onChange={(e) => setInwardMaster(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="Notes"
-              className={inputClasses}
+              className={`${inputClasses} md:col-span-2`}
             />
             <div className="relative">
               <input
@@ -1588,146 +1593,154 @@ export default function GoodsInwardPage() {
                 </ul>
               )}
             </div>
-            <div className="relative">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  name="breakup_nm1"
+                  value={inwardMaster.breakup_nm1}
+                  onChange={handleInwardMasterChange}
+                  onKeyDown={(e) => handleKeyDown(e, 'breakup_nm1')}
+                  placeholder="Breakup 1"
+                  className={`${inputClasses} w-full`}
+                  autoComplete="off"
+                />
+                {showBreakupSuggestions && activeBreakupNo === 1 && breakupSuggestions.length > 0 && inwardMaster.breakup_nm1.trim() && (
+                  <ul className="absolute z-20 bg-white border border-gray-200 mt-1.5 w-full shadow-lg rounded-lg text-xs max-h-48 overflow-y-auto">
+                    {breakupSuggestions.map((breakup, index) => (
+                      <li
+                        key={breakup.id}
+                        id={`breakup-suggestion-${index}`}
+                        className={`px-3 py-2 cursor-pointer ${breakupHighlightedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
+                        onClick={() => handleBreakupSuggestionClick(breakup, 1)}
+                      >
+                        {breakup.breakup_nm}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <input
-                type="text"
-                name="breakup_nm1"
-                value={inwardMaster.breakup_nm1}
+                type="number"
+                name="breakup_amt1"
+                value={inwardMaster.breakup_amt1}
                 onChange={handleInwardMasterChange}
-                onKeyDown={(e) => handleKeyDown(e, 'breakup_nm1')}
-                placeholder="Breakup 1"
-                className={`${inputClasses} w-full`}
-                autoComplete="off"
+                placeholder="Amount 1"
+                className={`${inputClasses} w-24 text-right shrink-0`}
+                step="0.01"
               />
-              {showBreakupSuggestions && activeBreakupNo === 1 && breakupSuggestions.length > 0 && inwardMaster.breakup_nm1.trim() && (
-                <ul className="absolute z-20 bg-white border border-gray-200 mt-1.5 w-full shadow-lg rounded-lg text-xs max-h-48 overflow-y-auto">
-                  {breakupSuggestions.map((breakup, index) => (
-                    <li
-                      key={breakup.id}
-                      id={`breakup-suggestion-${index}`}
-                      className={`px-3 py-2 cursor-pointer ${breakupHighlightedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
-                      onClick={() => handleBreakupSuggestionClick(breakup, 1)}
-                    >
-                      {breakup.breakup_nm}
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
-            <input
-              type="number"
-              name="breakup_amt1"
-              value={inwardMaster.breakup_amt1}
-              onChange={handleInwardMasterChange}
-              placeholder="Amount 1"
-              className={`${inputClasses} text-right`}
-              step="0.01"
-            />
-            <div className="relative">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  name="breakup_nm2"
+                  value={inwardMaster.breakup_nm2}
+                  onChange={handleInwardMasterChange}
+                  onKeyDown={(e) => handleKeyDown(e, 'breakup_nm2')}
+                  placeholder="Breakup 2"
+                  className={`${inputClasses} w-full`}
+                  autoComplete="off"
+                />
+                {showBreakupSuggestions && activeBreakupNo === 2 && breakupSuggestions.length > 0 && inwardMaster.breakup_nm2.trim() && (
+                  <ul className="absolute z-20 bg-white border border-gray-200 mt-1.5 w-full shadow-lg rounded-lg text-xs max-h-48 overflow-y-auto">
+                    {breakupSuggestions.map((breakup, index) => (
+                      <li
+                        key={breakup.id}
+                        id={`breakup-suggestion-${index}`}
+                        className={`px-3 py-2 cursor-pointer ${breakupHighlightedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
+                        onClick={() => handleBreakupSuggestionClick(breakup, 2)}
+                      >
+                        {breakup.breakup_nm}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <input
-                type="text"
-                name="breakup_nm2"
-                value={inwardMaster.breakup_nm2}
+                type="number"
+                name="breakup_amt2"
+                value={inwardMaster.breakup_amt2}
                 onChange={handleInwardMasterChange}
-                onKeyDown={(e) => handleKeyDown(e, 'breakup_nm2')}
-                placeholder="Breakup 2"
-                className={`${inputClasses} w-full`}
-                autoComplete="off"
+                placeholder="Amount 2"
+                className={`${inputClasses} w-24 text-right shrink-0`}
+                step="0.01"
               />
-              {showBreakupSuggestions && activeBreakupNo === 2 && breakupSuggestions.length > 0 && inwardMaster.breakup_nm2.trim() && (
-                <ul className="absolute z-20 bg-white border border-gray-200 mt-1.5 w-full shadow-lg rounded-lg text-xs max-h-48 overflow-y-auto">
-                  {breakupSuggestions.map((breakup, index) => (
-                    <li
-                      key={breakup.id}
-                      id={`breakup-suggestion-${index}`}
-                      className={`px-3 py-2 cursor-pointer ${breakupHighlightedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
-                      onClick={() => handleBreakupSuggestionClick(breakup, 2)}
-                    >
-                      {breakup.breakup_nm}
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
-            <input
-              type="number"
-              name="breakup_amt2"
-              value={inwardMaster.breakup_amt2}
-              onChange={handleInwardMasterChange}
-              placeholder="Amount 2"
-              className={`${inputClasses} text-right`}
-              step="0.01"
-            />
-            <div className="relative">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  name="breakup_nm3"
+                  value={inwardMaster.breakup_nm3}
+                  onChange={handleInwardMasterChange}
+                  onKeyDown={(e) => handleKeyDown(e, 'breakup_nm3')}
+                  placeholder="Breakup 3"
+                  className={`${inputClasses} w-full`}
+                  autoComplete="off"
+                />
+                {showBreakupSuggestions && activeBreakupNo === 3 && breakupSuggestions.length > 0 && inwardMaster.breakup_nm3.trim() && (
+                  <ul className="absolute z-20 bg-white border border-gray-200 mt-1.5 w-full shadow-lg rounded-lg text-xs max-h-48 overflow-y-auto">
+                    {breakupSuggestions.map((breakup, index) => (
+                      <li
+                        key={breakup.id}
+                        id={`breakup-suggestion-${index}`}
+                        className={`px-3 py-2 cursor-pointer ${breakupHighlightedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
+                        onClick={() => handleBreakupSuggestionClick(breakup, 3)}
+                      >
+                        {breakup.breakup_nm}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <input
-                type="text"
-                name="breakup_nm3"
-                value={inwardMaster.breakup_nm3}
+                type="number"
+                name="breakup_amt3"
+                value={inwardMaster.breakup_amt3}
                 onChange={handleInwardMasterChange}
-                onKeyDown={(e) => handleKeyDown(e, 'breakup_nm3')}
-                placeholder="Breakup 3"
-                className={`${inputClasses} w-full`}
-                autoComplete="off"
+                placeholder="Amount 3"
+                className={`${inputClasses} w-24 text-right shrink-0`}
+                step="0.01"
               />
-              {showBreakupSuggestions && activeBreakupNo === 3 && breakupSuggestions.length > 0 && inwardMaster.breakup_nm3.trim() && (
-                <ul className="absolute z-20 bg-white border border-gray-200 mt-1.5 w-full shadow-lg rounded-lg text-xs max-h-48 overflow-y-auto">
-                  {breakupSuggestions.map((breakup, index) => (
-                    <li
-                      key={breakup.id}
-                      id={`breakup-suggestion-${index}`}
-                      className={`px-3 py-2 cursor-pointer ${breakupHighlightedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
-                      onClick={() => handleBreakupSuggestionClick(breakup, 3)}
-                    >
-                      {breakup.breakup_nm}
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
-            <input
-              type="number"
-              name="breakup_amt3"
-              value={inwardMaster.breakup_amt3}
-              onChange={handleInwardMasterChange}
-              placeholder="Amount 3"
-              className={`${inputClasses} text-right`}
-              step="0.01"
-            />
-            <div className="relative">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  name="breakup_nm4"
+                  value={inwardMaster.breakup_nm4}
+                  onChange={handleInwardMasterChange}
+                  onKeyDown={(e) => handleKeyDown(e, 'breakup_nm4')}
+                  placeholder="Breakup 4"
+                  className={`${inputClasses} w-full`}
+                  autoComplete="off"
+                />
+                {showBreakupSuggestions && activeBreakupNo === 4 && breakupSuggestions.length > 0 && inwardMaster.breakup_nm4.trim() && (
+                  <ul className="absolute z-20 bg-white border border-gray-200 mt-1.5 w-full shadow-lg rounded-lg text-xs max-h-48 overflow-y-auto">
+                    {breakupSuggestions.map((breakup, index) => (
+                      <li
+                        key={breakup.id}
+                        id={`breakup-suggestion-${index}`}
+                        className={`px-3 py-2 cursor-pointer ${breakupHighlightedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
+                        onClick={() => handleBreakupSuggestionClick(breakup, 4)}
+                      >
+                        {breakup.breakup_nm}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <input
-                type="text"
-                name="breakup_nm4"
-                value={inwardMaster.breakup_nm4}
+                type="number"
+                name="breakup_amt4"
+                value={inwardMaster.breakup_amt4}
                 onChange={handleInwardMasterChange}
-                onKeyDown={(e) => handleKeyDown(e, 'breakup_nm4')}
-                placeholder="Breakup 4"
-                className={`${inputClasses} w-full`}
-                autoComplete="off"
+                placeholder="Amount 4"
+                className={`${inputClasses} w-24 text-right shrink-0`}
+                step="0.01"
               />
-              {showBreakupSuggestions && activeBreakupNo === 4 && breakupSuggestions.length > 0 && inwardMaster.breakup_nm4.trim() && (
-                <ul className="absolute z-20 bg-white border border-gray-200 mt-1.5 w-full shadow-lg rounded-lg text-xs max-h-48 overflow-y-auto">
-                  {breakupSuggestions.map((breakup, index) => (
-                    <li
-                      key={breakup.id}
-                      id={`breakup-suggestion-${index}`}
-                      className={`px-3 py-2 cursor-pointer ${breakupHighlightedIndex === index ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
-                      onClick={() => handleBreakupSuggestionClick(breakup, 4)}
-                    >
-                      {breakup.breakup_nm}
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
-            <input
-              type="number"
-              name="breakup_amt4"
-              value={inwardMaster.breakup_amt4}
-              onChange={handleInwardMasterChange}
-              placeholder="Amount 4"
-              className={`${inputClasses} text-right`}
-              step="0.01"
-            />
           </div>
         </div>
 
@@ -1740,18 +1753,18 @@ export default function GoodsInwardPage() {
             <div className="overflow-auto max-h-[60vh] min-h-[120px] lg:max-h-none lg:h-full lg:min-h-0">
               <table className="w-full min-w-[980px] sb-text-sm">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white uppercase tracking-wide">
-                    <th className="px-2 sb-th-py text-left font-semibold w-[240px]">Product</th>
-                    <th className="px-2 sb-th-py text-left font-semibold w-[100px]">I S B N</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Qty</th>
-                    <th className="px-2 sb-th-py text-left font-semibold w-[80px]">Curr</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[70px]">ExRt</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[80px]">F Val</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Tax%</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Dis%</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[80px]">-/+Adj</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[90px]">Nett</th>
-                    <th className="px-2 sb-th-py text-center font-semibold w-[40px]">Action</th>
+                  <tr className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white uppercase tracking-wider text-xs shadow-md divide-x divide-white/20 border-b border-indigo-500">
+                    <th className="px-3 sb-th-py text-left font-medium w-[240px]">Product</th>
+                    <th className="px-3 sb-th-py text-left font-medium w-[100px]">I S B N</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Qty</th>
+                    <th className="px-3 sb-th-py text-left font-medium w-[80px]">Curr</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[70px]">ExRt</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[80px]">F Val</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Tax%</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Dis%</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[80px]">-/+Adj</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[90px]">Nett</th>
+                    <th className="px-3 sb-th-py text-center font-medium w-[40px]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">

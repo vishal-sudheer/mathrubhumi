@@ -507,7 +507,7 @@ export default function SaleBillReturn() {
               ))}
             </select>
 
-            <div className="relative">
+            <div className="relative md:col-span-2">
               <input
                 name="customer"
                 value={header.customer}
@@ -536,44 +536,48 @@ export default function SaleBillReturn() {
               value={header.notes}
               onChange={handleHeaderChange}
               placeholder="Notes"
-              className={inputClasses}
+              className={`${inputClasses} md:col-span-2`}
             />
-            <input
-              type="number"
-              step="0.01"
-              name="disP"
-              value={header.disP}
-              onChange={handleHeaderChange}
-              placeholder="Dis%"
-              className={`${inputClasses} text-right`}
-            />
-            <input
-              type="number"
-              step="1"
-              name="amt"
-              value={header.amt}
-              onChange={handleHeaderChange}
-              placeholder="Amt"
-              className={`${inputClasses} text-right`}
-            />
-            <input
-              type="number"
-              step="1"
-              name="nett"
-              value={header.nett}
-              onChange={handleHeaderChange}
-              placeholder="Nett"
-              className={`${inputClasses} bg-gray-50 text-right font-semibold`}
-              readOnly
-            />
-            <input
-              type="text"
-              name="rpv"
-              value={header.rpv}
-              onChange={handleHeaderChange}
-              placeholder="R/P V"
-              className={inputClasses}
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                step="0.01"
+                name="disP"
+                value={header.disP}
+                onChange={handleHeaderChange}
+                placeholder="Dis%"
+                className={`${inputClasses} text-right w-full`}
+              />
+              <input
+                type="number"
+                step="1"
+                name="amt"
+                value={header.amt}
+                onChange={handleHeaderChange}
+                placeholder="Amt"
+                className={`${inputClasses} text-right w-full`}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                step="1"
+                name="nett"
+                value={header.nett}
+                onChange={handleHeaderChange}
+                placeholder="Nett"
+                className={`${inputClasses} bg-gray-50 text-right font-semibold w-full`}
+                readOnly
+              />
+              <input
+                type="text"
+                name="rpv"
+                value={header.rpv}
+                onChange={handleHeaderChange}
+                placeholder="R/P V"
+                className={`${inputClasses} w-full`}
+              />
+            </div>
 
             <div className="relative">
               <input
@@ -616,16 +620,16 @@ export default function SaleBillReturn() {
             <div className="overflow-auto max-h-[60vh] min-h-[120px] lg:max-h-none lg:h-full lg:min-h-0">
               <table className="w-full min-w-[820px] sb-text-sm">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white uppercase tracking-wide">
-                    <th className="px-2 sb-th-py text-left font-semibold w-[240px]">Product</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Qty</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[80px]">Rate</th>
-                    <th className="px-2 sb-th-py text-left font-semibold w-[80px]">Curr</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[70px]">ExRt</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[60px]">Tax</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[70px]">Dis A</th>
-                    <th className="px-2 sb-th-py text-right font-semibold w-[90px]">Value</th>
-                    <th className="px-2 sb-th-py text-center font-semibold w-[40px]">Action</th>
+                  <tr className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white uppercase tracking-wider text-xs shadow-md divide-x divide-white/20 border-b border-indigo-500">
+                    <th className="px-3 sb-th-py text-left font-medium w-[240px]">Product</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Qty</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[80px]">Rate</th>
+                    <th className="px-3 sb-th-py text-left font-medium w-[80px]">Curr</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[70px]">ExRt</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[60px]">Tax</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[70px]">Dis A</th>
+                    <th className="px-3 sb-th-py text-right font-medium w-[90px]">Value</th>
+                    <th className="px-3 sb-th-py text-center font-medium w-[40px]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
