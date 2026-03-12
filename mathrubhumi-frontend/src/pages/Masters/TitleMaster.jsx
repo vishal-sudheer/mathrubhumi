@@ -1,4 +1,4 @@
-﻿// src/pages/Masters/TitleMaster.jsx
+// src/pages/Masters/TitleMaster.jsx
 import React, { useState, useEffect } from 'react';
 import { TrashIcon } from '@heroicons/react/24/solid';
 import Modal from '../../components/Modal';
@@ -908,23 +908,23 @@ export default function TitleMaster() {
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto rounded-lg border border-gray-200">
-            <div className="min-w-[1610px]">
-              <table className="w-full table-fixed border-collapse">
-                <thead className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                  <tr>
-                    <th className="w-[100px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Code</th>
-                    <th className="w-[350px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Title</th>
-                    <th className="w-[120px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Language</th>
-                    <th className="w-[200px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Author</th>
-                    <th className="w-[200px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Publisher</th>
-                    <th className="w-[200px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Translator</th>
-                    <th className="w-[120px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Category</th>
-                    <th className="w-[175px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Sub-Category</th>
-                    <th className="w-[120px] px-3 py-2 text-left text-sm font-semibold tracking-wide">ISBN No.</th>
-                    <th className="w-[80px] px-3 py-2 text-left text-sm font-semibold tracking-wide">R O Level</th>
-                    <th className="w-[80px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Dn Level</th>
-                    <th className="w-[300px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Title (Mal)</th>
-                    <th className="w-[40px] px-3 py-2 text-center text-sm font-semibold">Action</th>
+            <div className="min-w-[2150px]">
+              <table className="w-full table-fixed border-separate border-spacing-0">
+                <thead>
+                  <tr className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white uppercase tracking-wider text-xs shadow-md">
+                    <th className="w-[100px] px-3 py-2 text-left font-medium tracking-wide border border-white/40 rounded-tl-lg">Code</th>
+                    <th className="w-[350px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Title</th>
+                    <th className="w-[120px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Language</th>
+                    <th className="w-[200px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Author</th>
+                    <th className="w-[200px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Publisher</th>
+                    <th className="w-[200px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Translator</th>
+                    <th className="w-[120px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Category</th>
+                    <th className="w-[175px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Sub-Category</th>
+                    <th className="w-[120px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">ISBN No.</th>
+                    <th className="w-[100px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">R O Level</th>
+                    <th className="w-[100px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Dn Level</th>
+                    <th className="w-[300px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Title (Mal)</th>
+                    <th className="w-[64px] px-3 py-2 text-center font-medium border border-t border-r border-b border-white/40 rounded-tr-lg">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -939,37 +939,37 @@ export default function TitleMaster() {
                       const keyFor = (field) => `${item.id}:${field}`;
                       return (
                         <tr key={item.id} className="hover:bg-blue-50/50 transition-colors animate-fade-in" style={{ animationDelay: `${index * 30}ms` }}>
-                          <td className="px-3 py-2 w-[100px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[100px]">
                             <input
                               type="text"
                               value={item.code || ''}
                               readOnly
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-100 text-gray-500 text-sm cursor-not-allowed"
+                              className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-100 text-gray-500 text-sm cursor-not-allowed"
                             />
                           </td>
-                          <td className="px-3 py-2 w-[300px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[300px]">
                             <input
                               type="text"
                               value={item.title || ''}
                               onChange={(e) => handleTableInputChange(item.id, 'title', e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, title: e.target.value }, 'title')}
                               onBlur={(e) => handleTableUpdate(item.id, { ...item, title: e.target.value }, 'title')}
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                              className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                             />
                           </td>
-                          <td className="px-3 py-2 w-[120px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[120px]">
                             <input
                               type="text"
                               value={item.language || ''}
                               onChange={(e) => handleTableInputChange(item.id, 'language', e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, language: e.target.value }, 'language')}
                               onBlur={(e) => handleTableUpdate(item.id, { ...item, language: e.target.value }, 'language')}
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                              className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                             />
                           </td>
 
                           {/* Author (suggestion) */}
-                          <td className="px-3 py-2 w-[150px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[150px]">
                             <div className="relative">
                               <input
                                 type="text"
@@ -977,7 +977,7 @@ export default function TitleMaster() {
                                 onChange={(e) => handleTableInputChange(item.id, 'author', e.target.value)}
                                 onKeyDown={(e) => handleRowKeyDown(e, item, 'author')}
                                 onBlur={(e) => handleTableUpdate(item.id, { ...item, author: e.target.value }, 'author')}
-                                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                                className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                                 autoComplete="off"
                               />
                               {rowShowSuggestions[keyFor('author')] &&
@@ -1004,7 +1004,7 @@ export default function TitleMaster() {
                           </td>
 
                           {/* Publisher (suggestion) */}
-                          <td className="px-3 py-2 w-[150px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[150px]">
                             <div className="relative">
                               <input
                                 type="text"
@@ -1012,7 +1012,7 @@ export default function TitleMaster() {
                                 onChange={(e) => handleTableInputChange(item.id, 'publisher', e.target.value)}
                                 onKeyDown={(e) => handleRowKeyDown(e, item, 'publisher')}
                                 onBlur={(e) => handleTableUpdate(item.id, { ...item, publisher: e.target.value }, 'publisher')}
-                                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                                className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                                 autoComplete="off"
                               />
                               {rowShowSuggestions[keyFor('publisher')] &&
@@ -1039,7 +1039,7 @@ export default function TitleMaster() {
                           </td>
 
                           {/* Translator (suggestion) */}
-                          <td className="px-3 py-2 w-[150px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[150px]">
                             <div className="relative">
                               <input
                                 type="text"
@@ -1047,7 +1047,7 @@ export default function TitleMaster() {
                                 onChange={(e) => handleTableInputChange(item.id, 'translator', e.target.value)}
                                 onKeyDown={(e) => handleRowKeyDown(e, item, 'translator')}
                                 onBlur={(e) => handleTableUpdate(item.id, { ...item, translator: e.target.value }, 'translator')}
-                                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                                className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                                 autoComplete="off"
                               />
                               {rowShowSuggestions[keyFor('translator')] &&
@@ -1074,7 +1074,7 @@ export default function TitleMaster() {
                           </td>
 
                           {/* Category (suggestion) */}
-                          <td className="px-3 py-2 w-[120px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[120px]">
                             <div className="relative">
                               <input
                                 type="text"
@@ -1082,7 +1082,7 @@ export default function TitleMaster() {
                                 onChange={(e) => handleTableInputChange(item.id, 'category', e.target.value)}
                                 onKeyDown={(e) => handleRowKeyDown(e, item, 'category')}
                                 onBlur={(e) => handleTableUpdate(item.id, { ...item, category: e.target.value }, 'category')}
-                                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                                className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                                 autoComplete="off"
                               />
                               {rowShowSuggestions[keyFor('category')] &&
@@ -1109,7 +1109,7 @@ export default function TitleMaster() {
                           </td>
 
                           {/* Sub-Category (suggestion) */}
-                          <td className="px-3 py-2 w-[120px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[120px]">
                             <div className="relative">
                               <input
                                 type="text"
@@ -1117,7 +1117,7 @@ export default function TitleMaster() {
                                 onChange={(e) => handleTableInputChange(item.id, 'subCategory', e.target.value)}
                                 onKeyDown={(e) => handleRowKeyDown(e, item, 'subCategory')}
                                 onBlur={(e) => handleTableUpdate(item.id, { ...item, subCategory: e.target.value }, 'subCategory')}
-                                className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                                className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                                 autoComplete="off"
                               />
                               {rowShowSuggestions[keyFor('subCategory')] &&
@@ -1143,53 +1143,53 @@ export default function TitleMaster() {
                             </div>
                           </td>
 
-                          <td className="px-3 py-2 w-[120px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[120px]">
                             <input
                               type="text"
                               value={item.isbnNo || ''}
                               onChange={(e) => handleTableInputChange(item.id, 'isbnNo', e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, isbnNo: e.target.value }, 'isbnNo')}
                               onBlur={(e) => handleTableUpdate(item.id, { ...item, isbnNo: e.target.value }, 'isbnNo')}
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                              className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                             />
                           </td>
-                          <td className="px-3 py-2 w-[80px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[100px]">
                             <input
                               type="number"
                               value={item.roLevel || ''}
                               onChange={(e) => handleTableInputChange(item.id, 'roLevel', e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, roLevel: e.target.value }, 'roLevel')}
                               onBlur={(e) => handleTableUpdate(item.id, { ...item, roLevel: e.target.value }, 'roLevel')}
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                              className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                             />
                           </td>
-                          <td className="px-3 py-2 w-[80px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[100px]">
                             <input
                               type="number"
                               value={item.dnLevel || ''}
                               onChange={(e) => handleTableInputChange(item.id, 'dnLevel', e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, dnLevel: e.target.value }, 'dnLevel')}
                               onBlur={(e) => handleTableUpdate(item.id, { ...item, dnLevel: e.target.value }, 'dnLevel')}
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                              className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                             />
                           </td>
-                          <td className="px-3 py-2 w-[200px]">
+                          <td className="px-2 py-1 border-b border-gray-100 w-[300px]">
                             <input
                               type="text"
                               value={item.titleMal || ''}
                               onChange={(e) => handleTableInputChange(item.id, 'titleMal', e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, titleMal: e.target.value }, 'titleMal')}
                               onBlur={(e) => handleTableUpdate(item.id, { ...item, titleMal: e.target.value }, 'titleMal')}
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                              className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200"
                             />
                           </td>
-                          <td className="px-3 py-2 text-center w-[40px]">
+                          <td className="px-2 py-1 border-b border-gray-100 text-center w-[64px]">
                             <button
                               onClick={() => handleDeleteItem(item.id)}
-                              className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                              className="inline-flex items-center justify-center w-7 h-7 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
                               title="Delete item"
                             >
-                              <TrashIcon className="w-5 h-5" />
+                              <TrashIcon className="w-4 h-4" />
                             </button>
                           </td>
                         </tr>

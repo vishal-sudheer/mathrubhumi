@@ -355,17 +355,17 @@ export default function PrivilegersMaster() {
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto rounded-lg border border-gray-200">
             <div className="min-w-[900px]">
-              <table className="w-full table-fixed border-collapse">
-                <thead className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                  <tr>
-                    <th className="w-[240px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Privileger Name</th>
-                    <th className="w-[200px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Address 1</th>
-                    <th className="w-[200px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Address 2</th>
-                    <th className="w-[110px] px-3 py-2 text-left text-sm font-semibold tracking-wide">City</th>
-                    <th className="w-[130px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Telephone</th>
-                    <th className="w-[130px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Contact</th>
-                    <th className="w-[200px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Email</th>
-                    <th className="w-[60px] px-3 py-2 text-center text-sm font-semibold">Action</th>
+              <table className="w-full table-fixed border-separate border-spacing-0">
+                <thead>
+                  <tr className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white uppercase tracking-wider text-xs shadow-md">
+                    <th className="w-[240px] px-3 py-2 text-left font-medium tracking-wide border border-white/40 rounded-tl-lg">Privileger Name</th>
+                    <th className="w-[200px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Address 1</th>
+                    <th className="w-[200px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Address 2</th>
+                    <th className="w-[110px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">City</th>
+                    <th className="w-[130px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Telephone</th>
+                    <th className="w-[130px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Contact</th>
+                    <th className="w-[200px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Email</th>
+                    <th className="w-[64px] px-3 py-2 text-center font-medium border border-t border-r border-b border-white/40 rounded-tr-lg">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -382,90 +382,90 @@ export default function PrivilegersMaster() {
                         className="hover:bg-blue-50/50 transition-colors animate-fade-in"
                         style={{ animationDelay: `${index * 30}ms` }}
                       >
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.privilegerName || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'privilegerName', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, privilegerName: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.address1 || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'address1', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, address1: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.address2 || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'address2', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, address2: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.city || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'city', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, city: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.telephone || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'telephone', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, telephone: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.contact || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'contact', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, contact: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.email || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'email', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, email: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2 text-center">
+                        <td className="px-2 py-1 border-b border-gray-100 text-center w-[64px]">
                           <button
                             onClick={() => handleDeletePrivileger(item.id)}
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                            className="inline-flex items-center justify-center w-7 h-7 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
                             title="Delete privileger"
                           >
-                            <TrashIcon className="w-5 h-5" />
+                            <TrashIcon className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>

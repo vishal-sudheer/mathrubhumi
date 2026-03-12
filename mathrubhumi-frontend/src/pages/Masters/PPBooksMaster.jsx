@@ -1,4 +1,4 @@
-﻿
+
 import React, { useState, useEffect } from 'react';
 import { TrashIcon } from '@heroicons/react/24/solid';
 import Modal from '../../components/Modal';
@@ -552,24 +552,24 @@ export default function PPBooksMaster() {
 
           <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto rounded-lg border border-gray-200">
             <div className="min-w-[1700px]">
-              <table className="w-full table-fixed border-collapse">
-                <thead className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                  <tr>
-                    <th className="w-[260px] px-3 py-2 text-left text-sm font-semibold tracking-wide">PP Book Name</th>
-                    <th className="w-[90px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Code</th>
-                    <th className="w-[90px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Nos</th>
-                    <th className="w-[120px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Face Value</th>
-                    <th className="w-[140px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Reg Start</th>
-                    <th className="w-[140px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Reg End</th>
-                    <th className="w-[140px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Release</th>
-                    <th className="w-[200px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Notes</th>
-                    <th className="w-[90px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Closed</th>
-                    <th className="w-[180px] px-3 py-2 text-left text-sm font-semibold tracking-wide">PP Book Firm</th>
-                    <th className="w-[80px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Nos Ex</th>
-                    <th className="w-[90px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Title Id</th>
-                    <th className="w-[140px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Inserted</th>
-                    <th className="w-[140px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Modified</th>
-                    <th className="w-[60px] px-3 py-2 text-center text-sm font-semibold">Action</th>
+              <table className="w-full table-fixed border-separate border-spacing-0">
+                <thead>
+                  <tr className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white uppercase tracking-wider text-xs shadow-md">
+                    <th className="w-[260px] px-3 py-2 text-left font-medium tracking-wide border border-white/40 rounded-tl-lg">PP Book Name</th>
+                    <th className="w-[90px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Code</th>
+                    <th className="w-[90px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Nos</th>
+                    <th className="w-[120px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Face Value</th>
+                    <th className="w-[140px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Reg Start</th>
+                    <th className="w-[140px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Reg End</th>
+                    <th className="w-[140px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Release</th>
+                    <th className="w-[200px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Notes</th>
+                    <th className="w-[90px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Closed</th>
+                    <th className="w-[180px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">PP Book Firm</th>
+                    <th className="w-[80px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Nos Ex</th>
+                    <th className="w-[90px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Title Id</th>
+                    <th className="w-[140px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Inserted</th>
+                    <th className="w-[140px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Modified</th>
+                    <th className="w-[60px] px-3 py-2 text-center font-medium border border-t border-r border-b border-white/40 rounded-tr-lg">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -586,96 +586,96 @@ export default function PPBooksMaster() {
                         className="hover:bg-blue-50/50 transition-colors animate-fade-in"
                         style={{ animationDelay: `${index * 30}ms` }}
                       >
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.ppBookName || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'ppBookName', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, ppBookName: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.code || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'code', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, code: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="number"
                             value={item.nos ?? ''}
                             onChange={(e) => handleTableInputChange(item.id, 'nos', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, nos: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="number"
                             step="0.01"
                             value={item.faceValue || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'faceValue', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, faceValue: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="date"
                             value={item.regStartDate || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'regStartDate', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, regStartDate: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="date"
                             value={item.regEndDate || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'regEndDate', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, regEndDate: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="date"
                             value={item.dateOfRelease || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'dateOfRelease', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, dateOfRelease: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.notes || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'notes', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, notes: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <select
                             aria-label="Closed"
                             value={String(item.closed ?? '0')}
@@ -684,60 +684,60 @@ export default function PPBooksMaster() {
                               e.key === 'Enter' &&
                               handleTableUpdate(item.id, { ...item, closed: Number(e.target.value) })
                             }
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           >
                             <option value="0">No</option>
                             <option value="1">Yes</option>
                           </select>
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="text"
                             value={item.ppBookFirm || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'ppBookFirm', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, ppBookFirm: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="number"
                             value={item.nosEx || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'nosEx', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, nosEx: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100">
                           <input
                             type="number"
                             value={item.productId || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'productId', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, productId: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2 text-xs text-gray-600">
+                        <td className="px-2 py-1 border-b border-gray-100 text-xs text-gray-600">
                           {item.inserted ? new Date(item.inserted).toLocaleString() : ''}
                         </td>
-                        <td className="px-3 py-2 text-xs text-gray-600">
+                        <td className="px-2 py-1 border-b border-gray-100 text-xs text-gray-600">
                           {item.modified ? new Date(item.modified).toLocaleString() : ''}
                         </td>
-                        <td className="px-3 py-2 text-center">
+                        <td className="px-2 py-1 border-b border-gray-100 text-center w-[60px]">
                           <button
                             onClick={() => handleDeletePPBook(item.id)}
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                            className="inline-flex items-center justify-center w-7 h-7 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
                             title="Delete PP book"
                           >
-                            <TrashIcon className="w-5 h-5" />
+                            <TrashIcon className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>

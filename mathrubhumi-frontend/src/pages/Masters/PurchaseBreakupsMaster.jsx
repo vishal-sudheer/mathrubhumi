@@ -331,13 +331,13 @@ export default function PurchaseBreakupsMaster() {
             </div>
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto rounded-lg border border-gray-200">
-            <table className="w-full max-w-md">
+            <table className="w-full max-w-md table-fixed border-separate border-spacing-0">
               <thead>
-                <tr className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                  <th className="px-4 py-3 text-left text-sm font-semibold tracking-wide">
+                <tr className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white uppercase tracking-wider text-xs shadow-md">
+                  <th className="px-3 py-2 text-left font-medium tracking-wide border border-white/40 rounded-tl-lg">
                     Breakup Name
                   </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold w-16">
+                  <th className="px-3 py-2 text-center font-medium w-[64px] border border-t border-r border-b border-white/40 rounded-tr-lg">
                     Action
                   </th>
                 </tr>
@@ -356,26 +356,26 @@ export default function PurchaseBreakupsMaster() {
                       className="hover:bg-blue-50/50 transition-colors animate-fade-in"
                       style={{ animationDelay: `${index * 30}ms` }}
                     >
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1 border-b border-gray-100">
                         <input
                           type="text"
                           value={item.breakupName || ''}
                           onChange={(e) => handleTableInputChange(item.id, 'breakupName', e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, breakupName: e.target.value })}
-                          className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                     focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                          className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                     focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                      transition-all duration-200"
                           placeholder="Enter breakup name"
                         />
                       </td>
-                      <td className="px-4 py-2 text-center">
+                      <td className="px-2 py-1 border-b border-gray-100 text-center w-[64px]">
                         <button
                           onClick={() => handleDeletePurchaseBreakup(item.id)}
-                          className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-500
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-md text-red-500
                                      hover:bg-red-50 hover:text-red-600 transition-colors"
                           title="Delete purchase breakup"
                         >
-                          <TrashIcon className="w-5 h-5" />
+                          <TrashIcon className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>

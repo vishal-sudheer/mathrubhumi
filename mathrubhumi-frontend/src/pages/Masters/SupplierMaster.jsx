@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrashIcon } from '@heroicons/react/24/solid';
 import Modal from '../../components/Modal';
 import PageHeader from '../../components/PageHeader';
@@ -326,20 +326,20 @@ export default function SupplierMaster() {
             </div>
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto rounded-lg border border-gray-200">
-            <div className="min-w-[1100px]">
-              <table className="w-full table-fixed border-collapse">
-                <thead className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                  <tr>
-                    <th className="w-[300px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Name</th>
-                    <th className="w-[250px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Address 1</th>
-                    <th className="w-[250px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Address 2</th>
-                    <th className="w-[100px] px-3 py-2 text-left text-sm font-semibold tracking-wide">City</th>
-                    <th className="w-[150px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Phone</th>
-                    <th className="w-[200px] px-3 py-2 text-left text-sm font-semibold tracking-wide">E-Mail</th>
-                    <th className="w-[100px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Debit</th>
-                    <th className="w-[100px] px-3 py-2 text-left text-sm font-semibold tracking-wide">Credit</th>
-                    <th className="w-[150px] px-3 py-2 text-left text-sm font-semibold tracking-wide">GSTIN</th>
-                    <th className="w-[50px] px-3 py-2 text-center text-sm font-semibold">Action</th>
+            <div className="min-w-[1700px]">
+              <table className="w-full table-fixed border-separate border-spacing-0">
+                <thead>
+                  <tr className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white uppercase tracking-wider text-xs shadow-md">
+                    <th className="w-[300px] px-3 py-2 text-left font-medium tracking-wide border border-white/40 rounded-tl-lg">Name</th>
+                    <th className="w-[250px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Address 1</th>
+                    <th className="w-[250px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Address 2</th>
+                    <th className="w-[100px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">City</th>
+                    <th className="w-[150px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Phone</th>
+                    <th className="w-[200px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">E-Mail</th>
+                    <th className="w-[100px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Debit</th>
+                    <th className="w-[100px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">Credit</th>
+                    <th className="w-[150px] px-3 py-2 text-left font-medium tracking-wide border border-t border-b border-white/40">GSTIN</th>
+                    <th className="w-[64px] px-3 py-2 text-center font-medium border border-t border-r border-b border-white/40 rounded-tr-lg">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -356,114 +356,114 @@ export default function SupplierMaster() {
                         className="hover:bg-blue-50/50 transition-colors animate-fade-in"
                         style={{ animationDelay: `${index * 30}ms` }}
                       >
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100 w-[300px]">
                           <input
                             type="text"
                             value={item.name || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'name', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, name: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100 w-[250px]">
                           <input
                             type="text"
                             value={item.address1 || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'address1', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, address1: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100 w-[250px]">
                           <input
                             type="text"
                             value={item.address2 || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'address2', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, address2: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100 w-[100px]">
                           <input
                             type="text"
                             value={item.city || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'city', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, city: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100 w-[150px]">
                           <input
                             type="text"
                             value={item.phone || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'phone', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, phone: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100 w-[200px]">
                           <input
                             type="text"
                             value={item.email || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'email', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, email: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100 w-[100px]">
                           <input
                             type="number"
                             value={item.debit || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'debit', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, debit: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                             step="0.001"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100 w-[100px]">
                           <input
                             type="number"
                             value={item.credit || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'credit', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, credit: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                             step="0.001"
                           />
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1 border-b border-gray-100 w-[150px]">
                           <input
                             type="text"
                             value={item.gstin || ''}
                             onChange={(e) => handleTableInputChange(item.id, 'gstin', e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleTableUpdate(item.id, { ...item, gstin: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm
-                                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400 focus:bg-white
+                            className="w-full px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 text-sm
+                                       focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white
                                        transition-all duration-200"
                           />
                         </td>
-                        <td className="px-3 py-2 text-center">
+                        <td className="px-2 py-1 border-b border-gray-100 text-center w-[64px]">
                           <button
                             onClick={() => handleDeleteSupplier(item.id)}
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                            className="inline-flex items-center justify-center w-7 h-7 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
                             title="Delete supplier"
                           >
-                            <TrashIcon className="w-5 h-5" />
+                            <TrashIcon className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>
