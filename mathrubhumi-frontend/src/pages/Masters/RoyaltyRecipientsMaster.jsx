@@ -50,12 +50,10 @@ export default function RoyaltyRecipientsMaster() {
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -64,8 +62,6 @@ export default function RoyaltyRecipientsMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating royalty recipient: id=${id}, data=`, updatedItem);
-
     const payload = {
       royalty_recipient_nm: updatedItem.royaltyRecipientName || '',
       address1: updatedItem.address1 || null,
@@ -75,12 +71,8 @@ export default function RoyaltyRecipientsMaster() {
       contact: updatedItem.contact || null,
       email: updatedItem.email || null
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/royalty-recipient-update/${id}/`, payload);
-      console.log('Royalty recipient updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Royalty recipient updated successfully!',
@@ -100,7 +92,6 @@ export default function RoyaltyRecipientsMaster() {
 
   const handleAddRecipient = async () => {
     if (!formData.royaltyRecipientName) {
-      console.log('Validation failed: royaltyRecipientName is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Royalty Recipient Name field',
@@ -119,13 +110,8 @@ export default function RoyaltyRecipientsMaster() {
       contact: formData.contact || null,
       email: formData.email || null
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/royalty-recipient-create/', payload);
-      console.log('Royalty recipient created:', response.data);
       setModal({
         isOpen: true,
         message: 'Royalty recipient added successfully!',
@@ -159,7 +145,6 @@ export default function RoyaltyRecipientsMaster() {
   };
 
   const handleDeleteRecipient = (id) => {
-    console.log(`Prompting to delete royalty recipient: id=${id}`);
     setModal({
       isOpen: true,
       message: 'Are you sure you want to delete this royalty recipient?',
@@ -170,7 +155,6 @@ export default function RoyaltyRecipientsMaster() {
           onClick: async () => {
             try {
               const response = await api.delete(`/auth/royalty-recipient-delete/${id}/`);
-              console.log('Royalty recipient deleted:', response.data);
               await fetchAllReceipients({ page, pageSize });
               setModal({
                 isOpen: true,
@@ -216,7 +200,6 @@ export default function RoyaltyRecipientsMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Royalty recipients fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -239,7 +222,6 @@ export default function RoyaltyRecipientsMaster() {
         email: item.email || ''
       }));
       setItems(fetchedItems);
-      console.log('Updated items state:', fetchedItems);
       setTotalCount(total);
     } catch (error) {
       console.error('Error fetching royalty recipients:', error);

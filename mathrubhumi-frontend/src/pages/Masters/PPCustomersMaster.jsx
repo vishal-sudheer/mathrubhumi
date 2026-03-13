@@ -53,12 +53,10 @@ export default function PPCustomersMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -67,8 +65,6 @@ export default function PPCustomersMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating PP customer: id=${id}, data=`, updatedItem);
-
     const payload = {
       pp_customer_nm: updatedItem.ppCustomerName || '',
       address1: updatedItem.address1 || null,
@@ -78,12 +74,8 @@ export default function PPCustomersMaster() {
       contact: updatedItem.contact || null,
       email: updatedItem.email || null
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/pp-customer-update/${id}/`, payload);
-      console.log('PP customer updated:', response.data);
       setModal({
         isOpen: true,
         message: 'PP customer updated successfully!',
@@ -103,7 +95,6 @@ export default function PPCustomersMaster() {
 
   const handleAddPPCustomer = async () => {
     if (!formData.ppCustomerName) {
-      console.log('Validation failed: ppCustomerName is empty');
       setModal({
         isOpen: true,
         message: 'Please fill PP Customer Name field',
@@ -122,13 +113,8 @@ export default function PPCustomersMaster() {
       contact: formData.contact || null,
       email: formData.email || null
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/pp-customer-create/', payload);
-      console.log('PP customer created:', response.data);
       setModal({
         isOpen: true,
         message: 'PP customer added successfully!',
@@ -162,7 +148,6 @@ export default function PPCustomersMaster() {
   };
 
   const handleDeletePPCustomer = (id) => {
-    console.log(`Prompting to delete PP customer: id=${id}`);
     setDeletePPCustomerId(id);
     setModal({
       isOpen: true,
@@ -174,7 +159,6 @@ export default function PPCustomersMaster() {
           onClick: async () => {
             try {
               const response = await api.delete(`/auth/pp-customer-delete/${id}/`);
-              console.log('PP customer deleted:', response.data);
               await fetchAllPPCustomers({ page, pageSize });
               setModal({
                 isOpen: true,
@@ -222,7 +206,6 @@ export default function PPCustomersMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('PP customers fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -245,7 +228,6 @@ export default function PPCustomersMaster() {
         email: item.email || ''
       }));
       setItems(fetchedItems);
-      console.log('Updated items state:', fetchedItems);
       setTotalCount(total);
     } catch (error) {
       console.error('Error fetching PP customers:', error);

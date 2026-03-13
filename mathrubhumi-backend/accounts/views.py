@@ -12,7 +12,6 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser, Role
 from django.db import transaction, connection, IntegrityError
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.dateparse import parse_date
 from .permissions import is_admin_user
 
@@ -191,7 +190,7 @@ def pp_books_title_search(request):
       return JsonResponse(out, safe=False, json_dumps_params={'ensure_ascii': False})
     except Exception as e:
       logger.exception("Error in pp_books_title_search")
-      return JsonResponse({'error': str(e)}, status=400)
+      return JsonResponse({'error': 'An unexpected error occurred.'}, status=400)
 
 
 @api_view(['GET'])
@@ -228,7 +227,7 @@ def pp_customers_name_search(request):
       return JsonResponse(out, safe=False, json_dumps_params={'ensure_ascii': False})
     except Exception as e:
       logger.exception("Error in pp_customers_name_search")
-      return JsonResponse({'error': str(e)}, status=400)
+      return JsonResponse({'error': 'An unexpected error occurred.'}, status=400)
 
 
 @api_view(['GET'])
@@ -258,7 +257,7 @@ def agents_name_search(request):
       return JsonResponse(out, safe=False, json_dumps_params={'ensure_ascii': False})
     except Exception as e:
       logger.exception("Error in agents_name_search")
-      return JsonResponse({'error': str(e)}, status=400)
+      return JsonResponse({'error': 'An unexpected error occurred.'}, status=400)
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -287,9 +286,15 @@ def remittance_customer_search(request):
 
         data = [{"id": r[0], "customer_nm": r[1] or ""} for r in rows]
         return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
-    except Exception as e:
-        logger.exception("Error in remittance_customer_search")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in remittance_customer_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in remittance_customer_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in remittance_customer_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -319,9 +324,15 @@ def pp_receipt_by_customer_id(request):
 
         data = [{"receipt_no": r[0], "entry_date": r[1], "bank": r[2], "chq_dd_no": r[3], "amount": r[4] or ""} for r in rows]
         return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
-    except Exception as e:
-        logger.exception("Error in finding customer details.")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in finding customer details.: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in finding customer details.: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in finding customer details.")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -350,9 +361,15 @@ def branches_name_search(request):
 
         data = [{"id": r[0], "branches_nm": r[1] or ""} for r in rows]
         return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
-    except Exception as e:
-        logger.exception("Error in branches_name_search")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in branches_name_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in branches_name_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in branches_name_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 ################### SALE BILL ###################
 
@@ -431,8 +448,8 @@ def create_sale(request):
                     item['titleId'] = int(item['titleId'])
                     item['purchaseItemId'] = int(item.get('purchaseItemId') or 0)
             except (ValueError, TypeError) as e:
-                logger.error(f"Invalid data type: {str(e)}")
-                return JsonResponse({'error': f'Invalid data type: {str(e)}'}, status=400)
+                logger.exception("Invalid data type")
+                return JsonResponse({'error': 'Invalid data format.'}, status=400)
 
             # If not credit sale, set the cr_customer_id to 0
             # (0 is "Credit Sale" in your sale_type_reverse_mapping)
@@ -531,9 +548,15 @@ def create_sale(request):
             logger.info(f"Sale created successfully with ID: {sale_id}")
             return JsonResponse({'message': 'Sale saved successfully', 'sale_id': sale_id}, status=201)
 
-        except Exception as e:
-            logger.error(f"Error in create_sale: {str(e)}")
-            return JsonResponse({'error': str(e)}, status=400)
+        except KeyError as e:
+            logger.warning("Missing required field in create_sale: %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in create_sale: %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
+            logger.exception("Unexpected error in create_sale")
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
@@ -589,10 +612,10 @@ def create_goods_inward(request):
                     item['currencyIndex'] = int(item['currencyIndex'])
                     item['titleId'] = int(item['titleId'])
             except (ValueError, TypeError) as e:
-                logger.error(f"Invalid data type: {str(e)}")
-                return JsonResponse({'error': f'Invalid data type: {str(e)}'}, status=400)
+                logger.exception("Invalid data type")
+                return JsonResponse({'error': 'Invalid data format.'}, status=400)
 
-            type_mapping = {'Purchase': 0, 'Return': 1, 'Consignment': 2}
+            type_mapping = {'Purchase': 0, 'Sale Or Return': 1, 'Consignment': 2, 'Own Titles': 3, 'Own Periodicals': 4, "Other`s Periodicals": 5, 'Stock Transfer': 6}
             with transaction.atomic():
 
                 # running number
@@ -665,9 +688,15 @@ def create_goods_inward(request):
                 status=201
             )
 
-        except Exception as e:
-            logger.error(f"Error in create_purchase: {str(e)}")
-            return JsonResponse({'error': str(e)}, status=400)
+        except KeyError as e:
+            logger.warning("Missing required field in create_purchase: %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in create_purchase: %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
+            logger.exception("Unexpected error in create_purchase")
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
@@ -781,9 +810,15 @@ def get_sale_by_id(request, sale_id):
             logger.info(f"Sale retrieved successfully: ID {sale_id}")
             return JsonResponse(sale_data, safe=False)
 
-        except Exception as e:
-            logger.error(f"Error in get_sale_by_id (GET): {str(e)}")
-            return JsonResponse({'error': str(e)}, status=400)
+        except KeyError as e:
+            logger.warning("Missing required field in get_sale_by_id (GET): %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in get_sale_by_id (GET): %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
+            logger.exception("Unexpected error in get_sale_by_id (GET)")
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     elif request.method == 'PUT':
         try:
@@ -825,7 +860,7 @@ def get_sale_by_id(request, sale_id):
             except KeyError as e:
                 logger.error(f"Invalid enum value for type/mode/class: {e}")
                 return JsonResponse(
-                    {'error': f'Invalid value for one of type/mode/class: {str(e)}'},
+                    {'error': 'Invalid value for sale type, mode, or class.'},
                     status=400
                 )
 
@@ -882,8 +917,8 @@ def get_sale_by_id(request, sale_id):
                     item['purchaseItemId'] = int(item.get('purchaseItemId') or 0)
 
             except (ValueError, TypeError) as e:
-                logger.error(f"Invalid data type: {str(e)}")
-                return JsonResponse({'error': f'Invalid data type: {str(e)}'}, status=400)
+                logger.exception("Invalid data type")
+                return JsonResponse({'error': 'Invalid data format.'}, status=400)
 
             total_value = sum(item['value'] for item in data['items'])
             for item in data['items']:
@@ -975,9 +1010,15 @@ def get_sale_by_id(request, sale_id):
             logger.info(f"Sale updated successfully: ID {sale_id}")
             return JsonResponse({'message': 'Sale updated successfully'}, status=200)
 
-        except Exception as e:
-            logger.error(f"Error in get_sale_by_id (PUT): {str(e)}")
-            return JsonResponse({'error': str(e)}, status=400)
+        except KeyError as e:
+            logger.warning("Missing required field in get_sale_by_id (PUT): %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in get_sale_by_id (PUT): %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
+            logger.exception("Unexpected error in get_sale_by_id (PUT)")
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
@@ -1014,7 +1055,7 @@ def get_goods_inward_by_id(request, goods_inward_purchase_no):
                     logger.warning(f"Goods Inward not found: ID {goods_inward_purchase_no}")
                     return JsonResponse({'error': 'Goods Inward not found'}, status=404)
 
-                type_mapping = {0: 'Purchase', 1: 'Return', 2: 'Consignment'}
+                type_mapping = {0: 'Purchase', 1: 'Sale Or Return', 2: 'Consignment', 3: 'Own Titles', 4: 'Own Periodicals', 5: "Other`s Periodicals", 6: 'Stock Transfer'}
                 goods_inward_data = {
                     'inward_date': goods_inward[0].isoformat() if goods_inward[0] else '',
                     'bill_no': goods_inward[1] or '',
@@ -1080,9 +1121,15 @@ def get_goods_inward_by_id(request, goods_inward_purchase_no):
             logger.info(f"Goods Inward retrieved successfully: ID {goods_inward_id}")
             return JsonResponse(goods_inward_data, safe=False)
 
-        except Exception as e:
-            logger.error(f"Error in get_goods_inward_by_id (GET): {str(e)}")
-            return JsonResponse({'error': str(e)}, status=400)
+        except KeyError as e:
+            logger.warning("Missing required field in get_goods_inward_by_id (GET): %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in get_goods_inward_by_id (GET): %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
+            logger.exception("Unexpected error in get_goods_inward_by_id (GET)")
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     elif request.method == 'PUT':
         try:
@@ -1120,10 +1167,7 @@ def get_goods_inward_by_id(request, goods_inward_purchase_no):
                 return JsonResponse({'error': 'Items must be a non-empty list'}, status=400)
 
             try:
-                print('==========')
-                print(data['entry_date'])
-                print(data['srl_no'])
-                print(data['id'])
+                logger.debug("GI update: entry_date=%s, srl_no=%s, id=%s", data.get('entry_date'), data.get('srl_no'), data.get('id'))
                 gross = _coerce_float(data.get('gross'), 0.0)
                 nett = _coerce_float(data.get('nett'), 0.0)
                 p_breakup_id1 = _coerce_int(data.get('p_breakup_id1'), 0)
@@ -1156,10 +1200,10 @@ def get_goods_inward_by_id(request, goods_inward_purchase_no):
                     else:
                         item['itemId'] = 0
             except (ValueError, TypeError) as e:
-                logger.error(f"Invalid data type: {str(e)}")
-                return JsonResponse({'error': f'Invalid data type: {str(e)}'}, status=400)
+                logger.exception("Invalid data type")
+                return JsonResponse({'error': 'Invalid data format.'}, status=400)
 
-            type_mapping = {'Purchase': 0, 'Return': 1, 'Consignment': 2}
+            type_mapping = {'Purchase': 0, 'Sale Or Return': 1, 'Consignment': 2, 'Own Titles': 3, 'Own Periodicals': 4, "Other`s Periodicals": 5, 'Stock Transfer': 6}
             with connection.cursor() as cursor:
                 goods_inward_id = int(data.get('id') or 0)
                 if goods_inward_id <= 0:
@@ -1289,9 +1333,15 @@ def get_goods_inward_by_id(request, goods_inward_purchase_no):
             logger.info(f"Goods Inward updated successfully: ID {goods_inward_id}")
             return JsonResponse({'message': 'Goods Inward updated successfully'}, status=200)
 
-        except Exception as e:
-            logger.error(f"Error in get_goods_inward_by_id (PUT): {str(e)}")
-            return JsonResponse({'error': str(e)}, status=400)
+        except KeyError as e:
+            logger.warning("Missing required field in get_goods_inward_by_id (PUT): %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in get_goods_inward_by_id (PUT): %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
+            logger.exception("Unexpected error in get_goods_inward_by_id (PUT)")
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
@@ -1343,9 +1393,15 @@ def product_search(request):
         logger.info(f"Product search query: {query}, results: {len(suggestions)}, sample: {suggestions[:2]}")
         return Response(suggestions, content_type='application/json; charset=utf-8')
 
-    except Exception as e:
-        logger.error(f"Error in product_search: {str(e)}")
-        return Response({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in product_search: %s", e)
+        return Response({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in product_search: %s", e)
+        return Response({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in product_search")
+        return Response({'error': 'An unexpected error occurred.'}, status=500)
     
 
 @api_view(['GET'])
@@ -1389,9 +1445,15 @@ def batch_select(request):
             logger.info(f"Product: {titleId}, results: {len(batchList)}, sample: {batchList}")
         return Response(batchList, content_type='application/json; charset=utf-8')
 
-    except Exception as e:
-        logger.error(f"Error in batch_select: {str(e)}")
-        return Response({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in batch_select: %s", e)
+        return Response({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in batch_select: %s", e)
+        return Response({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in batch_select")
+        return Response({'error': 'An unexpected error occurred.'}, status=500)
     
 
 @api_view(['GET'])
@@ -1428,14 +1490,20 @@ def customer_search(request):
         logger.info(f"Customer search successful for query: {query}")
         return JsonResponse(suggestions, safe=False, json_dumps_params={'ensure_ascii': False})
 
-    except Exception as e:
-        logger.error(f"Error in customer_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in customer_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in customer_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in customer_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def supplier_search(request):
-    print('Inside supplier search.')
+
     try:
         query = request.GET.get('q', '')
         if not query:
@@ -1463,14 +1531,20 @@ def supplier_search(request):
         logger.info(f"Supplier search successful for query: {query}")
         return JsonResponse(suggestions, safe=False, json_dumps_params={'ensure_ascii': False})
 
-    except Exception as e:
-        logger.error(f"Error in supplier_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in supplier_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in supplier_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in supplier_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_search(request):
-    print('Inside user search.')
+
     try:
         query = request.GET.get('q', '')
         if not query:
@@ -1498,14 +1572,20 @@ def user_search(request):
         logger.info(f"User search successful for query: {query}")
         return JsonResponse(suggestions, safe=False, json_dumps_params={'ensure_ascii': False})
 
-    except Exception as e:
-        logger.error(f"Error in user_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in user_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in user_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in user_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def branches_search(request):
-    print('Inside branches search.')
+
     try:
         query = request.GET.get('q', '')
         if not query:
@@ -1533,14 +1613,20 @@ def branches_search(request):
         logger.info(f"Branches search successful for query: {query}")
         return JsonResponse(suggestions, safe=False, json_dumps_params={'ensure_ascii': False})
 
-    except Exception as e:
-        logger.error(f"Error in branches search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in branches search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in branches search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in branches search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def breakup_search(request):
-    print('Inside breakup search.')
+
     try:
         query = request.GET.get('q', '')
         if not query:
@@ -1568,9 +1654,15 @@ def breakup_search(request):
         logger.info(f"Breakup search successful for query: {query}")
         return JsonResponse(suggestions, safe=False, json_dumps_params={'ensure_ascii': False})
 
-    except Exception as e:
-        logger.error(f"Error in breakup search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in breakup search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in breakup search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in breakup search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -1588,9 +1680,15 @@ def get_currencies(request):
             currencies = [{'id': row[0], 'name': row[1]} for row in results]
             logger.info(f"Currencies retrieved: {currencies}")
             return Response(currencies)  # Use Response for structured JSON
-    except Exception as e:
-        logger.error(f"Error in get_currencies: {str(e)}")
-        return Response({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in get_currencies: %s", e)
+        return Response({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in get_currencies: %s", e)
+        return Response({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in get_currencies")
+        return Response({'error': 'An unexpected error occurred.'}, status=500)
     
 
 
@@ -1626,9 +1724,15 @@ def author_search(request):
         logger.info(f"Author search query: {query}, results: {len(suggestions)}, sample: {suggestions[:2]}")
         return JsonResponse(suggestions, safe=False, json_dumps_params={'ensure_ascii': False})
 
-    except Exception as e:
-        logger.error(f"Error in author_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in author_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in author_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in author_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -1661,9 +1765,15 @@ def publisher_search(request):
         logger.info(f"Publisher search query: {query}, results: {len(suggestions)}, sample: {suggestions[:2]}")
         return JsonResponse(suggestions, safe=False, json_dumps_params={'ensure_ascii': False})
 
-    except Exception as e:
-        logger.error(f"Error in publisher_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in publisher_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in publisher_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in publisher_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 
 @api_view(['GET'])
@@ -1697,9 +1807,15 @@ def category_search(request):
         logger.info(f"Category search query: {query}, results: {len(suggestions)}, sample: {suggestions[:2]}")
         return JsonResponse(suggestions, safe=False, json_dumps_params={'ensure_ascii': False})
 
-    except Exception as e:
-        logger.error(f"Error in category_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in category_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in category_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in category_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -1732,9 +1848,15 @@ def sub_category_search(request):
         logger.info(f"Sub-Category search query: {query}, results: {len(suggestions)}, sample: {suggestions[:2]}")
         return JsonResponse(suggestions, safe=False, json_dumps_params={'ensure_ascii': False})
 
-    except Exception as e:
-        logger.error(f"Error in sub_category_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sub_category_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sub_category_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sub_category_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 
 ################### TITLE MASTER ###################
@@ -1779,9 +1901,15 @@ def title_create(request):
                 ]
             )
         return JsonResponse({'message': 'Title created successfully'}, status=201)
-    except Exception as e:
-        logger.error(f"Error in title_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in title_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in title_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in title_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -1916,9 +2044,15 @@ def title_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in title_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in title_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in title_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in title_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 
 @api_view(['PUT'])
@@ -1977,9 +2111,15 @@ def title_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Title with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Title updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in title_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in title_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in title_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in title_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -1998,9 +2138,15 @@ def title_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Title with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Title deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in title_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in title_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in title_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in title_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 
 ################### AUTHOR MASTER ###################
@@ -2033,9 +2179,15 @@ def author_create(request):
                 ]
             )
         return JsonResponse({'message': 'Author created successfully'}, status=201)
-    except Exception as e:
-        logger.error(f"Error in author_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in author_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in author_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in author_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -2126,9 +2278,15 @@ def author_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in author_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in author_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in author_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in author_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -2154,9 +2312,15 @@ def authors_list(request):
             for row in results
         ]
         return JsonResponse(authors, safe=False, json_dumps_params={'ensure_ascii': False})
-    except Exception as e:
-        logger.error(f"Error in authors_list: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in authors_list: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in authors_list: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in authors_list")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['PUT'])
@@ -2195,9 +2359,15 @@ def author_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Author with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Author updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in author_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in author_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in author_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in author_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -2216,9 +2386,15 @@ def author_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Author with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Author deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in author_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in author_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in author_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in author_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### PUBLISHER MASTER ###################
 
@@ -2252,9 +2428,15 @@ def publisher_create(request):
                 ]
             )
         return JsonResponse({'message': 'Publisher created successfully'}, status=201)
-    except Exception as e:
-        logger.error(f"Error in publisher_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in publisher_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in publisher_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in publisher_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -2347,9 +2529,15 @@ def publisher_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in publisher_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in publisher_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in publisher_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in publisher_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -2391,9 +2579,15 @@ def publisher_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Publisher with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Publisher updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in publisher_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in publisher_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in publisher_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in publisher_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -2412,9 +2606,15 @@ def publisher_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Publisher with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Publisher deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in publisher_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in publisher_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in publisher_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in publisher_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### SUUPLIER MASTER ###################
 
@@ -2448,9 +2648,15 @@ def supplier_create(request):
                 ]
             )
         return JsonResponse({'message': 'Supplier created successfully'}, status=201)
-    except Exception as e:
-        logger.error(f"Error in supplier_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in supplier_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in supplier_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in supplier_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -2543,9 +2749,15 @@ def supplier_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in supplier_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in supplier_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in supplier_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in supplier_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -2587,9 +2799,42 @@ def supplier_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Supplier with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Supplier updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in supplier_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in supplier_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in supplier_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in supplier_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def supplier_delete(request, id):
+    try:
+        logger.info(f"Deleting supplier id={id}")
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                DELETE FROM suppliers
+                WHERE id = %s
+                RETURNING id
+                """,
+                [id]
+            )
+            if cursor.rowcount == 0:
+                return JsonResponse({'error': f'Supplier with id {id} not found'}, status=404)
+        return JsonResponse({'message': 'Supplier deleted successfully'}, status=200)
+    except KeyError as e:
+        logger.warning("Missing required field in supplier_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in supplier_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in supplier_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 ################### CREDIT CUSTOMER MASTER ###################
 
@@ -2626,9 +2871,15 @@ def credit_customer_create(request):
                 ]
             )
         return JsonResponse({'message': 'Credit customer created successfully'}, status=201)
-    except Exception as e:
-        logger.error(f"Error in credit_customer_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in credit_customer_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in credit_customer_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in credit_customer_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -2724,9 +2975,15 @@ def credit_customer_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in credit_customer_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in credit_customer_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in credit_customer_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in credit_customer_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -2774,9 +3031,15 @@ def credit_customer_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Credit customer with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Credit customer updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in credit_customer_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in credit_customer_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in credit_customer_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in credit_customer_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['DELETE'])
@@ -2797,9 +3060,15 @@ def credit_customer_delete(request, id):
             if not row:
                 return JsonResponse({'error': f'Credit customer with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Credit customer deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in credit_customer_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in credit_customer_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in credit_customer_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in credit_customer_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### CATEGORY MASTER ###################
 
@@ -2859,9 +3128,15 @@ def category_create(request):
             return JsonResponse({'error': 'Category already exists'}, status=400)
         logger.error(f"Error in category_create: {error_text}")
         return JsonResponse({'error': error_text}, status=400)
-    except Exception as e:
-        logger.error(f"Error in category_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in category_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in category_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in category_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -2946,9 +3221,15 @@ def categories_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in categories_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in categories_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in categories_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in categories_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -2974,9 +3255,15 @@ def category_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Category with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Category updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in category_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in category_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in category_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in category_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -2995,9 +3282,15 @@ def category_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Category with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Category deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in category_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in category_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in category_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in category_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### SUB CATEGORY MASTER ###################
 
@@ -3019,9 +3312,15 @@ def sub_category_create(request):
             )
             new_id = cursor.fetchone()[0]
         return JsonResponse({'message': 'Sub-category created successfully', 'id': new_id}, status=201)
-    except Exception as e:
-        logger.error(f"Error in sub_category_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sub_category_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sub_category_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sub_category_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -3106,9 +3405,15 @@ def sub_categories_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in sub_categories_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sub_categories_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sub_categories_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sub_categories_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -3134,9 +3439,15 @@ def sub_category_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Sub-category with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Sub-category updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in sub_category_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sub_category_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sub_category_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sub_category_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -3155,9 +3466,15 @@ def sub_category_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Sub-category with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Sub-category deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in sub_category_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sub_category_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sub_category_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sub_category_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### PP CUSTOMERS MASTER ###################
 
@@ -3187,9 +3504,15 @@ def pp_customer_create(request):
             )
             new_id = cursor.fetchone()[0]
         return JsonResponse({'message': 'PP customer created successfully', 'id': new_id}, status=201)
-    except Exception as e:
-        logger.error(f"Error in pp_customer_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in pp_customer_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in pp_customer_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in pp_customer_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -3280,9 +3603,15 @@ def pp_customers_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in pp_customers_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in pp_customers_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in pp_customers_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in pp_customers_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -3320,9 +3649,15 @@ def pp_customer_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'PP customer with id {id} not found'}, status=404)
         return JsonResponse({'message': 'PP customer updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in pp_customer_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in pp_customer_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in pp_customer_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in pp_customer_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -3341,9 +3676,15 @@ def pp_customer_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'PP customer with id {id} not found'}, status=404)
         return JsonResponse({'message': 'PP customer deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in pp_customer_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in pp_customer_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in pp_customer_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in pp_customer_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
    
 ################### PRIVILEGERS MASTER ###################
 
@@ -3373,9 +3714,15 @@ def privileger_create(request):
             )
             new_id = cursor.fetchone()[0]
         return JsonResponse({'message': 'Privileger created successfully', 'id': new_id}, status=201)
-    except Exception as e:
-        logger.error(f"Error in privileger_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in privileger_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in privileger_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in privileger_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -3466,9 +3813,15 @@ def privilegers_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in privilegers_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in privilegers_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in privilegers_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in privilegers_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -3506,9 +3859,15 @@ def privileger_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Privileger with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Privileger updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in privileger_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in privileger_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in privileger_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in privileger_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -3527,9 +3886,15 @@ def privileger_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Privileger with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Privileger deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in privileger_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in privileger_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in privileger_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in privileger_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### AGENTS MASTER ###################
 
@@ -3559,9 +3924,15 @@ def agent_create(request):
             )
             new_id = cursor.fetchone()[0]
         return JsonResponse({'message': 'Agent created successfully', 'id': new_id}, status=201)
-    except Exception as e:
-        logger.error(f"Error in agent_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in agent_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in agent_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in agent_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -3652,9 +4023,15 @@ def agents_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in agents_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in agents_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in agents_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in agents_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -3692,9 +4069,15 @@ def agent_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Agent with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Agent updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in agent_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in agent_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in agent_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in agent_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -3713,9 +4096,15 @@ def agent_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Agent with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Agent deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in agent_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in agent_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in agent_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in agent_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### ROYALTY RECIPENTS MASTER ###################
 
@@ -3745,9 +4134,15 @@ def royalty_recipient_create(request):
             )
             new_id = cursor.fetchone()[0]
         return JsonResponse({'message': 'Royalty recipient created successfully', 'id': new_id}, status=201)
-    except Exception as e:
-        logger.error(f"Error in royalty_recipient_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in royalty_recipient_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in royalty_recipient_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in royalty_recipient_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -3838,9 +4233,15 @@ def royalty_recipients_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in royalty_recipients_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in royalty_recipients_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in royalty_recipients_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in royalty_recipients_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -3878,9 +4279,15 @@ def royalty_recipient_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Royalty recipient with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Royalty recipient updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in royalty_recipient_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in royalty_recipient_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in royalty_recipient_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in royalty_recipient_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -3899,9 +4306,15 @@ def royalty_recipient_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Royalty recipient with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Royalty recipient deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in royalty_recipient_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in royalty_recipient_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in royalty_recipient_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in royalty_recipient_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### PP BOOKS MASTER ###################
 
@@ -3944,9 +4357,15 @@ def pp_book_create(request):
             'inserted': inserted.isoformat() if inserted else None,
             'modified': modified.isoformat() if modified else None
         }, status=201)
-    except Exception as e:
-        logger.error(f"Error in pp_book_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in pp_book_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in pp_book_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in pp_book_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -4056,9 +4475,15 @@ def pp_books_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in pp_books_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in pp_books_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in pp_books_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in pp_books_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -4106,9 +4531,15 @@ def pp_book_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'PP book with id {id} not found'}, status=404)
         return JsonResponse({'message': 'PP book updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in pp_book_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in pp_book_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in pp_book_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in pp_book_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -4127,9 +4558,15 @@ def pp_book_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'PP book with id {id} not found'}, status=404)
         return JsonResponse({'message': 'PP book deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in pp_book_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in pp_book_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in pp_book_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in pp_book_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### PURCHASE BREASKUP MASTER ###################
 
@@ -4151,9 +4588,15 @@ def purchase_breakup_create(request):
             )
             new_id = cursor.fetchone()[0]
         return JsonResponse({'message': 'Purchase breakup created successfully', 'id': new_id}, status=201)
-    except Exception as e:
-        logger.error(f"Error in purchase_breakup_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in purchase_breakup_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in purchase_breakup_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in purchase_breakup_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -4238,9 +4681,15 @@ def purchase_breakups_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in purchase_breakups_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in purchase_breakups_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in purchase_breakups_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in purchase_breakups_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -4262,9 +4711,15 @@ def purchase_breakup_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Purchase breakup with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Purchase breakup updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in purchase_breakup_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in purchase_breakup_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in purchase_breakup_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in purchase_breakup_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -4283,9 +4738,15 @@ def purchase_breakup_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Purchase breakup with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Purchase breakup deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in purchase_breakup_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in purchase_breakup_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in purchase_breakup_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in purchase_breakup_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### PLACES MASTER ###################
 
@@ -4307,9 +4768,15 @@ def place_create(request):
             )
             new_id = cursor.fetchone()[0]
         return JsonResponse({'message': 'Place created successfully', 'id': new_id}, status=201)
-    except Exception as e:
-        logger.error(f"Error in place_create: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in place_create: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in place_create: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in place_create")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -4394,9 +4861,15 @@ def places_master_search(request):
             },
             json_dumps_params={'ensure_ascii': False}
         )
-    except Exception as e:
-        logger.error(f"Error in places_master_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in places_master_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in places_master_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in places_master_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -4418,9 +4891,15 @@ def place_update(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Place with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Place updated successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in place_update: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in place_update: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in place_update: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in place_update")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -4439,9 +4918,15 @@ def place_delete(request, id):
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'Place with id {id} not found'}, status=404)
         return JsonResponse({'message': 'Place deleted successfully'}, status=200)
-    except Exception as e:
-        logger.error(f"Error in place_delete: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in place_delete: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in place_delete: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in place_delete")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 ################### GOODS INWARD RETURN ###################
 
@@ -4469,9 +4954,15 @@ def supplier_search(request):
             logger.info(f"Supplier search returned {len(response)} results")
             return JsonResponse(response, safe=False)
 
-    except Exception as e:
-        logger.error(f"Error in supplier_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in supplier_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in supplier_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in supplier_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -4506,9 +4997,15 @@ def purchase_search(request):
             logger.info(f"Purchase search returned {len(response)} results")
             return JsonResponse(response, safe=False)
 
-    except Exception as e:
-        logger.error(f"Error in purchase_search: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in purchase_search: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in purchase_search: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in purchase_search")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -4517,7 +5014,7 @@ def get_purchase_items_by_id(request, purchase_id):
     """
     Retrieve purchase items by purchase ID for the popup.
     """
-    print("purchase_id=", purchase_id)
+
     try:
         logger.debug(f"Fetching purchase items for purchase_id: {purchase_id}")
         with connection.cursor() as cursor:
@@ -4566,13 +5063,19 @@ def get_purchase_items_by_id(request, purchase_id):
                 }
                 for row in items
             ]
-            print("response=", response)
+
             logger.info(f"Retrieved {len(response)} purchase items for purchase_id: {purchase_id}")
             return JsonResponse(response, safe=False)
 
-    except Exception as e:
-        logger.error(f"Error in get_purchase_items_by_id: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in get_purchase_items_by_id: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in get_purchase_items_by_id: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in get_purchase_items_by_id")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 
 # ---------- helpers ----------
@@ -4767,9 +5270,15 @@ def goods_inward(request):
             status=201,
         )
 
-    except Exception as e:
-        logger.error(f"Error in goods_inward: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in goods_inward: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in goods_inward: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in goods_inward")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 
@@ -4875,9 +5384,15 @@ def goods_inward_detail(request, id):
 
                 return JsonResponse(resp, status=200)
 
-        except Exception as e:
+        except KeyError as e:
+            logger.warning("Missing required field in request handler: %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in request handler: %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
             logger.error(f"Error in goods_inward_detail GET: {e}")
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     # ---------- PUT: update purchase_rt + replace items ----------
     elif request.method == 'PUT':
@@ -5046,9 +5561,15 @@ def goods_inward_detail(request, id):
                 status=200,
             )
 
-        except Exception as e:
+        except KeyError as e:
+            logger.warning("Missing required field in request handler: %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in request handler: %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
             logger.error(f"Error in goods_inward_detail PUT: {e}")
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     # ---------- fallback (should never hit with api_view) ----------
     return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -5090,8 +5611,14 @@ def sales_rt_customers(request):
                 )
             rows = cur.fetchall()
         return JsonResponse([{'id': r[0], 'customer_nm': r[1]} for r in rows], safe=False)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in request handler: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in request handler: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -5131,8 +5658,14 @@ def sales_rt_bills(request):
             [{'id': r[0], 'bill_no': r[1], 'sale_date': r[2].isoformat() if r[2] else None} for r in rows],
             safe=False,
         )
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in request handler: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in request handler: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -5194,8 +5727,14 @@ def sales_rt_bill_items(request, sale_id: int):
             for r in rows
         ]
         return JsonResponse(data, safe=False)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in request handler: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in request handler: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -5304,8 +5843,14 @@ def sales_rt_create(request):
                     )
 
         return JsonResponse({'id': parent_id, 'message': 'Sales return created successfully'}, status=201)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in request handler: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in request handler: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
@@ -5397,8 +5942,14 @@ def sales_rt_detail(request, id: int):
                 ],
             }
             return JsonResponse(data, safe=False)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+        except KeyError as e:
+            logger.warning("Missing required field in request handler: %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in request handler: %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     if request.method == 'PUT':
         data = request.data or {}
@@ -5521,8 +6072,14 @@ def sales_rt_detail(request, id: int):
                         )
 
             return JsonResponse({'id': int(id), 'message': 'Sales return updated successfully'}, status=200)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+        except KeyError as e:
+            logger.warning("Missing required field in request handler: %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in request handler: %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     if request.method == 'DELETE':
         try:
@@ -5533,8 +6090,14 @@ def sales_rt_detail(request, id: int):
                     if cur.rowcount == 0:
                         return JsonResponse({'error': 'Sales return not found'}, status=404)
             return JsonResponse({'message': 'Sales return deleted successfully'}, status=200)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+        except KeyError as e:
+            logger.warning("Missing required field in request handler: %s", e)
+            return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid data format in request handler: %s", e)
+            return JsonResponse({'error': 'Invalid data format.'}, status=400)
+        except Exception:
+            return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
     
@@ -5558,8 +6121,7 @@ def pp_receipts_iud(request):
                 reg_no = d.get('reg_no')
                 p_receipt_no = d.get('receipt_no')
                 p_r_type = d.get('r_type')
-                print('---------------------')
-                print(p_r_type)
+                logger.debug("pp_receipts_iud: r_type=%s", p_r_type)
 
                 p_pp_customer_book_id = d.get('pp_customer_book_id')
                 if p_r_type in (0, 1):
@@ -5646,22 +6208,23 @@ def pp_receipts_iud(request):
                     which,
                 ]
                 
-                # DEBUG: Print the full SQL query with parameters inserted (safely quoted)
-                full_sql = cur.mogrify(query, params).decode('utf-8')
-                print("=== DEBUG: Executing Procedure ===")
-                print(full_sql)
-                print("=== Parameters Raw ===")
-                for i, param in enumerate(params):
-                    print(f"Param {i+1}: {param} (type: {type(param)})")
-                print("=== END DEBUG ===\n")
+                if logger.isEnabledFor(logging.DEBUG):
+                    full_sql = cur.mogrify(query, params).decode('utf-8')
+                    logger.debug("Executing Procedure: %s", full_sql)
                 
                 cur.execute(query, params)
 
         return JsonResponse({'message': 'PP receipt processed successfully', 'which': which}, status=200)
 
-    except Exception as e:
-        print(f"=== ERROR in pp_receipts_iud: {str(e)} ===")  # Also print error for debug
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in pp_receipts_iud: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in pp_receipts_iud: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in pp_receipts_iud")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 
 @api_view(['GET'])
@@ -5762,8 +6325,14 @@ def pp_receipt_by_no(request):
 
         return JsonResponse(data, status=200)
 
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in request handler: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in request handler: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -5818,8 +6387,14 @@ def pp_installment_prefill(request):
             'pp_customer_id': row[9],
         }
         return JsonResponse(data, status=200)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in request handler: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in request handler: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -5838,9 +6413,15 @@ def sale_types_list(request):
         
         data = [{"sale_typeid": row[0], "sale_type": row[1] or ""} for row in rows]
         return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
-    except Exception as e:
-        logger.exception("Error in sale_types_list")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sale_types_list: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sale_types_list: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sale_types_list")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -5865,7 +6446,7 @@ def bill_wise_sale_register_report(request):
             branch_id_int = int(branch_id)
             sale_type_id_int = int(sale_type_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_sales_bill_wise() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -5919,9 +6500,15 @@ def bill_wise_sale_register_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in bill_wise_sale_register_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in bill_wise_sale_register_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in bill_wise_sale_register_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in bill_wise_sale_register_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -5947,7 +6534,7 @@ def date_wise_sale_register_report(request):
             branch_id_int = int(branch_id)
             sale_type_id_int = int(sale_type_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_sales_bill_wise() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6001,9 +6588,15 @@ def date_wise_sale_register_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in date_wise_sale_register_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in date_wise_sale_register_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in date_wise_sale_register_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in date_wise_sale_register_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6029,7 +6622,7 @@ def credit_customer_wise_sales_report(request):
             branch_id_int = int(branch_id)
             credit_customer_id_int = int(credit_customer_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_sales_credit_customer_wise() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6073,9 +6666,15 @@ def credit_customer_wise_sales_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in credit_customer_wise_sales_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in credit_customer_wise_sales_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in credit_customer_wise_sales_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in credit_customer_wise_sales_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6097,7 +6696,7 @@ def cial_sale_register_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_cial_sales_register() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6136,9 +6735,15 @@ def cial_sale_register_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in cial_sale_register_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in cial_sale_register_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in cial_sale_register_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in cial_sale_register_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6160,7 +6765,7 @@ def abc_sale_register_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_abc_sales_register() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6195,9 +6800,15 @@ def abc_sale_register_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in abc_sale_register_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in abc_sale_register_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in abc_sale_register_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in abc_sale_register_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6219,7 +6830,7 @@ def sales_agent_wise_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_sales_agent_wise() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6262,9 +6873,15 @@ def sales_agent_wise_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in sales_agent_wise_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sales_agent_wise_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sales_agent_wise_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sales_agent_wise_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6286,7 +6903,7 @@ def sale_and_stock_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_sale_stock() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6325,9 +6942,15 @@ def sale_and_stock_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in sale_and_stock_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sale_and_stock_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sale_and_stock_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sale_and_stock_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6346,7 +6969,7 @@ def daily_stock_statement_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         as_on_date_obj = parse_date(as_on_date)
         if not as_on_date_obj:
@@ -6437,9 +7060,15 @@ def daily_stock_statement_report(request):
                 'sold_items_with_more_less_value': len(report_data['sold_items_with_more_less_value']),
             }
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in daily_stock_statement_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in daily_stock_statement_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in daily_stock_statement_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in daily_stock_statement_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6461,7 +7090,7 @@ def daily_account_statement_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         from_date_obj = parse_date(date_from)
         to_date_obj = parse_date(date_to)
@@ -6711,9 +7340,15 @@ def daily_account_statement_report(request):
                 'incomes_and_expenses': len(incomes_and_expenses),
             }
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in daily_account_statement_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in daily_account_statement_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in daily_account_statement_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in daily_account_statement_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6735,7 +7370,7 @@ def category_wise_sales_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_category_wise_sales() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6778,9 +7413,15 @@ def category_wise_sales_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in category_wise_sales_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in category_wise_sales_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in category_wise_sales_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in category_wise_sales_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6802,7 +7443,7 @@ def type_wise_sale_register_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_sales_type_wise() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6843,9 +7484,15 @@ def type_wise_sale_register_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in type_wise_sale_register_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in type_wise_sale_register_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in type_wise_sale_register_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in type_wise_sale_register_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6867,7 +7514,7 @@ def sale_class_ratio_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_sales_class_ratio() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6902,9 +7549,15 @@ def sale_class_ratio_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in sale_class_ratio_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sale_class_ratio_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sale_class_ratio_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sale_class_ratio_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6926,7 +7579,7 @@ def publisher_author_wise_sales_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_publisher_author_wise_sales() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -6967,9 +7620,15 @@ def publisher_author_wise_sales_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in publisher_author_wise_sales_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in publisher_author_wise_sales_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in publisher_author_wise_sales_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in publisher_author_wise_sales_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -6991,7 +7650,7 @@ def sub_category_mode_product_wise_sales_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_sales_sub_category_mode_product_wise() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -7036,9 +7695,15 @@ def sub_category_mode_product_wise_sales_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in sub_category_mode_product_wise_sales_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in sub_category_mode_product_wise_sales_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in sub_category_mode_product_wise_sales_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in sub_category_mode_product_wise_sales_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -7060,7 +7725,7 @@ def author_publisher_sales_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_author_publisher_wise_sales() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -7101,9 +7766,15 @@ def author_publisher_sales_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in author_publisher_sales_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in author_publisher_sales_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in author_publisher_sales_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in author_publisher_sales_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -7125,7 +7796,7 @@ def category_publisher_author_wise_sales_report(request):
         try:
             branch_id_int = int(branch_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_category_publisher_author_wise_sales() that the jrxml uses
         # The jrxml expects p_company_id, using branch_id as company_id
@@ -7168,9 +7839,15 @@ def category_publisher_author_wise_sales_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in category_publisher_author_wise_sales_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in category_publisher_author_wise_sales_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in category_publisher_author_wise_sales_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in category_publisher_author_wise_sales_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 @api_view(['GET'])
@@ -7196,7 +7873,7 @@ def author_wise_title_sales_report(request):
             branch_id_int = int(branch_id)
             author_id_int = int(author_id)
         except (ValueError, TypeError) as e:
-            return JsonResponse({'error': f'Invalid parameter format: {str(e)}'}, status=400)
+            return JsonResponse({'error': 'Invalid parameter format.'}, status=400)
 
         # Query the database function get_author_wise_title_sales()
         with connection.cursor() as cursor:
@@ -7233,9 +7910,15 @@ def author_wise_title_sales_report(request):
             },
             'total_records': len(report_data)
         }, status=200)
-    except Exception as e:
-        logger.exception("Error in author_wise_title_sales_report")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in author_wise_title_sales_report: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in author_wise_title_sales_report: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in author_wise_title_sales_report")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 ################### REMITTANCE ENTRY ###################
@@ -7272,9 +7955,15 @@ def remittance_by_no(request):
         if not rows:
             return JsonResponse({"error": "Not found"}, status=404)
         return JsonResponse(rows[0])
-    except Exception as e:
-        logger.exception("Error in remittance_by_no")
-        return JsonResponse({"error": str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in remittance_by_no: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in remittance_by_no: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in remittance_by_no")
+        return JsonResponse({"error": "An unexpected error occurred."}, status=500)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -7393,9 +8082,15 @@ def remittance_save(request):
             "id": next_id,
             "remittance_no": next_remit_no,
         })
-    except Exception as e:
-        logger.exception("Error in remittance_save")
-        return JsonResponse({"error": str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in remittance_save: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in remittance_save: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in remittance_save")
+        return JsonResponse({"error": "An unexpected error occurred."}, status=500)
 
 ################### CR REALISATION ENTRY ###################
 
@@ -7427,9 +8122,15 @@ def cr_realisation_by_customer_id(request):
 
         data = [{"receipt_no": r[0], "entry_date": r[1], "bank": r[2], "chq_dd_no": r[3], "amount": r[4] or ""} for r in rows]
         return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
-    except Exception as e:
-        logger.exception("Error in finding customer details.")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in finding customer details.: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in finding customer details.: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in finding customer details.")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
     
 
 # SAVE
@@ -7485,9 +8186,15 @@ def cr_realisation_save(request):
             {'message': 'Credit realisation saved', 'receipt_no': receipt_no},
             status=200
         )
-    except Exception as e:
-        logger.exception("Error in cr_realisation_save")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in cr_realisation_save: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in cr_realisation_save: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in cr_realisation_save")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 # LOAD
 @api_view(['GET'])
@@ -7533,6 +8240,12 @@ def cr_realisation_by_no(request):
             'address': row[12],
         }
         return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
-    except Exception as e:
-        logger.exception("Error in cr_realisation_by_no")
-        return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as e:
+        logger.warning("Missing required field in cr_realisation_by_no: %s", e)
+        return JsonResponse({'error': f'Missing required field: {e}'}, status=400)
+    except (ValueError, TypeError) as e:
+        logger.warning("Invalid data format in cr_realisation_by_no: %s", e)
+        return JsonResponse({'error': 'Invalid data format.'}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in cr_realisation_by_no")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)

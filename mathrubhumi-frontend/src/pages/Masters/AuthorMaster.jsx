@@ -47,12 +47,10 @@ export default function AuthorMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -61,8 +59,6 @@ export default function AuthorMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating author: id=${id}, data=`, updatedItem);
-
     const payload = {
       id: id,
       author_nm: updatedItem.name || '',
@@ -73,12 +69,8 @@ export default function AuthorMaster() {
       telephone: updatedItem.phone || null,
       city: updatedItem.city || null
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/author-update/${id}/`, payload);
-      console.log('Author updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Author updated successfully!',
@@ -98,7 +90,6 @@ export default function AuthorMaster() {
 
   const handleAddAuthor = async () => {
     if (!formData.code || !formData.name) {
-      console.log('Validation failed: code or name is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Code and Name fields',
@@ -118,13 +109,8 @@ export default function AuthorMaster() {
       telephone: formData.phone || null,
       city: formData.city || null
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/author-create/', payload);
-      console.log('Author created:', response.data);
       setModal({
         isOpen: true,
         message: 'Author added successfully!',
@@ -174,7 +160,6 @@ export default function AuthorMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Authors fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -199,7 +184,6 @@ export default function AuthorMaster() {
       }));
       setItems(fetchedItems);
       setTotalCount(total);
-      console.log('Updated items state:', fetchedItems);
     } catch (error) {
       console.error('Error fetching authors:', error);
       setModal({

@@ -23,7 +23,7 @@ def health_check(request):
     except Exception as e:
         return JsonResponse({
             "status": "unhealthy",
-            "error": str(e)
+            "error": "Database connection failed."
         }, status=503)
 
 

@@ -136,7 +136,6 @@ export default function PPBooksMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('PP books fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -168,7 +167,6 @@ export default function PPBooksMaster() {
       }));
       setItems(fetchedItems);
       setTotalCount(total);
-      console.log('Updated items state:', fetchedItems);
     } catch (error) {
       console.error('Error fetching PP books:', error);
       setModal({
@@ -206,8 +204,6 @@ export default function PPBooksMaster() {
 
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
-
     if (name === 'ppBookName') {
       setFormData((prev) => ({ ...prev, ppBookName: value, productId: '0' }));
       const trimmed = value.trim();
@@ -218,7 +214,6 @@ export default function PPBooksMaster() {
       } else {
         try {
           const res = await api.get(`/auth/product-search/?q=${encodeURIComponent(trimmed)}`);
-          console.log('Title API response:', res.data);
           if (res.data && res.data.length > 0) {
             setTitleSuggestions(res.data);
             setShowTitleSuggestions(true);
@@ -248,7 +243,6 @@ export default function PPBooksMaster() {
       } else {
         try {
           const res = await api.get(`/auth/publisher-search/?q=${encodeURIComponent(trimmed)}`);
-          console.log('Publisher API response:', res.data);
           if (res.data && res.data.length > 0) {
             setPublisherSuggestions(res.data);
             setShowPublisherSuggestions(true);
@@ -272,7 +266,6 @@ export default function PPBooksMaster() {
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -281,8 +274,6 @@ export default function PPBooksMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating PP book: id=${id}, data=`, updatedItem);
-
     const payload = {
       company_id: 1,
       pp_book_nm: updatedItem.ppBookName || '',
@@ -298,12 +289,8 @@ export default function PPBooksMaster() {
       nos_ex: updatedItem.nosEx ? parseInt(updatedItem.nosEx) : 0,
       product_id: updatedItem.productId ? parseInt(updatedItem.productId) : 0
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/pp-book-update/${id}/`, payload);
-      console.log('PP book updated:', response.data);
       setModal({
         isOpen: true,
         message: 'PP book updated successfully!',
@@ -323,7 +310,6 @@ export default function PPBooksMaster() {
 
   const handleAddPPBook = async () => {
     if (!formData.ppBookName || !formData.code || !formData.closed || !formData.ppBookFirmId) {
-      console.log('Validation failed: required fields missing');
       setModal({
         isOpen: true,
         message: 'Please fill all required fields: PP Book Name, Code, Closed, PP Book Firm Id',
@@ -348,13 +334,8 @@ export default function PPBooksMaster() {
       nos_ex: formData.nosEx ? parseInt(formData.nosEx, 10) : 0,
       product_id: formData.productId ? parseInt(formData.productId, 10) : 0
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/pp-book-create/', payload);
-      console.log('PP book created:', response.data);
       setModal({
         isOpen: true,
         message: 'PP book added successfully!',
@@ -402,7 +383,6 @@ export default function PPBooksMaster() {
   };
 
   const handleDeletePPBook = (id) => {
-    console.log(`Prompting to delete PP book: id=${id}`);
     setDeletePPBookId(id);
     setModal({
       isOpen: true,
@@ -414,7 +394,6 @@ export default function PPBooksMaster() {
           onClick: async () => {
             try {
               const response = await api.delete(`/auth/pp-book-delete/${id}/`);
-              console.log('PP book deleted:', response.data);
               await fetchAllPPBooks({ page, pageSize });
               setModal({
                 isOpen: true,

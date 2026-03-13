@@ -67,12 +67,10 @@ export default function CreditCustomerMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -81,8 +79,6 @@ export default function CreditCustomerMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating credit customer: id=${id}, data=`, updatedItem);
-
     const payload = {
       id: id,
       customer_nm: updatedItem.name || '',
@@ -98,12 +94,8 @@ export default function CreditCustomerMaster() {
       gstin: updatedItem.gstin || null,
       class: parseInt(updatedItem.class) || 0
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/credit-customer-update/${id}/`, payload);
-      console.log('Credit customer updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Credit customer updated successfully!',
@@ -123,7 +115,6 @@ export default function CreditCustomerMaster() {
 
   const handleAddCreditCustomer = async () => {
     if (!formData.name) {
-      console.log('Validation failed: name is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Name field',
@@ -148,13 +139,8 @@ export default function CreditCustomerMaster() {
       gstin: formData.gstin || null,
       class: parseInt(formData.class) || 0
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/credit-customer-create/', payload);
-      console.log('Credit customer created:', response.data);
       setModal({
         isOpen: true,
         message: 'Credit customer added successfully!',
@@ -208,7 +194,6 @@ export default function CreditCustomerMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Credit customers fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -236,7 +221,6 @@ export default function CreditCustomerMaster() {
         class: item.class !== null && item.class !== undefined ? item.class.toString() : ''
       }));
       setItems(fetchedItems);
-      console.log('Updated items state:', fetchedItems);
       setTotalCount(total);
     } catch (error) {
       console.error('Error fetching credit customers:', error);

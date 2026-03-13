@@ -47,12 +47,10 @@ export default function PurchaseBreakupsMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -61,17 +59,11 @@ export default function PurchaseBreakupsMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating purchase breakup: id=${id}, data=`, updatedItem);
-
     const payload = {
       breakup_nm: updatedItem.breakupName || ''
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/purchase-breakup-update/${id}/`, payload);
-      console.log('Purchase breakup updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Purchase breakup updated successfully!',
@@ -91,7 +83,6 @@ export default function PurchaseBreakupsMaster() {
 
   const handleAddPurchaseBreakup = async () => {
     if (!formData.breakupName) {
-      console.log('Validation failed: breakupName is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Breakup Name field',
@@ -104,13 +95,8 @@ export default function PurchaseBreakupsMaster() {
     const payload = {
       breakup_nm: formData.breakupName
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/purchase-breakup-create/', payload);
-      console.log('Purchase breakup created:', response.data);
       setModal({
         isOpen: true,
         message: 'Purchase breakup added successfully!',
@@ -138,7 +124,6 @@ export default function PurchaseBreakupsMaster() {
   };
 
   const handleDeletePurchaseBreakup = (id) => {
-    console.log(`Prompting to delete purchase breakup: id=${id}`);
     setDeleteBreakupId(id);
     setModal({
       isOpen: true,
@@ -150,7 +135,6 @@ export default function PurchaseBreakupsMaster() {
           onClick: async () => {
             try {
               const response = await api.delete(`/auth/purchase-breakup-delete/${id}/`);
-              console.log('Purchase breakup deleted:', response.data);
               await fetchAllPurchaseBreakups({ page, pageSize });
               setModal({
                 isOpen: true,
@@ -198,7 +182,6 @@ export default function PurchaseBreakupsMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Purchase breakups fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -215,7 +198,6 @@ export default function PurchaseBreakupsMaster() {
         breakupName: item.breakup_nm || ''
       }));
       setItems(fetchedItems);
-      console.log('Updated items state:', fetchedItems);
       setTotalCount(total);
     } catch (error) {
       console.error('Error fetching purchase breakups:', error);

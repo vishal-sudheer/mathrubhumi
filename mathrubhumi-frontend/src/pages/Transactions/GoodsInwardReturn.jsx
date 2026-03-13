@@ -251,7 +251,7 @@ export default function GoodsInwardReturnPage() {
         return;
       }
       try {
-        const res = await api.get(`/auth/suppliers/search/?q=${encodeURIComponent(value)}`);
+        const res = await api.get(`/auth/supplier-search/?q=${encodeURIComponent(value)}`);
         const data = Array.isArray(res.data) ? res.data : [];
         setSupplierSuggestions(data);
         setShowSupplierSuggestions(data.length > 0);

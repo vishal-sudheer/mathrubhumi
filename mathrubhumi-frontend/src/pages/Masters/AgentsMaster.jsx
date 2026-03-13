@@ -46,12 +46,10 @@ export default function AgentsMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -60,8 +58,6 @@ export default function AgentsMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating agent: id=${id}, data=`, updatedItem);
-
     const payload = {
       agent_nm: updatedItem.agentName || '',
       address1: updatedItem.address1 || null,
@@ -71,12 +67,8 @@ export default function AgentsMaster() {
       contact: updatedItem.contact || null,
       email: updatedItem.email || null
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/agent-update/${id}/`, payload);
-      console.log('Agent updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Agent updated successfully!',
@@ -96,7 +88,6 @@ export default function AgentsMaster() {
 
   const handleAddAgent = async () => {
     if (!formData.agentName) {
-      console.log('Validation failed: agentName is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Agent Name field',
@@ -115,13 +106,8 @@ export default function AgentsMaster() {
       contact: formData.contact || null,
       email: formData.email || null
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/agent-create/', payload);
-      console.log('Agent created:', response.data);
       setModal({
         isOpen: true,
         message: 'Agent added successfully!',
@@ -155,7 +141,6 @@ export default function AgentsMaster() {
   };
 
   const handleDeleteAgent = (id) => {
-    console.log(`Prompting to delete agent: id=${id}`);
     setDeleteAgentId(id);
     setModal({
       isOpen: true,
@@ -167,7 +152,6 @@ export default function AgentsMaster() {
           onClick: async () => {
             try {
               const response = await api.delete(`/auth/agent-delete/${id}/`);
-              console.log('Agent deleted:', response.data);
               await fetchAllAgents({ page, pageSize });
               setModal({
                 isOpen: true,
@@ -215,7 +199,6 @@ export default function AgentsMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Agents fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -238,7 +221,6 @@ export default function AgentsMaster() {
         email: item.email || ''
       }));
       setItems(fetchedItems);
-      console.log('Updated items state:', fetchedItems);
       setTotalCount(total);
     } catch (error) {
       console.error('Error fetching agents:', error);

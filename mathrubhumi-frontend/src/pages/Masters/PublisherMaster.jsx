@@ -48,12 +48,10 @@ export default function PublisherMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -62,8 +60,6 @@ export default function PublisherMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating publisher: id=${id}, data=`, updatedItem);
-
     const payload = {
       id: id,
       publisher_nm: updatedItem.name || '',
@@ -76,12 +72,8 @@ export default function PublisherMaster() {
       city: updatedItem.city || null,
       max_discount_p: parseFloat(updatedItem.discount) || 0.00
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/publisher-update/${id}/`, payload);
-      console.log('Publisher updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Publisher updated successfully!',
@@ -101,7 +93,6 @@ export default function PublisherMaster() {
 
   const handleAddPublisher = async () => {
     if (!formData.code || !formData.name) {
-      console.log('Validation failed: code or name is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Code and Name fields',
@@ -123,13 +114,8 @@ export default function PublisherMaster() {
       city: formData.city || null,
       max_discount_p: parseFloat(formData.discount) || 0.00
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/publisher-create/', payload);
-      console.log('Publisher created:', response.data);
       const newItem = {
         id: parseInt(formData.code),
         code: formData.code,
@@ -143,9 +129,7 @@ export default function PublisherMaster() {
         city: formData.city,
         discount: formData.discount
       };
-      console.log('Adding publisher:', newItem);
       setItems((prev) => [...prev, newItem]);
-      console.log('Current items state:', [...items, newItem]);
       setModal({
         isOpen: true,
         message: 'Publisher added successfully!',
@@ -197,8 +181,6 @@ export default function PublisherMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Publishers fetched:', response.data);
-
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -228,7 +210,6 @@ export default function PublisherMaster() {
       });
       setItems(fetchedItems);
       setTotalCount(total);
-      console.log('Updated items state:', fetchedItems);
     } catch (error) {
       console.error('Error fetching publishers:', error);
       setModal({

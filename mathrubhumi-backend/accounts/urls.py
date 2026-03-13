@@ -54,6 +54,7 @@ urlpatterns = [
     path('supplier-create/', views.supplier_create, name='supplier_create'),
     path('supplier-master-search/', views.supplier_master_search, name='supplier_master_search'),
     path('supplier-update/<int:id>/', views.supplier_update, name='supplier_update'),
+    path('supplier-delete/<int:id>/', views.supplier_delete, name='supplier_delete'),
     path('credit-customer-create/', views.credit_customer_create, name='credit_customer_create'),
     path('credit-customer-master-search/', views.credit_customer_master_search, name='credit_customer_master_search'),
     path('credit-customer-update/<int:id>/', views.credit_customer_update, name='credit_customer_update'),
@@ -104,7 +105,6 @@ urlpatterns = [
     path('place-update/<int:id>/', views.place_update, name='place_update'),
     path('place-delete/<int:id>/', views.place_delete, name='place_delete'),
     # Goods Inward Return routes
-    path('suppliers/search/', views.supplier_search, name='supplier_search'),
     path('purchase/search/', views.purchase_search, name='purchase_search'),
     path('purchase/<int:purchase_id>/items/', views.get_purchase_items_by_id, name='get_purchase_items_by_id'),
     path('goods-inward/', views.goods_inward, name='goods_inward'),

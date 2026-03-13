@@ -878,8 +878,6 @@ export default function SaleBillPage() {
           purchaseItemId: parseInt(String(item.purchaseItemId || 0)),
         })),
       };
-      console.log('Payload:', JSON.stringify(payload, null, 2));
-
       if (isEditMode && saleId) {
         await api.put(`/auth/sales/${saleId}/`, payload);
         showModal('Sale updated successfully', 'success');

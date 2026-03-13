@@ -76,12 +76,10 @@ export default function SupplierMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -90,8 +88,6 @@ export default function SupplierMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating supplier: id=${id}, data=`, updatedItem);
-
     const payload = {
       id: id,
       supplier_nm: updatedItem.name || '',
@@ -104,12 +100,8 @@ export default function SupplierMaster() {
       credit: parseFloat(updatedItem.credit) || 0.00,
       gstin: updatedItem.gstin || null
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/supplier-update/${id}/`, payload);
-      console.log('Supplier updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Supplier updated successfully!',
@@ -129,7 +121,6 @@ export default function SupplierMaster() {
 
   const handleAddSupplier = async () => {
     if (!formData.name) {
-      console.log('Validation failed: name is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Name field',
@@ -151,13 +142,8 @@ export default function SupplierMaster() {
       credit: parseFloat(formData.credit) || 0.00,
       gstin: formData.gstin || null
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/supplier-create/', payload);
-      console.log('Supplier created:', response.data);
       setModal({
         isOpen: true,
         message: 'Supplier added successfully!',
@@ -208,7 +194,6 @@ export default function SupplierMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Suppliers fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -234,7 +219,6 @@ export default function SupplierMaster() {
       }));
       setItems(fetchedItems);
       setTotalCount(total);
-      console.log('Updated items state:', fetchedItems);
     } catch (error) {
       console.error('Error fetching suppliers:', error);
       setModal({
@@ -249,7 +233,6 @@ export default function SupplierMaster() {
   };
 
   const handleDeleteSupplier = (id) => {
-    console.log(`Deleting supplier: id=${id}`);
     setItems((prev) => prev.filter((item) => item.id !== id));
     setTotalCount((prev) => Math.max(0, prev - 1));
   };

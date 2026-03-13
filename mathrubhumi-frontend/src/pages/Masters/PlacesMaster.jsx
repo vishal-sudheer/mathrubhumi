@@ -40,12 +40,10 @@ export default function PlacesMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -54,17 +52,11 @@ export default function PlacesMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating place: id=${id}, data=`, updatedItem);
-
     const payload = {
       place_nm: updatedItem.placeName || ''
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/place-update/${id}/`, payload);
-      console.log('Place updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Place updated successfully!',
@@ -84,7 +76,6 @@ export default function PlacesMaster() {
 
   const handleAddPlace = async () => {
     if (!formData.placeName) {
-      console.log('Validation failed: placeName is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Place Name field',
@@ -97,13 +88,8 @@ export default function PlacesMaster() {
     const payload = {
       place_nm: formData.placeName
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/place-create/', payload);
-      console.log('Place created:', response.data);
       setModal({
         isOpen: true,
         message: 'Place added successfully!',
@@ -131,7 +117,6 @@ export default function PlacesMaster() {
   };
 
   const handleDeletePlace = (id) => {
-    console.log(`Prompting to delete place: id=${id}`);
     setDeletePlaceId(id);
     setModal({
       isOpen: true,
@@ -143,7 +128,6 @@ export default function PlacesMaster() {
           onClick: async () => {
             try {
               const response = await api.delete(`/auth/place-delete/${id}/`);
-              console.log('Place deleted:', response.data);
               await fetchAllPlaces({ page, pageSize });
               setModal({
                 isOpen: true,
@@ -191,7 +175,6 @@ export default function PlacesMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Places fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -209,7 +192,6 @@ export default function PlacesMaster() {
       }));
       setItems(fetchedItems);
       setTotalCount(total);
-      console.log('Updated items state:', fetchedItems);
     } catch (error) {
       console.error('Error fetching places:', error);
       setModal({

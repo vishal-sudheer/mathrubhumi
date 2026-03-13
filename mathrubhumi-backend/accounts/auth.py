@@ -92,7 +92,7 @@ def branches_list(request):
         return Response([{"id": r[0], "branches_nm": r[1] or ""} for r in rows])
     except Exception as e:
         logger.exception("Error in branches_list")
-        return Response({"error": str(e)}, status=400)
+        return Response({"error": "An unexpected error occurred."}, status=500)
 
 
 @api_view(["GET"])

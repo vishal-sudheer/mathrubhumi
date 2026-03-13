@@ -40,12 +40,10 @@ export default function SubCategoriesMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -54,17 +52,11 @@ export default function SubCategoriesMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating sub-category: id=${id}, data=`, updatedItem);
-
     const payload = {
       sub_category_nm: updatedItem.subCategoryName || ''
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/sub-category-update/${id}/`, payload);
-      console.log('Sub-category updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Sub-category updated successfully!',
@@ -84,7 +76,6 @@ export default function SubCategoriesMaster() {
 
   const handleAddSubCategory = async () => {
     if (!formData.subCategoryName) {
-      console.log('Validation failed: subCategoryName is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Sub Category Name field',
@@ -97,13 +88,8 @@ export default function SubCategoriesMaster() {
     const payload = {
       sub_category_nm: formData.subCategoryName
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/sub-category-create/', payload);
-      console.log('Sub-category created:', response.data);
       setModal({
         isOpen: true,
         message: 'Sub-category added successfully!',
@@ -131,7 +117,6 @@ export default function SubCategoriesMaster() {
   };
 
   const handleDeleteSubCategory = (id) => {
-    console.log(`Prompting to delete sub-category: id=${id}`);
     setDeleteSubCategoryId(id);
     setModal({
       isOpen: true,
@@ -143,7 +128,6 @@ export default function SubCategoriesMaster() {
           onClick: async () => {
             try {
               const response = await api.delete(`/auth/sub-category-delete/${id}/`);
-              console.log('Sub-category deleted:', response.data);
               await fetchAllSubCategories({ page, pageSize });
               setModal({
                 isOpen: true,
@@ -191,7 +175,6 @@ export default function SubCategoriesMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Sub-categories fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -208,7 +191,6 @@ export default function SubCategoriesMaster() {
         subCategoryName: item.sub_category_nm || ''
       }));
       setItems(fetchedItems);
-      console.log('Updated items state:', fetchedItems);
       setTotalCount(total);
     } catch (error) {
       console.error('Error fetching sub-categories:', error);

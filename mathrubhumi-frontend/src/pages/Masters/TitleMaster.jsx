@@ -139,7 +139,6 @@ export default function TitleMaster() {
   /* ---------------- TOP FORM handlers ---------------- */
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => {
       const next = { ...prev, [name]: value };
       if (suggestableFields.includes(name)) {
@@ -158,7 +157,6 @@ export default function TitleMaster() {
         try {
           const endpoint = endpointFor(name);
           const response = await api.get(`${endpoint}?q=${encodeURIComponent(trimmed)}`);
-          console.log(`Suggestions for ${name}:`, response.data);
           if (response.data && response.data.length > 0) {
             setSuggestions((prev) => ({ ...prev, [name]: response.data }));
             setShowSuggestions((prev) => ({ ...prev, [name]: true }));
@@ -190,8 +188,6 @@ export default function TitleMaster() {
     else if (field === 'category') value = suggestion.category_nm;
     else if (field === 'subCategory') value = suggestion.sub_category_nm;
     else value = suggestion.author_nm;
-
-    console.log(`Suggestion selected for ${field}:`, value);
     setFormData((prev) => ({ ...prev, [field]: value, [idFieldFor(field)]: suggestion.id }));
     setSuggestions((prev) => ({ ...prev, [field]: [] }));
     setShowSuggestions((prev) => ({ ...prev, [field]: false }));
@@ -229,7 +225,6 @@ export default function TitleMaster() {
 
   /* ---------------- TABLE handlers ---------------- */
   const handleTableInputChange = async (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) => {
         if (item.id !== id) return item;
@@ -328,7 +323,6 @@ export default function TitleMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem, changedField = null) => {
-    console.log(`Updating item: id=${id}, data=`, updatedItem);
     const currentRow = items.find((item) => item.id === id);
     const saved = currentRow?.saved || updatedItem.saved || {};
     const revertRow = () => {
@@ -473,12 +467,8 @@ export default function TitleMaster() {
       sap_code: updatedItem.sapCode || null,
       location_id
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/title-update/${id}/`, payload);
-      console.log('Title updated:', response.data);
       const nextRowBase = currentRow || updatedItem;
       const nextRow = {
         ...nextRowBase,
@@ -542,7 +532,6 @@ export default function TitleMaster() {
 
   const handleAddItem = async () => {
     if (!formData.code || !formData.title) {
-      console.log('Validation failed: code or title is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Code and Title fields',
@@ -624,13 +613,8 @@ export default function TitleMaster() {
       sap_code: formData.sapCode || null,
       location_id
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/title-create/', payload);
-      console.log('Title created:', response.data);
       setModal({
         isOpen: true,
         message: 'Title added successfully!',
@@ -696,7 +680,6 @@ export default function TitleMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Titles fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -744,7 +727,6 @@ export default function TitleMaster() {
       });
       setItems(fetchedItems);
       setTotalCount(total);
-      console.log('Updated items state:', fetchedItems);
     } catch (error) {
       console.error('Error fetching titles:', error);
       setModal({
@@ -759,7 +741,6 @@ export default function TitleMaster() {
   };
 
   const handleDeleteItem = (id) => {
-    console.log(`Deleting item: id=${id}`);
     setDeleteTitleId(id);
     setModal({
       isOpen: true,

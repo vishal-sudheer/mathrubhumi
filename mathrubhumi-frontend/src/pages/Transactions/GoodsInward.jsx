@@ -151,7 +151,6 @@ export default function GoodsInwardPage() {
     try {
       let decoded = str.replace(/\\u([0-9A-Fa-f]{4})/g, (_, code) => String.fromCharCode(parseInt(code, 16)));
       decoded = decodeURIComponent(decoded.replace(/%([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16))));
-      console.log('Decoded title_m:', { input: str, output: decoded });
       return decoded;
     } catch (e) {
       console.error('Decode error:', { error: e.message, input: str });
@@ -177,7 +176,6 @@ export default function GoodsInwardPage() {
     const fetchCurrencies = async () => {
       try {
         const response = await api.get('/auth/currencies/');
-        console.log('Currencies API response:', response.data);
         if (Array.isArray(response.data) && response.data.length > 0 && response.data.every(cur => cur.id !== undefined && cur.name)) {
           setCurrencies(response.data);
           const defaultCurrency = response.data.find(cur => cur.name === 'Indian Rupees') || response.data[0] || { id: 0, name: 'Indian Rupees' };
@@ -262,8 +260,6 @@ export default function GoodsInwardPage() {
       const newIsDotPrefixed = trimmed.startsWith('.');
       setIsDotPrefixed(newIsDotPrefixed);
       setIsMalayalam(newIsDotPrefixed);
-      console.log('Input change (itemName):', { value: trimmed, isDotPrefixed: newIsDotPrefixed, isMalayalam: newIsDotPrefixed });
-
       if (trimmed.length === 0 || (newIsDotPrefixed && trimmed.length === 1)) {
         setSuggestions([]);
         setShowSuggestions(false);
@@ -273,14 +269,12 @@ export default function GoodsInwardPage() {
       } else {
         try {
           const res = await api.get(`/auth/product-search/?q=${encodeURIComponent(trimmed)}`);
-          console.log('API response:', res.data);
           if (res.data && res.data.length > 0) {
             const decodedSuggestions = res.data.map(suggestion => ({
               ...suggestion,
               title_m: decodeUnicode(suggestion.title_m),
               raw_title_m: suggestion.raw_title_m
             }));
-            console.log('Suggestions:', decodedSuggestions);
             setSuggestions(decodedSuggestions);
             setShowSuggestions(true);
             setHighlightedIndex(-1);
@@ -387,7 +381,6 @@ export default function GoodsInwardPage() {
 
     if (name === 'supplier_nm') {
       const trimmed = value.trim();
-      console.log('Input change (supplier_nm):', { value: trimmed });
       if (trimmed.length === 0) {
         setSupplierSuggestions([]);
         setShowSupplierSuggestions(false);
@@ -395,7 +388,6 @@ export default function GoodsInwardPage() {
       } else {
         try {
           const res = await api.get(`/auth/supplier-search/?q=${encodeURIComponent(trimmed)}`);
-          console.log('Supplier API response:', res.data);
           if (res.data && res.data.length > 0) {
             setSupplierSuggestions(res.data);
             setShowSupplierSuggestions(true);
@@ -414,7 +406,6 @@ export default function GoodsInwardPage() {
       }
     } else if (name === 'branches_nm') {
       const trimmed = value.trim();
-      console.log('Input change (branches_nm):', { value: trimmed });
       if (trimmed.length === 0) {
         setBranchesSuggestions([]);
         setShowBranchesSuggestions(false);
@@ -422,7 +413,6 @@ export default function GoodsInwardPage() {
       } else {
         try {
           const res = await api.get(`/auth/branches-search/?q=${encodeURIComponent(trimmed)}`);
-          console.log('Branches API response:', res.data);
           if (res.data && res.data.length > 0) {
             setBranchesSuggestions(res.data);
             setShowBranchesSuggestions(true);
@@ -451,7 +441,6 @@ export default function GoodsInwardPage() {
       } else {
         try {
           const res = await api.get(`/auth/breakup-search/?q=${encodeURIComponent(trimmed)}`);
-          console.log('Breakup API response:', res.data);
           if (res.data && res.data.length > 0) {
             setBreakupSuggestions(res.data);
             setShowBreakupSuggestions(true);
@@ -640,7 +629,6 @@ export default function GoodsInwardPage() {
   const handleItemSuggestionClick = (suggestion) => {
     const selectedTitle = isDotPrefixed ? suggestion.title_m : (suggestion.language === 1 ? suggestion.title_m : suggestion.title);
     const isMalayalamTitle = isDotPrefixed || suggestion.language === 1;
-    console.log('Suggestion selected:', { selectedTitle, isMalayalam: isMalayalamTitle, raw_title_m: suggestion.raw_title_m, language: suggestion.language });
     setFormData((prev) => ({
       ...prev,
       itemName: selectedTitle,
@@ -659,7 +647,6 @@ export default function GoodsInwardPage() {
   };
 
   const handleSupplierSuggestionClick = (suggestion) => {
-    console.log('Supplier suggestion selected:', { supplier_nm: suggestion.supplier_nm, supplier_id: suggestion.id });
     setInwardMaster((prev) => ({
       ...prev,
       supplier_nm: suggestion.supplier_nm,
@@ -673,7 +660,6 @@ export default function GoodsInwardPage() {
 
 
   const handleBranchesSuggestionClick = (suggestion) => {
-    console.log('Branches suggestion selected:', { branches_nm: suggestion.branches_nm });
     setInwardMaster((prev) => ({
       ...prev,
       branches_nm: suggestion.branches_nm,
@@ -685,7 +671,6 @@ export default function GoodsInwardPage() {
   };
 
   const handleBreakupSuggestionClick = (suggestion, breakupNo) => {
-    console.log('Breakup suggestion selected:', { breakup_nm: suggestion.breakup_nm }, breakupNo);
     setInwardMaster((prev) => ({
       ...prev,
       [`breakup_nm${breakupNo}`]: suggestion.breakup_nm,
@@ -785,7 +770,6 @@ export default function GoodsInwardPage() {
         currencyIndex: resolveCurrencyId('Indian Rupees')
       });
       setIsMalayalam(false);
-      console.log('Item added:', { itemName, isMalayalam: false });
     } catch (error) {
       showModal('Invalid item data', 'error');
     }
@@ -902,8 +886,6 @@ export default function GoodsInwardPage() {
           currencyIndex: parseInt(item.currencyIndex)
         }))
       };
-      console.log('Payload:', JSON.stringify(payload, null, 2));
-
       if (isEditMode && goodsInwardId) {
         await api.put(`/auth/goods_inward/${goodsInwardId}/`, payload);
         showModal('Goods Inward updated successfully', 'success');
@@ -935,8 +917,6 @@ export default function GoodsInwardPage() {
     try {
       const response = await api.get(`/auth/goods_inward/${parsedId}/`);
       const data = response.data;
-      console.log('Loaded Goods Inward:', data);
-
       setInwardMaster({
         srl_no: data.purchase_no || '',
         id: data.purchase_id || '',

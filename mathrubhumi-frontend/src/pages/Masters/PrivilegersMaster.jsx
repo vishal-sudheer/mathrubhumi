@@ -51,12 +51,10 @@ export default function PrivilegersMaster() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTableInputChange = (id, field, value) => {
-    console.log(`Table input changed: id=${id}, field=${field}, value=${value}`);
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [field]: value } : item
@@ -65,8 +63,6 @@ export default function PrivilegersMaster() {
   };
 
   const handleTableUpdate = async (id, updatedItem) => {
-    console.log(`Updating privileger: id=${id}, data=`, updatedItem);
-
     const payload = {
       privileger_nm: updatedItem.privilegerName || '',
       address1: updatedItem.address1 || null,
@@ -76,12 +72,8 @@ export default function PrivilegersMaster() {
       contact: updatedItem.contact || null,
       email: updatedItem.email || null
     };
-
-    console.log('Update payload:', payload);
-
     try {
       const response = await api.put(`/auth/privileger-update/${id}/`, payload);
-      console.log('Privileger updated:', response.data);
       setModal({
         isOpen: true,
         message: 'Privileger updated successfully!',
@@ -101,7 +93,6 @@ export default function PrivilegersMaster() {
 
   const handleAddPrivileger = async () => {
     if (!formData.privilegerName) {
-      console.log('Validation failed: privilegerName is empty');
       setModal({
         isOpen: true,
         message: 'Please fill Privileger Name field',
@@ -120,13 +111,8 @@ export default function PrivilegersMaster() {
       contact: formData.contact || null,
       email: formData.email || null
     };
-
-    console.log('Form data on submit:', formData);
-    console.log('Payload for API:', payload);
-
     try {
       const response = await api.post('/auth/privileger-create/', payload);
-      console.log('Privileger created:', response.data);
       setModal({
         isOpen: true,
         message: 'Privileger added successfully!',
@@ -160,7 +146,6 @@ export default function PrivilegersMaster() {
   };
 
   const handleDeletePrivileger = (id) => {
-    console.log(`Prompting to delete privileger: id=${id}`);
     setModal({
       isOpen: true,
       message: 'Are you sure you want to delete this privileger?',
@@ -171,7 +156,6 @@ export default function PrivilegersMaster() {
           onClick: async () => {
             try {
               const response = await api.delete(`/auth/privileger-delete/${id}/`);
-              console.log('Privileger deleted:', response.data);
               await fetchAllPrivilegers({ page, pageSize });
               setModal({
                 isOpen: true,
@@ -217,7 +201,6 @@ export default function PrivilegersMaster() {
           ...(trimmedQuery.length >= 2 ? { q: trimmedQuery } : {})
         }
       });
-      console.log('Privilegers fetched:', response.data);
       const payload = response.data || {};
       const results = Array.isArray(payload) ? payload : (payload.results || []);
       const total = Array.isArray(payload) ? results.length : (payload.total ?? results.length);
@@ -240,7 +223,6 @@ export default function PrivilegersMaster() {
         email: item.email || ''
       }));
       setItems(fetchedItems);
-      console.log('Updated items state:', fetchedItems);
       setTotalCount(total);
     } catch (error) {
       console.error('Error fetching privilegers:', error);
