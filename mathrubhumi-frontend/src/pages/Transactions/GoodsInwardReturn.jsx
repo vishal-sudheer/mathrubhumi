@@ -21,6 +21,7 @@ const computeValue = (qty, rate, ex, disP) => {
   const dp = num(disP);
   return q * r * x * (1 - dp / 100);
 };
+const today = new Date().toISOString().split("T")[0];
 
 export default function GoodsInwardReturnPage() {
   const currentCompanyId = Number(getSession().branch?.id || 0);
@@ -81,7 +82,7 @@ export default function GoodsInwardReturnPage() {
 
   const [inwardMaster, setInwardMaster] = useState({
     srl_no: '',
-    entry_date: '',
+    entry_date: today,
     supplier_nm: '',
     supplier_id: '',
     bill_no: '',
@@ -719,7 +720,7 @@ export default function GoodsInwardReturnPage() {
   const resetForm = () => {
     setInwardMaster({
       srl_no: '',
-      entry_date: '',
+      entry_date: today,
       supplier_nm: '',
       supplier_id: '',
       bill_no: '',

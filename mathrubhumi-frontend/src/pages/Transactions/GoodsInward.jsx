@@ -60,6 +60,8 @@ export default function GoodsInwardPage() {
   const [showMeTitleSugs, setShowMeTitleSugs] = useState(false);
   const [meTitleHi, setMeTitleHi] = useState(-1);
 
+  const today = new Date().toISOString().split("T")[0];
+
   const [formData, setFormData] = useState({
     itemName: '',
     isbn: '',
@@ -97,7 +99,7 @@ export default function GoodsInwardPage() {
   const [inwardMaster, setInwardMaster] = useState({
     srl_no: '',
     id: '',
-    entry_date: '',
+    entry_date: today,
     bill_no: '',
     bill_date: '',
     reference: '',
@@ -1007,7 +1009,7 @@ export default function GoodsInwardPage() {
     setInwardMaster({
       srl_no: '',
       id: '',
-      entry_date: '',
+      entry_date: today,
       bill_no: '',
       bill_date: '',
       reference: '',

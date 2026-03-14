@@ -17,6 +17,17 @@ from .permissions import is_admin_user
 
 logger = logging.getLogger(__name__)
 
+sale_bill_type_mapping = {
+    'Credit Sale': 'CREDIT_SALE',
+    'Cash Sale': 'CASH_SALE',
+    'P P Sale': 'PP_SALE',
+    'Stock Transfer': 'ST_SALE',
+    'Approval': 'APPROVAL_SALE',
+    'Gift Voucher': 'GIFT_V_SALE',
+    'Gift Bill': 'GIFT_B_SALE',
+    'Cash Memo': 'CASH_SALE',
+}
+
 sale_type_mapping = {
     0: "Credit Sale",
     1: "Cash Sale",
@@ -485,8 +496,10 @@ def create_sale(request):
                         item['allocatedBillDiscount'] = (item['value'] / total_value) * bill_discount_amount
 
             with transaction.atomic():
-                bill_no = get_next_value(branch_id, '2526', 'CREDIT_SALE')
+                sale_type = sale_bill_type_mapping.get(data['type'], 'CREDIT_SALE')
+                bill_no = get_next_value(branch_id, '2526', sale_type)
                 bill_no = '2025-26/' + f"{bill_no:05d}"
+
                 user_id = int(getattr(request.user, 'id', 0) or 0)
                 with connection.cursor() as cursor:
                     cursor.execute(

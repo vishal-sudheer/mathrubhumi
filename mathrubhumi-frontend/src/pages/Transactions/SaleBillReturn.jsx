@@ -10,7 +10,7 @@ const asNum = (v, d = 0) => {
   return Number.isFinite(n) ? n : d;
 };
 const money = (v) => asNum(v).toFixed(2);
-const today = () => new Date().toISOString().split('T')[0];
+const today = new Date().toISOString().split("T")[0];
 
 /* Value = Qty * Rate * ExRt * (1 + Tax%/100) - DiscountAmount */
 const computeValue = (qty, rate, exrt, tax, discA) => {
@@ -47,7 +47,7 @@ export default function SaleBillReturn() {
   /* ---------- header / master ---------- */
   const [header, setHeader] = useState({
     no: '',
-    date: '',
+    date: today,
     type: '',
     pay: '',
     customer: '',
@@ -432,7 +432,7 @@ export default function SaleBillReturn() {
   const resetForm = () => {
     setHeader({
       no: '',
-      date: '',
+      date: today,
       type: '',
       pay: '',
       customer: '',
@@ -509,7 +509,7 @@ export default function SaleBillReturn() {
               className={inputClasses}
             >
               <option value="" disabled hidden>Pay</option>
-              {['Cash', 'Money Order', 'Cheque', 'Demand Draft', 'Cr/Dr Card', 'Digital Payment'].map((opt) => (
+              {['Cash', 'Card', 'UPI', 'N.A.'].map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
