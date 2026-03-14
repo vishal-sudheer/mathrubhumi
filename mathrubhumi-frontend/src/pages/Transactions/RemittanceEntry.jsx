@@ -197,6 +197,13 @@ export default function RemittanceEntry() {
     setForm((p) => ({ ...p, [name]: value }));
   };
 
+  const handleRemittanceDateFocus = (e) => {
+    e.target.type = "date";
+    setForm((prev) => (
+      prev.date ? prev : { ...prev, date: today() }
+    ));
+  };
+
   const closeAfterBlur = (closer) => () => setTimeout(closer, 120);
 
   const handleCustomerChange = (e) => {
@@ -383,7 +390,7 @@ export default function RemittanceEntry() {
           />
           <input
             type={form.date ? "date" : "text"}
-            onFocus={(e) => (e.target.type = "date")}
+            onFocus={handleRemittanceDateFocus}
             onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
             name="date"
             value={form.date}

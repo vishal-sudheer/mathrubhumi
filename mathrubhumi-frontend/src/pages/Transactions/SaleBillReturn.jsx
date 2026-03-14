@@ -76,6 +76,13 @@ export default function SaleBillReturn() {
     }
   };
 
+  const handleReturnDateFocus = (e) => {
+    e.target.type = 'date';
+    setHeader((prev) => (
+      prev.date ? prev : { ...prev, date: today() }
+    ));
+  };
+
   /* ---------- items (main table) ---------- */
   const [items, setItems] = useState([]);
 
@@ -476,7 +483,7 @@ export default function SaleBillReturn() {
             />
             <input
               type={header.date ? 'date' : 'text'}
-              onFocus={(e) => (e.target.type = 'date')}
+              onFocus={handleReturnDateFocus}
               onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="date"
               value={header.date}

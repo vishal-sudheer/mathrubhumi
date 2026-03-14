@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from "react";
 import api from "../../utils/axiosInstance";
 import Modal from "../../components/Modal";
 import PageHeader from "../../components/PageHeader";
+import { getSession } from "../../utils/session";
 
 /* ---------- tiny helpers ---------- */
 const today = () => new Date().toISOString().split("T")[0];
@@ -33,6 +34,7 @@ const A_TYPE = {
 const A_TYPE_INV = Object.fromEntries(Object.entries(A_TYPE).map(([k, v]) => [v, k]));
 
 export default function PPReceiptEntry() {
+  const currentCompanyId = Number(getSession().branch?.id || 0);
   const [form, setForm] = useState({
     receiptType: "",
     receiptNo: "",
@@ -135,6 +137,13 @@ export default function PPReceiptEntry() {
     setForm((p) => ({ ...p, [name]: value }));
   };
 
+  const handleReceiptDateFocus = (e) => {
+    e.target.type = "date";
+    setForm((prev) => (
+      prev.date ? prev : { ...prev, date: today() }
+    ));
+  };
+
   const handleBookChange = (e) => {
     handleChange(e);
     setPpBookId(null);
@@ -209,7 +218,7 @@ export default function PPReceiptEntry() {
     const a_type = A_TYPE[form.modeOfPay] ?? 0;
 
     const payload = {
-      company_id: 1,
+      company_id: currentCompanyId,
       id: 1,
       receipt_no: asInt(form.receiptNo, null),
       entry_date: form.date,
@@ -418,7 +427,7 @@ export default function PPReceiptEntry() {
 
           <input
             type={form.date ? "date" : "text"}
-            onFocus={(e) => (e.target.type = "date")}
+            onFocus={handleReceiptDateFocus}
             onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
             name="date"
             value={form.date}

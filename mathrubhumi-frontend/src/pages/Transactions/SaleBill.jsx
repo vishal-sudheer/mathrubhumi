@@ -3,6 +3,8 @@ import api from '../../utils/axiosInstance';
 import Modal from '../../components/Modal';
 import { TrashIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
+const getTodayDate = () => new Date().toISOString().split('T')[0];
+
 export default function SaleBillPage() {
   const [items, setItems] = useState([]);
   const [saleIdToLoad, setSaleIdToLoad] = useState('');
@@ -1024,6 +1026,13 @@ export default function SaleBillPage() {
   const actionButtonClasses = "sb-input inline-flex items-center justify-center gap-2 px-3 rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-medium shadow-lg shadow-blue-500/20 hover:from-blue-600 hover:to-indigo-700 active:scale-[0.985] transition-all duration-200";
   const tableInputClasses = "sb-table-input w-full px-2 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200";
 
+  const handleSaleDateFocus = (e) => {
+    e.target.type = 'date';
+    setSaleMaster((prev) => (
+      prev.sale_date ? prev : { ...prev, sale_date: getTodayDate() }
+    ));
+  };
+
   return (
     <div className="sb-page min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 lg:h-[100svh] lg:overflow-hidden lg:flex lg:flex-col">
       <Modal
@@ -1046,13 +1055,12 @@ export default function SaleBillPage() {
             />
             <input
               type={saleMaster.sale_date ? 'date' : 'text'}
-              onFocus={(e) => (e.target.type = 'date')}
+              onFocus={handleSaleDateFocus}
               onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="sale_date"
               value={saleMaster.sale_date}
               placeholder="Sale Date"
               className={`${inputClasses} bg-gray-50 font-semibold`}
-              readOnly
             />
 
             <div className="relative">

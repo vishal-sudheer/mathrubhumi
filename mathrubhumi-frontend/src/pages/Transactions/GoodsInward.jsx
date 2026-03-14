@@ -4,6 +4,8 @@ import { TrashIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import Modal from '../../components/Modal';
 import { getSession } from '../../utils/session';
 
+const getTodayDate = () => new Date().toISOString().split('T')[0];
+
 export default function GoodsInwardPage() {
   const { user: sessionUser } = getSession();
   const [items, setItems] = useState([]);
@@ -1121,6 +1123,13 @@ export default function GoodsInwardPage() {
   const actionButtonClasses = "sb-input inline-flex items-center justify-center gap-2 px-3 rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-medium shadow-lg shadow-blue-500/20 hover:from-blue-600 hover:to-indigo-700 active:scale-[0.985] transition-all duration-200";
   const tableInputClasses = "sb-table-input w-full px-2 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400/60 focus:border-blue-400 focus:bg-white transition-all duration-200";
 
+  const handleDateFocus = (field) => (e) => {
+    e.target.type = 'date';
+    setInwardMaster((prev) => (
+      prev[field] ? prev : { ...prev, [field]: getTodayDate() }
+    ));
+  };
+
   return (
     <div className="sb-page min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 lg:h-[100svh] lg:overflow-hidden lg:flex lg:flex-col">
       <Modal isOpen={modal.isOpen} message={modal.message} type={modal.type} buttons={modal.buttons} />
@@ -1438,7 +1447,7 @@ export default function GoodsInwardPage() {
             />
             <input
               type={inwardMaster.entry_date ? 'date' : 'text'}
-              onFocus={(e) => (e.target.type = 'date')}
+              onFocus={handleDateFocus('entry_date')}
               onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="entry_date"
               value={inwardMaster.entry_date}
@@ -1456,7 +1465,7 @@ export default function GoodsInwardPage() {
             />
             <input
               type={inwardMaster.bill_date ? 'date' : 'text'}
-              onFocus={(e) => (e.target.type = 'date')}
+              onFocus={handleDateFocus('bill_date')}
               onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="bill_date"
               value={inwardMaster.bill_date}

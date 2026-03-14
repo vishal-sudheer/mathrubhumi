@@ -4,8 +4,10 @@ import { TrashIcon } from '@heroicons/react/24/solid';
 import Modal from '../../components/Modal';
 import PageHeader from '../../components/PageHeader';
 import api from '../../utils/axiosInstance';
+import { getSession } from '../../utils/session';
 
 export default function PPBooksMaster() {
+  const currentCompanyId = Number(getSession().branch?.id || 0);
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({
     ppBookName: '',
@@ -275,7 +277,7 @@ export default function PPBooksMaster() {
 
   const handleTableUpdate = async (id, updatedItem) => {
     const payload = {
-      company_id: 1,
+      company_id: currentCompanyId,
       pp_book_nm: updatedItem.ppBookName || '',
       code: updatedItem.code || '',
       nos: updatedItem.nos ? parseInt(updatedItem.nos) : null,
@@ -320,7 +322,7 @@ export default function PPBooksMaster() {
     }
 
     const payload = {
-      company_id: 1,
+      company_id: currentCompanyId,
       pp_book_nm: formData.ppBookName,
       code: formData.code,
       nos: formData.nos ? parseInt(formData.nos) : null,

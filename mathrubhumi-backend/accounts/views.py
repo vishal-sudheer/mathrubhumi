@@ -97,6 +97,18 @@ def _decimal_to_float(value, default=0.0):
         return float(value)
     return float(value)
 
+
+def _get_request_company_id(request) -> int:
+    branch_id_header = request.headers.get('X-Branch-Id')
+    if branch_id_header is None:
+        raise ValueError('Missing X-Branch-Id header.')
+
+    company_id = int(branch_id_header)
+    if company_id <= 0:
+        raise ValueError('Invalid X-Branch-Id header.')
+
+    return company_id
+
 def get_next_value(company_id: int, fin_year: str, code: str) -> int:
     query = """
            UPDATE public."last_values" SET last_value = last_value + 1
@@ -170,6 +182,7 @@ def pp_books_title_search(request):
     """
     try:
       q = request.GET.get('q', '')
+      company_id = _get_request_company_id(request)
       if len(q) < 2:
           return JsonResponse({'error': 'Query must be at least 2 characters'}, status=400)
       with connection.cursor() as cur:
@@ -179,11 +192,11 @@ def pp_books_title_search(request):
                 FROM pp_books ppb
                 JOIN publishers p ON (ppb.pp_book_firm_id = p.id)
                 JOIN titles t ON (ppb.product_id = t.id)
-               WHERE t.title ILIKE %s
+               WHERE ppb.company_id = %s AND t.title ILIKE %s
                ORDER BY t.title
                LIMIT 50
               """,
-              [f'%{q}%']
+              [company_id, f'%{q}%']
           )
           rows = cur.fetchall()
       out = [{'id': r[0], 'title': r[1] or ''} for r in rows]
@@ -201,6 +214,7 @@ def pp_customers_name_search(request):
     """
     try:
       q = request.GET.get('q', '')
+      company_id = _get_request_company_id(request)
       if len(q) < 2:
           return JsonResponse({'error': 'Query must be at least 2 characters'}, status=400)
       with connection.cursor() as cur:
@@ -208,11 +222,11 @@ def pp_customers_name_search(request):
               """
               SELECT id, pp_customer_nm, address1, address2, city, telephone, pin
                 FROM pp_customers
-               WHERE pp_customer_nm ILIKE %s
+               WHERE company_id = %s AND pp_customer_nm ILIKE %s
                ORDER BY pp_customer_nm
                LIMIT 50
               """,
-              [f'%{q}%']
+              [company_id, f'%{q}%']
           )
           rows = cur.fetchall()
       out = [{
@@ -303,6 +317,7 @@ def pp_receipt_by_customer_id(request):
     Load receipts by customer id. Returns all necessary fields so the UI can fill everything.
     """
     try:
+        company_id = _get_request_company_id(request)
         customer_id = request.GET.get('customer_id', '').strip()
         if not customer_id:
             return JsonResponse({'error': 'customer is required'}, status=400)
@@ -316,10 +331,10 @@ def pp_receipt_by_customer_id(request):
                     r.chq_dd_no,
                     r.amount
                 FROM pp_receipts r
-                WHERE r.pp_customer_id = %s AND r.a_type = 2
+                WHERE r.company_id = %s AND r.pp_customer_id = %s AND r.a_type = 2
                 ORDER BY r.id DESC
                 LIMIT 10
-            """, [customer_id])
+            """, [company_id, customer_id])
             rows = cur.fetchall()
 
         data = [{"receipt_no": r[0], "entry_date": r[1], "bank": r[2], "chq_dd_no": r[3], "amount": r[4] or ""} for r in rows]
@@ -470,7 +485,7 @@ def create_sale(request):
                         item['allocatedBillDiscount'] = (item['value'] / total_value) * bill_discount_amount
 
             with transaction.atomic():
-                bill_no = get_next_value(1, '2526', 'CREDIT_SALE')
+                bill_no = get_next_value(branch_id, '2526', 'CREDIT_SALE')
                 bill_no = '2025-26/' + f"{bill_no:05d}"
                 user_id = int(getattr(request.user, 'id', 0) or 0)
                 with connection.cursor() as cursor:
@@ -619,7 +634,7 @@ def create_goods_inward(request):
             with transaction.atomic():
 
                 # running number
-                purchase_no = get_next_value(1, '2526', 'PURCHASE')
+                purchase_no = get_next_value(branch_id, '2526', 'PURCHASE')
 
                 with connection.cursor() as cursor:
                     cursor.execute(
@@ -3483,13 +3498,14 @@ def sub_category_delete(request, id):
 def pp_customer_create(request):
     try:
         data = request.data
+        company_id = _get_request_company_id(request)
         logger.info(f"Creating PP customer with data: {data}")
         
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                INSERT INTO pp_customers (pp_customer_nm, address1, address2, city, telephone, contact, email)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO pp_customers (pp_customer_nm, address1, address2, city, telephone, contact, email, company_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 [
@@ -3499,7 +3515,8 @@ def pp_customer_create(request):
                     data.get('city'),
                     data.get('telephone'),
                     data.get('contact'),
-                    data.get('email')
+                    data.get('email'),
+                    company_id
                 ]
             )
             new_id = cursor.fetchone()[0]
@@ -3518,15 +3535,16 @@ def pp_customer_create(request):
 @permission_classes([IsAuthenticated])
 def pp_customers_master_search(request):
     try:
+        company_id = _get_request_company_id(request)
         query = (request.GET.get('q') or '').strip()
         page_param = request.GET.get('page')
         page_size_param = request.GET.get('page_size')
         paginate = page_param is not None or page_size_param is not None
-        where_clause = ""
-        where_params = []
+        where_clause = "WHERE company_id = %s"
+        where_params = [company_id]
 
         if query:
-            where_clause = "WHERE pp_customer_nm ILIKE %s"
+            where_clause += " AND pp_customer_nm ILIKE %s"
             where_params.append(f"{query}%")
 
         if paginate:
@@ -3618,6 +3636,7 @@ def pp_customers_master_search(request):
 def pp_customer_update(request, id):
     try:
         data = request.data
+        company_id = _get_request_company_id(request)
         logger.info(f"Updating PP customer id={id} with data: {data}")
         
         with connection.cursor() as cursor:
@@ -3632,7 +3651,7 @@ def pp_customer_update(request, id):
                     telephone = %s,
                     contact = %s,
                     email = %s
-                WHERE id = %s
+                WHERE id = %s AND company_id = %s
                 RETURNING id
                 """,
                 [
@@ -3643,7 +3662,8 @@ def pp_customer_update(request, id):
                     data.get('telephone'),
                     data.get('contact'),
                     data.get('email'),
-                    id
+                    id,
+                    company_id
                 ]
             )
             if cursor.rowcount == 0:
@@ -3663,15 +3683,16 @@ def pp_customer_update(request, id):
 @permission_classes([IsAuthenticated])
 def pp_customer_delete(request, id):
     try:
+        company_id = _get_request_company_id(request)
         logger.info(f"Deleting PP customer id={id}")
         with connection.cursor() as cursor:
             cursor.execute(
                 """
                 DELETE FROM pp_customers
-                WHERE id = %s
+                WHERE id = %s AND company_id = %s
                 RETURNING id
                 """,
-                [id]
+                [id, company_id]
             )
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'PP customer with id {id} not found'}, status=404)
@@ -4323,6 +4344,7 @@ def royalty_recipient_delete(request, id):
 def pp_book_create(request):
     try:
         data = request.data
+        company_id = _get_request_company_id(request)
         logger.info(f"Creating PP book with data: {data}")
         
         with connection.cursor() as cursor:
@@ -4335,7 +4357,7 @@ def pp_book_create(request):
                 RETURNING id, inserted, modified
                 """,
                 [
-                    data['company_id'],
+                    company_id,
                     data['code'],
                     data.get('nos'),
                     data.get('face_value'),
@@ -4371,15 +4393,16 @@ def pp_book_create(request):
 @permission_classes([IsAuthenticated])
 def pp_books_master_search(request):
     try:
+        company_id = _get_request_company_id(request)
         query = (request.GET.get('q') or '').strip()
         page_param = request.GET.get('page')
         page_size_param = request.GET.get('page_size')
         paginate = page_param is not None or page_size_param is not None
-        where_clause = ""
-        where_params = []
+        where_clause = "WHERE ppb.company_id = %s"
+        where_params = [company_id]
 
         if query:
-            where_clause = "WHERE t.title ILIKE %s"
+            where_clause += " AND t.title ILIKE %s"
             where_params.append(f"{query}%")
 
         if paginate:
@@ -4490,6 +4513,7 @@ def pp_books_master_search(request):
 def pp_book_update(request, id):
     try:
         data = request.data
+        company_id = _get_request_company_id(request)
         logger.info(f"Updating PP book id={id} with data: {data}")
         
         with connection.cursor() as cursor:
@@ -4524,7 +4548,7 @@ def pp_book_update(request, id):
                     data['pp_book_firm_id'],
                     data['nos_ex'],
                     data['product_id'],
-                    data['company_id'],
+                    company_id,
                     id
                 ]
             )
@@ -4545,6 +4569,7 @@ def pp_book_update(request, id):
 @permission_classes([IsAuthenticated])
 def pp_book_delete(request, id):
     try:
+        company_id = _get_request_company_id(request)
         logger.info(f"Deleting PP book id={id}")
         with connection.cursor() as cursor:
             cursor.execute(
@@ -4553,7 +4578,7 @@ def pp_book_delete(request, id):
                 WHERE company_id = %s AND id = %s
                 RETURNING id
                 """,
-                [1, id]
+                [company_id, id]
             )
             if cursor.rowcount == 0:
                 return JsonResponse({'error': f'PP book with id {id} not found'}, status=404)
@@ -5201,7 +5226,7 @@ def goods_inward(request):
                 parent_id = _int(cur.fetchone()[0], 1)
 
                 # running number
-                purchase_rt_no = get_next_value(1, '2526', 'PURCHASE_RT')
+                purchase_rt_no = get_next_value(company_id, '2526', 'PURCHASE_RT')
 
                 # INSERT parent – note: NO bill_no here
                 cur.execute(
@@ -5781,7 +5806,7 @@ def sales_rt_create(request):
         
 
     cr_customer_id = _get_cr_customer_id()
-    sales_rt_no =  get_next_value(1, '2526', 'SALE_RT')
+    sales_rt_no =  get_next_value(branch_id, '2526', 'SALE_RT')
 
     try:
         with transaction.atomic():
@@ -6108,12 +6133,12 @@ def sales_rt_detail(request, id: int):
 def pp_receipts_iud(request):
     try:
         d = request.data or {}
+        company_id = _get_request_company_id(request)
 
         # Prepare Python-side sanitization for tricky fields
         pin_char = (d.get('pin') or '')
         pin_char = pin_char[:1] if pin_char else None  # procedure expects char(1)
         which = (d.get('which') or 'I')[:1]            # char(1)
-        company_id = d.get('company_id', 1)
         pp_book_id = d.get('pp_book_id')        
 
         with transaction.atomic():
@@ -6125,8 +6150,8 @@ def pp_receipts_iud(request):
 
                 p_pp_customer_book_id = d.get('pp_customer_book_id')
                 if p_r_type in (0, 1):
-                    p_pp_customer_book_id = get_next_value(1, '0000', 'PP_CSBK_ID')
-                p_receipt_no = get_next_value(1, '2526', 'PP_RCPT_NO')
+                    p_pp_customer_book_id = get_next_value(company_id, '0000', 'PP_CSBK_ID')
+                p_receipt_no = get_next_value(company_id, '2526', 'PP_RCPT_NO')
                 if which == 'I' and pp_book_id:
                     # Atomically increment and fetch the *new* code & nos
                     cur.execute(
@@ -6179,7 +6204,7 @@ def pp_receipts_iud(request):
                     )
                 """
                 params = [
-                    d.get('company_id', 1),
+                    company_id,
                     d.get('id'),
                     p_receipt_no,
                     d.get('entry_date'),
@@ -6234,6 +6259,7 @@ def pp_receipt_by_no(request):
     Load a single receipt by its receipt_no. Returns joined fields so the UI can fill everything.
     """
     try:
+        company_id = _get_request_company_id(request)
         receipt_no = request.GET.get('receipt_no', '').strip()
         if not receipt_no:
             return JsonResponse({'error': 'receipt_no is required'}, status=400)
@@ -6273,18 +6299,21 @@ def pp_receipt_by_no(request):
                 LEFT JOIN pp_customers c
                   ON c.id = r.pp_customer_id
                 LEFT JOIN pp_books b
-                  ON b.id = r.pp_book_id
+                  ON b.company_id = r.company_id
+                 AND b.id = r.pp_book_id
                 LEFT JOIN titles t
                   ON t.id = b.product_id
                 LEFT JOIN agents a
                   ON a.id = r.agent_id
                 LEFT JOIN pp_customer_books pcb
-                  ON pcb.pp_customer_id = r.pp_customer_id
+                  ON pcb.company_id = r.company_id
+                 AND pcb.pp_customer_id = r.pp_customer_id
                  AND pcb.pp_book_id = r.pp_book_id
-                WHERE r.receipt_no = %s
+                WHERE r.company_id = %s
+                  AND r.receipt_no = %s
                 ORDER BY r.id DESC
                 LIMIT 1
-            """, [receipt_no])
+            """, [company_id, receipt_no])
 
             row = cur.fetchone()
 
@@ -6339,6 +6368,7 @@ def pp_receipt_by_no(request):
 def pp_installment_prefill(request):
     
     try:
+        company_id = _get_request_company_id(request)
         reg_no = (request.GET.get('reg_no') or '').strip()
         if not reg_no:
             return JsonResponse({'error': 'reg_no is required'}, status=400)
@@ -6360,14 +6390,14 @@ def pp_installment_prefill(request):
                     pr.agent_id AS agent_id,
                     a.agent_nm
                 FROM pp_customers pc JOIN pp_customer_books pcb ON pc.id = pcb.pp_customer_id
-                                     JOIN pp_books pb ON pcb.pp_book_id = pb.id
+                                     JOIN pp_books pb ON pb.company_id = pcb.company_id AND pcb.pp_book_id = pb.id
                                      JOIN titles t ON pb.product_id = t.id
-                                     JOIN pp_receipts pr ON pr.pp_customer_book_id = pcb.id
+                                     JOIN pp_receipts pr ON pr.company_id = pcb.company_id AND pr.pp_customer_book_id = pcb.id
                                      JOIN agents a on a.id = pr.agent_id                                     
-               WHERE pcb.reg_no = %s
+               WHERE pcb.company_id = %s AND pcb.reg_no = %s
                LIMIT 1
                 """,
-                [reg_no]
+                [company_id, reg_no]
             )
             row = cursor.fetchone()
 
@@ -7939,6 +7969,7 @@ def remittance_by_no(request):
         return JsonResponse({"error": "remittance_no is required"}, status=400)
 
     try:
+        company_id = _get_request_company_id(request)
         with connection.cursor() as cur:
             cur.execute("""
                 SELECT r.company_id, r.id, r.remittance_no, r.entry_date, r.a_type, r.bank_id, r.amount,
@@ -7947,9 +7978,9 @@ def remittance_by_no(request):
                        b.branches_nm AS branch_name
                   FROM remittance r
              LEFT JOIN branches b ON b.id = r.account_id
-                 WHERE r.remittance_no = %s
+                 WHERE r.company_id = %s AND r.remittance_no = %s
                  LIMIT 1
-            """, [rn])
+            """, [company_id, rn])
             rows = dictfetchall(cur)
 
         if not rows:
@@ -7970,9 +8001,9 @@ def remittance_by_no(request):
 def remittance_save(request):
     """
     Insert into remittance per mapping:
-      - company_id = 1
+      - company_id = selected branch id
       - id = MAX(id)+1 (per company)
-      - remittance_no = get_next_value(1, '2526', 'REMITTANCE')
+      - remittance_no = get_next_value(company_id, '2526', 'REMITTANCE')
       - entry_date = payload.entry_date (YYYY-MM-DD)
       - a_type = payload.a_type (int)
       - bank_id = 0
@@ -8039,7 +8070,10 @@ def remittance_save(request):
     if account_id <= 0:
         return JsonResponse({"error": "account_id (branch id) is required"}, status=400)
 
-    company_id = 1  # fixed per spec
+    try:
+        company_id = _get_request_company_id(request)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Branch context missing. Please log in again.'}, status=400)
     bank_id = 0
     ac_receipt_id = 0
     exhibition_id = 0
@@ -8056,7 +8090,7 @@ def remittance_save(request):
                 # Next remittance_no via provided function
                 # Assuming get_next_value(company_id int, code text, series text) RETURNS int
                 # cur.execute("SELECT get_next_value(%s, %s, %s)", [company_id, '2526', 'REMITTANCE'])
-                next_remit_no = get_next_value(1, '2526', 'REMITTANCE')
+                next_remit_no = get_next_value(company_id, '2526', 'REMITTANCE')
 
                 # Insert row
                 cur.execute("""
@@ -8101,6 +8135,7 @@ def cr_realisation_by_customer_id(request):
     Load receipts by customer id. Returns all necessary fields so the UI can fill everything.
     """
     try:
+        company_id = _get_request_company_id(request)
         customer_id = request.GET.get('customer_id', '').strip()
         if not customer_id:
             return JsonResponse({'error': 'customer is required'}, status=400)
@@ -8114,10 +8149,10 @@ def cr_realisation_by_customer_id(request):
                     cr.chq_dd_no,
                     cr.amount
                 FROM cr_realisation cr
-                WHERE cr.customer_id = %s AND cr.a_type IN ( 2, 3, 5, 6 )
+                WHERE cr.company_id = %s AND cr.customer_id = %s AND cr.a_type IN ( 2, 3, 5, 6 )
                 ORDER BY cr.id DESC
                 LIMIT 10
-            """, [customer_id])
+            """, [company_id, customer_id])
             rows = cur.fetchall()
 
         data = [{"receipt_no": r[0], "entry_date": r[1], "bank": r[2], "chq_dd_no": r[3], "amount": r[4] or ""} for r in rows]
@@ -8142,12 +8177,12 @@ def cr_realisation_save(request):
     Body:
       entry_date, customer_id, amount, a_type, bank, chq_dd_no, note1, cancelled
     Creates a row in cr_realisation with:
-      company_id=1, exhibition_id=0, user_id=0, printed=0
-      id = get_next_id(1, '2526', 'CR_REAL') -> dnextid
-      receipt_no = get_next_value(1, '2526', 'CR_REAL')
+      company_id=selected branch id, exhibition_id=0, user_id=0, printed=0
+      receipt_no = get_next_value(company_id, '2526', 'CR_REAL')
     """
     try:
         body = request.data
+        company_id = _get_request_company_id(request)
         entry_date = body.get('entry_date')
         customer_id = int(body.get('customer_id') or 0)
         amount = body.get('amount')
@@ -8168,7 +8203,7 @@ def cr_realisation_save(request):
 
         with transaction.atomic():
             with connection.cursor() as cursor:
-                receipt_no = get_next_value(1, '2526', 'CR_REAL')
+                receipt_no = get_next_value(company_id, '2526', 'CR_REAL')
 
                 # Insert
                 cursor.execute(
@@ -8179,7 +8214,7 @@ def cr_realisation_save(request):
                       (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                        0, 0, 0)
                     """,
-                    [1, receipt_no, entry_date, customer_id, amount, a_type, bank, chq_dd_no, note1, cancelled]
+                    [company_id, receipt_no, entry_date, customer_id, amount, a_type, bank, chq_dd_no, note1, cancelled]
                 )
 
         return JsonResponse(
@@ -8205,6 +8240,7 @@ def cr_realisation_by_no(request):
     Returns cr_realisation joined with customer name.
     """
     try:
+        company_id = _get_request_company_id(request)
         rn = request.GET.get('receipt_no', '').strip()
         if not rn:
             return JsonResponse({'error': 'receipt_no is required'}, status=400)
@@ -8217,7 +8253,7 @@ def cr_realisation_by_no(request):
                   FROM cr_realisation r LEFT JOIN cr_customers c ON c.id = r.customer_id
                  WHERE r.company_id = %s AND r.receipt_no = %s
                 """,
-                [1, rn]
+                [company_id, rn]
             )
             row = cursor.fetchone()
 

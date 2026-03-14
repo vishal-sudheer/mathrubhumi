@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../../utils/axiosInstance';
 import { TrashIcon } from '@heroicons/react/24/solid';
+import { getSession } from '../../utils/session';
+
+const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 /* ---------- numeric helpers ---------- */
 const num = (v, d = 0) => {
@@ -20,6 +23,7 @@ const computeValue = (qty, rate, ex, disP) => {
 };
 
 export default function GoodsInwardReturnPage() {
+  const currentCompanyId = Number(getSession().branch?.id || 0);
   const [items, setItems] = useState([]);
   const [goodsInwardIdToLoad, setGoodsInwardIdToLoad] = useState('');
   const [goodsInwardId, setGoodsInwardId] = useState(null);
@@ -104,6 +108,13 @@ export default function GoodsInwardReturnPage() {
   };
   const closeToast = () =>
     setToast({ isOpen: false, title: 'Message', message: '', type: 'info', buttons: [] });
+
+  const handleEntryDateFocus = (e) => {
+    e.target.type = 'date';
+    setInwardMaster((prev) => (
+      prev.entry_date ? prev : { ...prev, entry_date: getTodayDate() }
+    ));
+  };
 
   const decodeUnicode = (str) => {
     if (!str) return '';
@@ -599,7 +610,7 @@ export default function GoodsInwardReturnPage() {
     try {
       const payload = {
         purchase_rt: {
-          company_id: 0,
+          company_id: currentCompanyId,
           purchase_rt_no: num(inwardMaster.srl_no),
           entry_date: inwardMaster.entry_date,
           nett: num(inwardMaster.nett),
@@ -612,7 +623,7 @@ export default function GoodsInwardReturnPage() {
           bill_no: inwardMaster.bill_no || '',
         },
         purchase_rt_items: items.map((item, index) => ({
-          company_id: 0,
+          company_id: currentCompanyId,
           id: num(item.rowId),
           title_id: num(item.titleId),
           quantity: num(item.quantity),
@@ -916,7 +927,7 @@ export default function GoodsInwardReturnPage() {
             />
             <input
               type={inwardMaster.entry_date ? 'date' : 'text'}
-              onFocus={(e) => (e.target.type = 'date')}
+              onFocus={handleEntryDateFocus}
               onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
               name="entry_date"
               value={inwardMaster.entry_date}

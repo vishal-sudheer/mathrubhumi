@@ -112,6 +112,13 @@ export default function CreditRealisationEntry() {
     setForm((p) => ({ ...p, [name]: value }));
   };
 
+  const handleCreditDateFocus = (e) => {
+    e.target.type = "date";
+    setForm((prev) => (
+      prev.date ? prev : { ...prev, date: today() }
+    ));
+  };
+
   const resetForm = () => {
     setForm({
       receiptNo: "",
@@ -254,7 +261,7 @@ export default function CreditRealisationEntry() {
           />
           <input
             type={form.date ? "date" : "text"}
-            onFocus={(e) => (e.target.type = "date")}
+            onFocus={handleCreditDateFocus}
             onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
             name="date"
             value={form.date}
