@@ -471,8 +471,8 @@ export default function SaleBillReturn() {
         </div>
       )}
 
-      <div className="sb-layout flex flex-col lg:flex-1 lg:min-h-0">
-        <div className={`${cardClasses} sb-card`}>
+      <div className="sb-layout flex flex-col lg:flex-1 lg:min-h-0 overflow-visible">
+        <div className={`${cardClasses} sb-card relative z-20 overflow-visible`}>
           <div className="sb-form-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             <input
               name="no"
@@ -514,7 +514,7 @@ export default function SaleBillReturn() {
               ))}
             </select>
 
-            <div className="relative md:col-span-2">
+            <div className="relative md:col-span-2 z-30">
               <input
                 name="customer"
                 value={header.customer}
@@ -524,7 +524,7 @@ export default function SaleBillReturn() {
                 autoComplete="off"
               />
               {showCustomerSuggestions && header.customer.trim() && (
-                <ul className="absolute z-50 bg-white border border-gray-200 mt-1 w-full shadow-md rounded-lg text-sm max-h-48 overflow-y-auto">
+                <ul className="absolute left-0 right-0 top-full z-[70] mt-1.5 rounded-lg border border-gray-200 bg-white text-sm shadow-lg max-h-48 overflow-y-auto">
                   {customerSuggestions.map((c, i) => (
                     <li
                       key={`${c.id || c.customer_nm}-${i}`}
@@ -586,7 +586,7 @@ export default function SaleBillReturn() {
               />
             </div>
 
-            <div className="relative">
+            <div className="relative z-30">
               <input
                 type="text"
                 name="billNo"
@@ -599,7 +599,7 @@ export default function SaleBillReturn() {
                 title={!selectedCustomer ? 'Select Customer first' : ''}
               />
               {showBillSuggestions && header.billNo.trim() && selectedCustomer && (
-                <ul className="absolute z-50 bg-white border border-gray-200 mt-1 w-full shadow-md rounded-lg text-sm max-h-48 overflow-y-auto">
+                <ul className="absolute left-0 right-0 top-full z-[70] mt-1.5 rounded-lg border border-gray-200 bg-white text-sm shadow-lg max-h-48 overflow-y-auto">
                   {billSuggestions.map((b) => (
                     <li
                       key={`bill-${b.id}`}
