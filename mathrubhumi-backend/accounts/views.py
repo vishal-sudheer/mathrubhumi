@@ -131,6 +131,136 @@ def get_next_value(company_id: int, fin_year: str, code: str) -> int:
         result = cursor.fetchone()
         return result[0] if result else -1
 
+
+def _get_sale_payload(*, sale_id=None, bill_no=None, company_id=None):
+    if sale_id is None and bill_no is None:
+        raise ValueError('Either sale_id or bill_no is required.')
+
+    sale_where = ""
+    sale_params = []
+
+    if sale_id is not None:
+        sale_where = "S.id = %s"
+        sale_params = [sale_id]
+    else:
+        sale_where = "S.bill_no = %s AND S.company_id = %s"
+        sale_params = [bill_no, company_id]
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"""
+            SELECT S.id,
+                S.customer_nm,
+                S.billing_address,
+                S.sale_date,
+                S.mobile_number,
+                S.type,
+                S.mode,
+                S.class,
+                S.cancel,
+                S.bill_discount,
+                S.bill_discount_amount,
+                S.gross,
+                S.round_off,
+                S.bill_amount,
+                S.note_1,
+                S.note_2,
+                S.freight_postage,
+                S.processing_charge,
+                S.bill_no,
+                S.agent_id,
+                COALESCE(A.agent_nm, '') AS agent_nm,
+                S.branch_id,
+                S.cr_customer_id
+            FROM sales S
+            LEFT JOIN agents A ON A.id = S.agent_id
+            WHERE {sale_where}
+            ORDER BY S.id DESC
+            LIMIT 1
+            """,
+            sale_params,
+        )
+        sale = cursor.fetchone()
+        if not sale:
+            return None
+
+        sale_type_label = sale_type_mapping.get(sale[5], str(sale[5]))
+        payment_type_label = sale_mode_mapping.get(sale[6], str(sale[6]))
+        class_type_label = class_type_mapping.get(sale[7], str(sale[7]))
+
+        sale_data = {
+            'id': sale[0],
+            'customer_nm': sale[1],
+            'billing_address': sale[2],
+            'sale_date': sale[3],
+            'mobile_number': sale[4],
+            'type': sale_type_label,
+            'mode': payment_type_label,
+            'class': class_type_label,
+            'cancel': 'Yes' if sale[8] == 1 else 'No',
+            'bill_discount': float(sale[9]) if sale[9] is not None else 0.0,
+            'bill_discount_amount': float(sale[10]) if sale[10] is not None else 0.0,
+            'gross': float(sale[11]) if sale[11] is not None else 0.0,
+            'round_off': float(sale[12]) if sale[12] is not None else 0.0,
+            'bill_amount': float(sale[13]) if sale[13] is not None else 0.0,
+            'note_1': sale[14] or '',
+            'note_2': sale[15] or '',
+            'freight_postage': float(sale[16]) if sale[16] is not None else 0.0,
+            'processing_charge': float(sale[17]) if sale[17] is not None else 0.0,
+            'bill_no': sale[18],
+            'agent_id': sale[19] or 0,
+            'agent_nm': sale[20] or '',
+            'branch_id': sale[21] or 0,
+            'customer_id': sale[22] or 0,
+            'items': [],
+        }
+
+        cursor.execute(
+            """
+            SELECT CASE WHEN T.language_id = 1 THEN T.title_m ELSE T.title END AS item_name,
+                   SI.exchange_rate,
+                   SI.quantity,
+                   SI.rate,
+                   SI.tax,
+                   SI.discount_p,
+                   SI.line_value,
+                   SI.currency_id,
+                   SI.title_id,
+                   T.language_id,
+                   C.currency_name,
+                   SI.allocated_bill_discount,
+                   SI.purchase_company_id,
+                   SI.purchase_id,
+                   SI.purchase_item_id
+              FROM sale_items SI
+              JOIN titles T ON (SI.title_id = T.id)
+              JOIN currencies C ON (SI.currency_id = C.id)
+             WHERE SI.sale_id = %s
+            """,
+            [sale[0]],
+        )
+        items = cursor.fetchall()
+        for item in items:
+            sale_data['items'].append({
+                'itemName': item[0],
+                'exchangeRate': float(item[1]) if item[1] is not None else 0.0,
+                'quantity': float(item[2]),
+                'rate': float(item[3]),
+                'tax': float(item[4]) if item[4] is not None else 0.0,
+                'discount': float(item[5]) if item[5] is not None else 0.0,
+                'value': float(item[6]),
+                'currencyIndex': int(item[7]),
+                'titleId': int(item[8]),
+                'language': int(item[9]),
+                'currency': item[10],
+                'allocatedBillDiscount': float(item[11]) if item[11] is not None else 0.0,
+                'purchaseCompanyId': int(item[12]) if item[12] is not None else 0,
+                'purchaseId': int(item[13]) if item[13] is not None else 0,
+                'purchaseItemId': int(item[14]) if item[14] is not None else 0,
+            })
+
+    return sale_data
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def protected_view(request):
@@ -734,106 +864,10 @@ def create_goods_inward(request):
 def get_sale_by_id(request, sale_id):
     if request.method == 'GET':
         try:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
-                    SELECT S.id,
-                        S.customer_nm,
-                        S.billing_address,
-                        S.sale_date,
-                        S.mobile_number,
-                        S.type,
-                        S.mode,
-                        S.class,
-                        S.cancel,
-                        S.bill_discount,
-                        S.bill_discount_amount,
-                        S.gross,
-                        S.round_off,
-                        S.bill_amount,
-                        S.note_1,
-                        S.note_2,
-                        S.freight_postage,
-                        S.processing_charge,
-                        S.bill_no,
-                        S.agent_id,
-                        COALESCE(A.agent_nm, '') AS agent_nm,
-                        S.branch_id,
-                        S.cr_customer_id
-                    FROM sales S
-                    LEFT JOIN agents A ON A.id = S.agent_id
-                    WHERE S.id = %s
-                    """,
-                    [sale_id]
-                )
-                sale = cursor.fetchone()
-                if not sale:
-                    logger.warning(f"Sale not found: ID {sale_id}")
-                    return JsonResponse({'error': 'Sale not found'}, status=404)
-
-                sale_type_label = sale_type_mapping.get(sale[5], str(sale[5]))
-                payment_type_label = sale_mode_mapping.get(sale[6], str(sale[6]))
-                class_type_label = class_type_mapping.get(sale[7], str(sale[7]))
-
-                sale_data = {
-                    'id': sale[0],
-                    'customer_nm': sale[1],
-                    'billing_address': sale[2],
-                    'sale_date': sale[3],
-                    'mobile_number': sale[4],
-                    'type': sale_type_label,
-                    'mode': payment_type_label,
-                    'class': class_type_label,
-                    'cancel': 'Yes' if sale[8] == 1 else 'No',
-                    'bill_discount': float(sale[9]) if sale[9] is not None else 0.0,
-                    'bill_discount_amount': float(sale[10]) if sale[10] is not None else 0.0,
-                    'gross': float(sale[11]) if sale[11] is not None else 0.0,
-                    'round_off': float(sale[12]) if sale[12] is not None else 0.0,
-                    'bill_amount': float(sale[13]) if sale[13] is not None else 0.0,
-                    'note_1': sale[14] or '',
-                    'note_2': sale[15] or '',
-                    'freight_postage': float(sale[16]) if sale[16] is not None else 0.0,
-                    'processing_charge': float(sale[17]) if sale[17] is not None else 0.0,
-                    'bill_no': sale[18],
-                    'agent_id': sale[19] or 0,
-                    'agent_nm': sale[20] or '',
-                    'branch_id': sale[21] or 0,
-                    'customer_id': sale[22] or 0,   # from cr_customer_id
-                    'items': [],
-                }
-
-
-                cursor.execute(
-                    """
-                    SELECT CASE WHEN T.language_id = 1 THEN T.title_m ELSE T.title END AS item_name, SI.exchange_rate, SI.quantity, 
-                           SI.rate, SI.tax, SI.discount_p, SI.line_value, SI.currency_id, SI.title_id, T.language_id, C.currency_name,
-                           SI.allocated_bill_discount, SI.purchase_company_id, SI.purchase_id, SI.purchase_item_id
-                      FROM sale_items SI
-                      JOIN titles     T ON (SI.title_id   = T.id)
-                      JOIN currencies C ON (SI.currency_id = C.id)
-                     WHERE sale_id = %s
-                    """,
-                    [sale_id]
-                )
-                items = cursor.fetchall()
-                for item in items:
-                    sale_data['items'].append({
-                        'itemName': item[0],
-                        'exchangeRate': float(item[1]) if item[1] is not None else 0.0,
-                        'quantity': float(item[2]),
-                        'rate': float(item[3]),
-                        'tax': float(item[4]) if item[4] is not None else 0.0,
-                        'discount': float(item[5]) if item[5] is not None else 0.0,
-                        'value': float(item[6]),
-                        'currencyIndex': int(item[7]),
-                        'titleId': int(item[8]),
-                        'language': int(item[9]),
-                        'currency': item[10],
-                        'allocatedBillDiscount': float(item[11]) if item[11] is not None else 0.0,
-                        'purchaseCompanyId': int(item[12]) if item[12] is not None else 0,
-                        'purchaseId': int(item[13]) if item[13] is not None else 0,
-                        'purchaseItemId': int(item[14]) if item[13] is not None else 0,
-                    })
+            sale_data = _get_sale_payload(sale_id=sale_id)
+            if not sale_data:
+                logger.warning(f"Sale not found: ID {sale_id}")
+                return JsonResponse({'error': 'Sale not found'}, status=404)
 
             logger.info(f"Sale retrieved successfully: ID {sale_id}")
             return JsonResponse(sale_data, safe=False)
@@ -1049,6 +1083,30 @@ def get_sale_by_id(request, sale_id):
             return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_sale_by_bill_no(request):
+    try:
+        bill_no = (request.GET.get('bill_no') or '').strip()
+        if not bill_no:
+            return JsonResponse({'error': 'bill_no is required'}, status=400)
+
+        company_id = _get_request_company_id(request)
+        sale_data = _get_sale_payload(bill_no=bill_no, company_id=company_id)
+        if not sale_data:
+            logger.warning("Sale not found for bill_no %s in company %s", bill_no, company_id)
+            return JsonResponse({'error': 'Sale not found'}, status=404)
+
+        logger.info("Sale retrieved successfully for bill_no %s in company %s", bill_no, company_id)
+        return JsonResponse(sale_data, safe=False)
+    except ValueError as e:
+        logger.warning("Invalid data in get_sale_by_bill_no: %s", e)
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in get_sale_by_bill_no")
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
 
 

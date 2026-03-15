@@ -136,6 +136,14 @@ class SalesReturnApiTests(TestCase):
         self.assertEqual(res.json()[0]['id'], self.sale_item_id)
         self.assertEqual(res.json()[0]['currency_name'], 'Indian Rupees')
 
+    def test_get_sale_by_bill_no(self):
+        url = reverse('get_sale_by_bill_no')
+        res = self.client.get(url, {'bill_no': 'BILL-001'}, HTTP_X_BRANCH_ID='1')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()['id'], self.sale_id)
+        self.assertEqual(res.json()['bill_no'], 'BILL-001')
+        self.assertEqual(len(res.json()['items']), 1)
+
     def test_sales_rt_crud(self):
         create_url = reverse('sales_rt_create')
         create_res = self.client.post(create_url, self._build_payload(), format='json')

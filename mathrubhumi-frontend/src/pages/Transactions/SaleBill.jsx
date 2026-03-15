@@ -7,7 +7,7 @@ const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 export default function SaleBillPage() {
   const [items, setItems] = useState([]);
-  const [saleIdToLoad, setSaleIdToLoad] = useState('');
+  const [billNoToLoad, setBillNoToLoad] = useState('');
   const [isEditMode, setIsEditMode] = useState(false);
   const [saleId, setSaleId] = useState(null);
 
@@ -808,7 +808,7 @@ export default function SaleBillPage() {
     });
     setIsEditMode(false);
     setSaleId(null);
-    setSaleIdToLoad('');
+    setBillNoToLoad('');
     setActiveDiscountField(null);
     setIsMalayalam(false);
     setCustomerSuggestions([]);
@@ -906,13 +906,15 @@ export default function SaleBillPage() {
   };
 
   const handleLoadSale = async () => {
-    if (!saleIdToLoad) {
-      showModal('Please enter a Sale ID', 'error');
+    if (!billNoToLoad.trim()) {
+      showModal('Please enter a Bill No', 'error');
       return;
     }
 
     try {
-      const response = await api.get(`/auth/sales/${saleIdToLoad}/`);
+      const response = await api.get('/auth/sales/by-bill/', {
+        params: { bill_no: billNoToLoad.trim() },
+      });
       const data = response.data;
 
       setSaleMaster((prev) => ({
@@ -989,7 +991,7 @@ export default function SaleBillPage() {
       }
 
       setIsEditMode(true);
-      setSaleId(parseInt(saleIdToLoad, 10));
+      setSaleId(data.id);
 
       if (data.items.some((item) => parseFloat(String(item.discount || 0)) > 0)) {
         setActiveDiscountField('item_discount');
@@ -1627,9 +1629,9 @@ export default function SaleBillPage() {
             <div className="flex flex-1 flex-col sm:flex-row gap-2">
               <input
                 type="text"
-                value={saleIdToLoad}
-                onChange={(e) => setSaleIdToLoad(e.target.value)}
-                placeholder="Sale ID"
+                value={billNoToLoad}
+                onChange={(e) => setBillNoToLoad(e.target.value)}
+                placeholder="Bill No"
                 className={`${inputClasses} w-full sm:w-60`}
               />
               <button

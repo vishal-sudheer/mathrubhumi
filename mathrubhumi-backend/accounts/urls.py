@@ -23,6 +23,7 @@ urlpatterns = [
     path('branches-name-search/', views.branches_name_search, name='branches_name_search'),
     # Sale Bill
     path('sales/', views.create_sale, name='create_sale'),
+    path('sales/by-bill/', views.get_sale_by_bill_no, name='get_sale_by_bill_no'),
     path('sales/<int:sale_id>/', views.get_sale_by_id, name='get_sale_by_id'),
     path('product-search/', views.product_search),
     path('customer-search/', views.customer_search, name='customer_search'),
